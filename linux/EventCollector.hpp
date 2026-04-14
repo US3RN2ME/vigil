@@ -23,7 +23,6 @@ namespace vigil::linux {
         EventCollector();
         void start() override;
         void stop() override;
-        void setProcessCallback(ProcessCallback callback) override;
 
     private:
         static int onEvent(void* ctx, void* data, size_t size);

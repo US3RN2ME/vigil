@@ -5,10 +5,16 @@
 #include <format>
 #include <fstream>
 
+namespace vigil::common {
+    [[nodiscard]] std::unique_ptr<IEventCollector> createEventCollector() {
+        return std::make_unique<linux::EventCollector>();
+    }
+}
+
 namespace vigil::linux {
     EventCollector::EventCollector() {
         try {
-            bpfObj_.emplace("execve.bpf.o");
+            bpfObj_.emplace("../bpf/execve.bpf.o");
             bpfObj_->load();
             bpfObj_->attach("onExecve");
             ringBuf_.emplace(bpfObj_->mapFd("rb"), onEvent, this);

@@ -11,7 +11,7 @@ set(VMLINUX_H "${CMAKE_CURRENT_SOURCE_DIR}/bpf/vmlinux.h")
 
 add_custom_command(
     OUTPUT ${VMLINUX_H}
-    COMMAND ${BPFTOOL} btf dump file /sys/kernel/btf/vmlinux format c > ${VMLINUX_H}
+    COMMAND /bin/sh -c "${BPFTOOL} btf dump file /sys/kernel/btf/vmlinux format c > ${VMLINUX_H}"
     COMMENT "Generating vmlinux.h from running kernel BTF"
     VERBATIM)
 
@@ -35,7 +35,7 @@ file(GLOB BPF_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/bpf/*.bpf.c
 
 foreach(BPF_SOURCE IN LISTS BPF_SOURCES)
     get_filename_component(BPF_NAME "${BPF_SOURCE}" NAME_WE)
-    set(BPF_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${BPF_NAME}.o")
+    set(BPF_OUTPUT "${CMAKE_BINARY_DIR}/bpf/${BPF_NAME}.bpf.o")
 
     add_custom_command(
         OUTPUT ${BPF_OUTPUT}
@@ -45,9 +45,14 @@ foreach(BPF_SOURCE IN LISTS BPF_SOURCES)
         COMMENT "Compiling eBPF: ${BPF_NAME}.bpf.c")
 
     list(APPEND BPF_OBJECTS ${BPF_OUTPUT})
+
+    if(BPF_NAME STREQUAL "execve.bpf")
+        target_compile_definitions(vigil_platform PUBLIC VIGIL_EXECVE_BPF_OBJECT="${BPF_OUTPUT}")
+    endif()
 endforeach()
 
 if(BPF_OBJECTS)
     add_custom_target(bpf_programs ALL DEPENDS ${BPF_OBJECTS})
     add_dependencies(bpf_programs vmlinux_h)
+    add_dependencies(vigil_platform bpf_programs)
 endif()

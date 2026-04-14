@@ -14,7 +14,9 @@ namespace vigil::common {
 
         virtual void start() = 0;
         virtual void stop() = 0;
-        virtual void setProcessCallback(ProcessCallback callback) = 0;
+        virtual void setProcessCallback(ProcessCallback callback) {
+            callback_ = std::move(callback);
+        }
 
         virtual ~IEventCollector() = default;
 

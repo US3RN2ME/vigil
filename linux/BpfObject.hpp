@@ -3,6 +3,7 @@
 #define VIGIL_LINUX_BPFOBJECT_HPP
 
 #include <string_view>
+#include <bpf/libbpf.h>
 
 namespace vigil::linux {
 
@@ -25,7 +26,7 @@ namespace vigil::linux {
         [[nodiscard]] int mapFd(std::string_view mapName) const;
 
     private:
-        struct bpf_object* obj_ = nullptr;
+        struct bpf_object *obj_ = nullptr;
     };
 
 } // namespace vigil::linux

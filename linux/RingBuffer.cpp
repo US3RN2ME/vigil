@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <stdexcept>
+#include <utility>
 
 namespace vigil::linux {
     RingBuffer::RingBuffer(int mapFd, Callback cb, void* ctx) {

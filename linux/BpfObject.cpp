@@ -1,8 +1,9 @@
 
 #include "BpfObject.hpp"
 
-#include <bpf/libbpf.h>
 #include <stdexcept>
+#include <utility>
+#include <sys/resource.h>
 
 namespace vigil::linux {
     BpfObject::BpfObject(std::string_view path) {
@@ -28,6 +29,13 @@ namespace vigil::linux {
     }
 
     void BpfObject::load() {
+        const rlimit rl{
+            .rlim_cur = RLIM_INFINITY,
+            .rlim_max = RLIM_INFINITY
+        };
+        if (setrlimit(RLIMIT_MEMLOCK, &rl) != 0)
+            throw std::runtime_error{"failed to raise RLIMIT_MEMLOCK"};
+
         if (bpf_object__load(obj_))
             throw std::runtime_error{"bpf_object__load failed"};
     }
