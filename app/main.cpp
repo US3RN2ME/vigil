@@ -12,7 +12,7 @@ int main() {
 
     collector->start();
 
-    collector->stop();
+    //collector->stop();
 
     return 0;
 }

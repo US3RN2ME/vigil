@@ -1,6 +1,7 @@
 
 #include "BpfObject.hpp"
 
+#include <iostream>
 #include <stdexcept>
 #include <utility>
 #include <sys/resource.h>
@@ -34,8 +35,7 @@ namespace vigil::linux {
             .rlim_max = RLIM_INFINITY
         };
         if (setrlimit(RLIMIT_MEMLOCK, &rl) != 0)
-            throw std::runtime_error{"failed to raise RLIMIT_MEMLOCK"};
-
+            std::cerr << "failed to raise RLIMIT_MEMLOCK" << std::endl;
         if (bpf_object__load(obj_))
             throw std::runtime_error{"bpf_object__load failed"};
     }
