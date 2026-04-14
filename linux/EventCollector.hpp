@@ -20,13 +20,13 @@ namespace vigil::linux {
 
     class EventCollector : public common::IEventCollector {
     public:
-        EventCollector();
         void start() override;
         void stop() override;
 
     private:
         static int onEvent(void* ctx, void* data, size_t size);
         static std::optional<common::ProcessInfo> readProcessInfo(int pid);
+        bool initEbpf();
 
         std::optional<BpfObject> bpfObj_;
         std::optional<RingBuffer> ringBuf_;

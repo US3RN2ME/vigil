@@ -12,39 +12,37 @@ namespace vigil::common {
 }
 
 namespace vigil::linux {
-    EventCollector::EventCollector() {
-        try {
-            bpfObj_.emplace("../bpf/execve.bpf.o");
-            bpfObj_->load();
-            bpfObj_->attach("onExecve");
-            ringBuf_.emplace(bpfObj_->mapFd("rb"), onEvent, this);
-            // return true;
-        } catch (const std::runtime_error& e) {
-            // log e.what()
-            // return false;
-        }
-    }
-
     void EventCollector::start() {
-        for (const auto& entry : std::filesystem::directory_iterator("/proc")) {
-            const auto name = entry.path().filename().string();
-            const auto isDigit = [](const auto c) {
-                return std::isdigit(c);
-            };
-            if (!std::all_of(name.begin(), name.end(), isDigit))
-                continue;
+        if (!initEbpf()) return;
 
-            const auto pid = std::stoi(name);
-            auto proc = readProcessInfo(pid);
-            if (proc && callback_) {
-                callback_(*proc);
-            }
+        running_ = true;
+        while (running_) {
+            const int result = ringBuf_->poll(100);
+            if (result < 0 && errno != EINTR) break;
         }
     }
 
-    void EventCollector::stop() {}
+    void EventCollector::stop() {
+        running_ = false;
+        ringBuf_.reset();
+        bpfObj_.reset();
+    }
 
-    int EventCollector::onEvent(void* ctx, void* data, size_t size) {}
+    int EventCollector::onEvent(void* ctx, void* data, size_t size) {
+        auto* self  = static_cast<EventCollector*>(ctx);
+        auto* event = static_cast<ExecveEvent*>(data);
+
+        auto proc = readProcessInfo(static_cast<int>(event->pid));
+        if (!proc) return 0;
+
+        proc->ppid = event->ppid;
+        proc->name = event->comm;
+
+        if (self->callback_) {
+            self->callback_(*proc);
+        }
+        return 0;
+    }
 
     std::optional<common::ProcessInfo> EventCollector::readProcessInfo(int pid) {
         common::ProcessInfo p;
@@ -125,5 +123,18 @@ namespace vigil::linux {
         p.integrity = common::ProcessInfo::Integrity::Medium;
 
         return p;
+    }
+
+    bool EventCollector::initEbpf() {
+        try {
+            bpfObj_.emplace("../bpf/execve.bpf.o");
+            bpfObj_->load();
+            bpfObj_->attach("onExecve");
+            ringBuf_.emplace(bpfObj_->mapFd("rb"), onEvent, this);
+            return true;
+        } catch (const std::runtime_error& e) {
+            // log e.what()
+            return false;
+        }
     }
 } // namespace vigil::linux
