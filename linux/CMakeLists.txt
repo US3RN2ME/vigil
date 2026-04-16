@@ -10,10 +10,10 @@ find_program(BPFTOOL bpftool REQUIRED)
 set(VMLINUX_H "${CMAKE_CURRENT_SOURCE_DIR}/bpf/vmlinux.h")
 
 add_custom_command(
-    OUTPUT ${VMLINUX_H}
-    COMMAND /bin/sh -c "${BPFTOOL} btf dump file /sys/kernel/btf/vmlinux format c > ${VMLINUX_H}"
-    COMMENT "Generating vmlinux.h from running kernel BTF"
-    VERBATIM)
+        OUTPUT ${VMLINUX_H}
+        COMMAND /bin/sh -c "${BPFTOOL} btf dump file /sys/kernel/btf/vmlinux format c > ${VMLINUX_H}"
+        COMMENT "Generating vmlinux.h from running kernel BTF"
+        VERBATIM)
 
 add_custom_target(vmlinux_h DEPENDS ${VMLINUX_H})
 
@@ -25,34 +25,35 @@ add_library(vigil_platform ${LINUX_SOURCES} ${LINUX_HEADERS})
 add_dependencies(vigil_platform vmlinux_h)
 
 target_include_directories(vigil_platform PUBLIC ${LIBBPF_INCLUDE_DIRS}
-                                                 "${CMAKE_CURRENT_SOURCE_DIR}")
+        "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(vigil_platform PUBLIC vigil_common ${LIBBPF_LIBRARIES} ${LIBELF_LIBRARY}
-                                            ${LIBZ_LIBRARY})
+        ${LIBZ_LIBRARY})
 
 target_compile_definitions(vigil_platform PUBLIC VIGIL_LINUX)
 
 file(GLOB BPF_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/bpf/*.bpf.c")
 
-foreach(BPF_SOURCE IN LISTS BPF_SOURCES)
+foreach (BPF_SOURCE IN LISTS BPF_SOURCES)
     get_filename_component(BPF_NAME "${BPF_SOURCE}" NAME_WE)
     set(BPF_OUTPUT "${CMAKE_BINARY_DIR}/bpf/${BPF_NAME}.bpf.o")
 
     add_custom_command(
-        OUTPUT ${BPF_OUTPUT}
-        COMMAND ${CLANG} -target bpf -O2 -g -I/usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu -c
-                ${BPF_SOURCE} -o ${BPF_OUTPUT}
-        DEPENDS ${BPF_SOURCE}
-        COMMENT "Compiling eBPF: ${BPF_NAME}.bpf.c")
+            OUTPUT ${BPF_OUTPUT}
+            COMMAND ${CLANG} -target bpf -O2 -g -I/usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu -c
+            ${BPF_SOURCE} -o ${BPF_OUTPUT}
+            DEPENDS ${BPF_SOURCE}
+            COMMENT "Compiling eBPF: ${BPF_NAME}.bpf.c")
 
     list(APPEND BPF_OBJECTS ${BPF_OUTPUT})
 
-    if(BPF_NAME STREQUAL "execve.bpf")
-        target_compile_definitions(vigil_platform PUBLIC VIGIL_EXECVE_BPF_OBJECT="${BPF_OUTPUT}")
-    endif()
-endforeach()
+    string(TOUPPER "${BPF_NAME}" BPF_NAME_UPPER)
 
-if(BPF_OBJECTS)
+    target_compile_definitions(vigil_platform
+            PUBLIC VIGIL_${BPF_NAME_UPPER}_BPF_OBJECT="${BPF_OUTPUT}")
+endforeach ()
+
+if (BPF_OBJECTS)
     add_custom_target(bpf_programs ALL DEPENDS ${BPF_OBJECTS})
     add_dependencies(bpf_programs vmlinux_h)
     add_dependencies(vigil_platform bpf_programs)
-endif()
+endif ()
