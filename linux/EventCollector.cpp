@@ -6,7 +6,7 @@
 #include <fstream>
 
 namespace vigil::common {
-    [[nodiscard]] std::unique_ptr<IEventCollector> createEventCollector() {
+    std::unique_ptr<EventCollector> createEventCollector() {
         return std::make_unique<linux::EventCollector>();
     }
 }
@@ -28,9 +28,9 @@ namespace vigil::linux {
         bpfObj_.reset();
     }
 
-    int EventCollector::onEvent(void* ctx, void* data, size_t size) {
-        auto* self  = static_cast<EventCollector*>(ctx);
-        auto* event = static_cast<ExecveEvent*>(data);
+    int EventCollector::onEvent(void *ctx, void *data, size_t size) {
+        auto *self = static_cast<EventCollector *>(ctx);
+        auto *event = static_cast<ExecveEvent *>(data);
 
         auto proc = readProcessInfo(static_cast<int>(event->pid));
         if (!proc) return 0;
@@ -38,9 +38,8 @@ namespace vigil::linux {
         proc->ppid = event->ppid;
         proc->name = event->comm;
 
-        if (self->callback_) {
-            self->callback_(*proc);
-        }
+        self->onProcess.emit(*proc);
+
         return 0;
     }
 
@@ -65,7 +64,7 @@ namespace vigil::linux {
         }
 
         if (std::ifstream f{base + "status"}; f) {
-            const auto parseValue = [](const std::string& line) -> std::string {
+            const auto parseValue = [](const std::string &line) -> std::string {
                 const auto colon = line.find(':');
                 if (colon == std::string::npos)
                     return {};
@@ -127,12 +126,12 @@ namespace vigil::linux {
 
     bool EventCollector::initEbpf() {
         try {
-            bpfObj_.emplace("../bpf/execve.bpf.o");
+            bpfObj_.emplace(VIGIL_EXECVE_BPF_OBJECT);
             bpfObj_->load();
             bpfObj_->attach("onExecve");
             ringBuf_.emplace(bpfObj_->mapFd("rb"), onEvent, this);
             return true;
-        } catch (const std::runtime_error& e) {
+        } catch (const std::runtime_error &e) {
             // log e.what()
             return false;
         }

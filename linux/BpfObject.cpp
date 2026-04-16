@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <utility>
 #include <sys/resource.h>
+#include <bpf/libbpf.h>
 
 namespace vigil::linux {
     BpfObject::BpfObject(std::string_view path) {
@@ -18,9 +19,11 @@ namespace vigil::linux {
             bpf_object__close(obj_);
     }
 
-    BpfObject::BpfObject(BpfObject&& o) noexcept : obj_{std::exchange(o.obj_, nullptr)} {}
+    BpfObject::BpfObject(BpfObject &&o) noexcept
+        : obj_{std::exchange(o.obj_, nullptr)} {
+    }
 
-    BpfObject& BpfObject::operator=(BpfObject&& o) noexcept {
+    BpfObject &BpfObject::operator=(BpfObject &&o) noexcept {
         if (this != &o) {
             if (obj_)
                 bpf_object__close(obj_);
@@ -41,17 +44,16 @@ namespace vigil::linux {
     }
 
     void BpfObject::attach(std::string_view programName) {
-        struct bpf_program* prog = bpf_object__find_program_by_name(obj_, programName.data());
+        struct bpf_program *prog = bpf_object__find_program_by_name(obj_, programName.data());
         if (!prog)
             throw std::runtime_error{"bpf program not found: " + std::string{programName}};
         bpf_program__attach(prog);
     }
 
     int BpfObject::mapFd(std::string_view mapName) const {
-        struct bpf_map* map = bpf_object__find_map_by_name(obj_, mapName.data());
+        struct bpf_map *map = bpf_object__find_map_by_name(obj_, mapName.data());
         if (!map)
             throw std::runtime_error{"bpf map not found: " + std::string{mapName}};
         return bpf_map__fd(map);
     }
-
 } // namespace vigil::linux

@@ -7,7 +7,7 @@
 
 #include "BpfObject.hpp"
 #include "RingBuffer.hpp"
-#include "common/IEventCollector.hpp"
+#include "common/EventCollector.hpp"
 #include "common/ProcessInfo.hpp"
 
 namespace vigil::linux {
@@ -18,14 +18,17 @@ namespace vigil::linux {
         char filename[256];
     };
 
-    class EventCollector : public common::IEventCollector {
+    class EventCollector : public common::EventCollector {
     public:
         void start() override;
+
         void stop() override;
 
     private:
-        static int onEvent(void* ctx, void* data, size_t size);
+        static int onEvent(void *ctx, void *data, size_t size);
+
         static std::optional<common::ProcessInfo> readProcessInfo(int pid);
+
         bool initEbpf();
 
         std::optional<BpfObject> bpfObj_;

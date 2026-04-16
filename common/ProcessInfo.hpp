@@ -16,7 +16,6 @@ namespace vigil::common {
     /// default values (false / 0 / Unknown) so that rules referencing them
     /// simply never fire — no #ifdef required in shared code.
     struct ProcessInfo {
-
         // ── Identity ─────────────────────────────────────────────────────────────
 
         /// Numeric process identifier.
@@ -83,6 +82,7 @@ namespace vigil::common {
             System,
             Unknown ///< Collector could not read the token.
         };
+
         Integrity integrity = Integrity::Unknown;
 
         // ── Memory ───────────────────────────────────────────────────────────────

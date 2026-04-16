@@ -3,21 +3,23 @@
 #define VIGIL_LINUX_BPFOBJECT_HPP
 
 #include <string_view>
-#include <bpf/libbpf.h>
+
+struct bpf_object;
 
 namespace vigil::linux {
-
     class BpfObject {
     public:
         explicit BpfObject(std::string_view path);
 
         ~BpfObject();
 
-        BpfObject(const BpfObject&) = delete;
-        BpfObject& operator=(const BpfObject&) = delete;
+        BpfObject(const BpfObject &) = delete;
 
-        BpfObject(BpfObject&& o) noexcept;
-        BpfObject& operator=(BpfObject&& o) noexcept;
+        BpfObject &operator=(const BpfObject &) = delete;
+
+        BpfObject(BpfObject &&o) noexcept;
+
+        BpfObject &operator=(BpfObject &&o) noexcept;
 
         void load();
 
@@ -26,9 +28,8 @@ namespace vigil::linux {
         [[nodiscard]] int mapFd(std::string_view mapName) const;
 
     private:
-        struct bpf_object *obj_ = nullptr;
+        struct bpf_object *obj_{};
     };
-
 } // namespace vigil::linux
 
 #endif // VIGIL_LINUX_BPFOBJECT_HPP

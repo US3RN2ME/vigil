@@ -4,9 +4,10 @@
 #include <functional>
 #include <stdexcept>
 #include <utility>
+#include <bpf/libbpf.h>
 
 namespace vigil::linux {
-    RingBuffer::RingBuffer(int mapFd, Callback cb, void* ctx) {
+    RingBuffer::RingBuffer(int mapFd, Callback cb, void *ctx) {
         rb_ = ring_buffer__new(mapFd, cb, ctx, nullptr);
         if (!rb_)
             throw std::runtime_error{"ring_buffer__new failed"};
@@ -17,9 +18,10 @@ namespace vigil::linux {
             ring_buffer__free(rb_);
     }
 
-    RingBuffer::RingBuffer(RingBuffer&& o) noexcept : rb_{std::exchange(o.rb_, nullptr)} {}
+    RingBuffer::RingBuffer(RingBuffer &&o) noexcept : rb_{std::exchange(o.rb_, nullptr)} {
+    }
 
-    RingBuffer& RingBuffer::operator=(RingBuffer&& o) noexcept {
+    RingBuffer &RingBuffer::operator=(RingBuffer &&o) noexcept {
         if (this != &o) {
             if (rb_)
                 ring_buffer__free(rb_);

@@ -2,29 +2,32 @@
 #ifndef VIGIL_LINUX_RINGBUFFER_HPP
 #define VIGIL_LINUX_RINGBUFFER_HPP
 
-#include <bpf/libbpf.h>
+#include <cstddef>
+
+struct ring_buffer;
 
 namespace vigil::linux {
     class RingBuffer {
     public:
-        using Callback = ring_buffer_sample_fn; // int(*)(void* ctx, void* data, size_t size)
+        using Callback = int (*)(void *ctx, void *data, size_t size);
 
-        RingBuffer(int mapFd, Callback cb, void* ctx);
+        RingBuffer(int mapFd, Callback cb, void *ctx);
 
         ~RingBuffer();
 
-        RingBuffer(const RingBuffer&) = delete;
-        RingBuffer& operator=(const RingBuffer&) = delete;
+        RingBuffer(const RingBuffer &) = delete;
 
-        RingBuffer(RingBuffer&& o) noexcept;
-        RingBuffer& operator=(RingBuffer&& o) noexcept;
+        RingBuffer &operator=(const RingBuffer &) = delete;
+
+        RingBuffer(RingBuffer &&o) noexcept;
+
+        RingBuffer &operator=(RingBuffer &&o) noexcept;
 
         int poll(int timeoutMs = 100) const;
 
     private:
-        struct ring_buffer* rb_ = nullptr;
+        struct ring_buffer *rb_ = nullptr;
     };
-
 } // namespace vigil::linux
 
 #endif // VIGIL_LINUX_RINGBUFFER_HPP
