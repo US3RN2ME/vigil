@@ -1,26 +1,20 @@
 #include <iostream>
 
-#include "common/EventCollector.hpp"
-#include "common/RuleEngine.hpp"
+#include <vigil/EventCollector.hpp>
+#include <vigil/RuleEngine.hpp>
 
 int main() {
-    auto collector = vigil::common::createEventCollector();
-    auto ruleEngine = vigil::common::createRuleEngine(vigil::common::Config::loadFromFile(VIGIL_CONFIG_PATH));
+   auto collector = vigil::createEventCollector();
+   auto engine = vigil::createRuleEngine(vigil::Config::loadFromFile(VIGIL_CONFIG_PATH));
 
-    collector->onProcess.connect([&ruleEngine](const vigil::common::ProcessInfo &info) {
-        std::cout << "onProcess" << info.pid << " " << info.exePath << std::endl;
-        ruleEngine->process(info);
-    });
+   collector->onProcess.connect([&](const vigil::ProcessInfo& info) {
+      engine->process(info);
+   });
 
-    ruleEngine->onAlert.connect([&](const vigil::common::Alert &alert) {
-        std::cout << "onAlert" << alert.rule << " " << alert.severity << std::endl;
-    });
+   engine->onAlert.connect([](const vigil::Alert& alert) {
+      std::cout << alert.rule << " " << alert.severity << "\n";
+   });
 
-    std::cout << "Starting..." << std::endl;
-
-    collector->start();
-
-    //collector->stop();
-
-    return 0;
+   collector->start();
+   return 0;
 }

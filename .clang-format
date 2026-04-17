@@ -1,6 +1,5 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
-TabWidth: 3
+IndentWidth: 3
 UseTab: Never
 ColumnLimit: 128
 
@@ -20,11 +19,15 @@ BraceWrapping:
   AfterUnion: false
   BeforeElse: false
   BeforeCatch: false
+  IndentBraces: false
 
-AlignConsecutiveAssignments: None
-AlignConsecutiveDeclarations: None
+AlignConsecutiveAssignments:
+  Enabled: false
+AlignConsecutiveDeclarations:
+  Enabled: false
 AlignEscapedNewlines: Right
-AlignTrailingComments: true
+AlignTrailingComments:
+  Kind: Always
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Never
@@ -50,14 +53,18 @@ SpacesInContainerLiterals: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 
-SortIncludes: CaseSensitive
+SortIncludes:
+  Enabled: true
+  IgnoreCase: false
 IncludeBlocks: Regroup
 IncludeCategories:
+  - Regex: '^<vigil/'
+    Priority: 3
   - Regex: '^<.*>'
     Priority: 1
   - Regex: '^".*"'
     Priority: 2
 
 FixNamespaceComments: true
-ReflowComments: 'Always'
-SortUsingDeclarations: true
+ReflowComments: true
+SortUsingDeclarations: LexicographicNumeric
