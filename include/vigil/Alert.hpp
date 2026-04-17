@@ -11,7 +11,7 @@ namespace vigil {
       std::string_view rule;
       std::string_view severity;
       const ProcessInfo& info;
-      std::vector<std::pair<std::string_view, std::string>> attributes;
+      std::vector<std::pair<std::string_view, std::string>> attributes{};
    };
 } // namespace vigil
 
