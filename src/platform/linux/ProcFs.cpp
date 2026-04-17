@@ -5,8 +5,9 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 
-#include "vigil/Logger.hpp"
+#include <vigil/Logger.hpp>
 
 namespace vigil::platform::linux {
    std::optional<ProcessInfo> readProcessInfo(int pid) {
@@ -20,7 +21,17 @@ namespace vigil::platform::linux {
          p.isMemfd = p.exePath.contains("/memfd:");
       } catch (...) {
          log::debug("process {} vanished before snapshot", pid);
-         return std::nullopt;
+         return {};
+      }
+
+      if (!p.exeDeleted && !p.isMemfd) {
+         struct stat exeLinkStat{};
+         struct stat exePathStat{};
+
+         const auto exeLink = base + "exe";
+         if (stat(exeLink.c_str(), &exeLinkStat) == 0 && stat(p.exePath.c_str(), &exePathStat) == 0) {
+            p.binaryReplaced = exeLinkStat.st_ino != exePathStat.st_ino;
+         }
       }
 
       if (std::ifstream f{base + "cmdline"}; f) {

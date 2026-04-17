@@ -1,9 +1,8 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-#include "vigil/Error.hpp"
-
 #include <vigil/Config.hpp>
+#include <vigil/Error.hpp>
 #include <vigil/Logger.hpp>
 
 namespace {

@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#include "vigil/ProcessInfo.hpp"
+#include <vigil/ProcessInfo.hpp>
 
 namespace vigil::platform::linux {
    std::optional<ProcessInfo> readProcessInfo(int pid);

@@ -6,7 +6,8 @@
 
 #include "BpfEvents.hpp"
 #include "ProcFs.hpp"
-#include "vigil/Logger.hpp"
+
+#include <vigil/Logger.hpp>
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {

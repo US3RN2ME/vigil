@@ -1,5 +1,4 @@
-#include "vigil/Error.hpp"
-
+#include <vigil/Error.hpp>
 #include <vigil/EventCollector.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
