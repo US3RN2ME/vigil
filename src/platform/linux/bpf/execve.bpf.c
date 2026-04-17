@@ -1,8 +1,10 @@
 
+// clang-format off
+#include "vmlinux.h"
+
 #include <bpf/bpf_core_read.h>
 #include <bpf/bpf_helpers.h>
-
-#include "vmlinux.h"
+// clang-format on
 
 struct ExecveEvent {
    __u32 pid;
