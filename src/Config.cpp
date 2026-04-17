@@ -1,6 +1,8 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include "vigil/Error.hpp"
+
 #include <vigil/Config.hpp>
 #include <vigil/Logger.hpp>
 
@@ -18,10 +20,8 @@ namespace vigil {
 
    Config Config::loadFromFile(const std::string_view path) {
       std::ifstream f{path.data()};
-      if (!f) {
-         log::error("cannot open config file: {}", path);
-         return {};
-      }
+      if (!f)
+         throw ConfigError{std::format("cannot open config file: '{}'", path)};
 
       try {
          const auto json = nlohmann::json::parse(f, nullptr, true, true);
@@ -51,8 +51,7 @@ namespace vigil {
          log::info("config loaded from {}", path);
          return cfg;
       } catch (const std::exception& e) {
-         log::error("failed to parse config {}: {}", path, e.what());
-         return {};
+         throw ConfigError{"failed to parse config '{}': {}", path, e.what()};
       }
    }
 

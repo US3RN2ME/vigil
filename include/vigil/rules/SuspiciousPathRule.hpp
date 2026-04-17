@@ -6,15 +6,17 @@
 
 namespace vigil::rules {
    class SuspiciousPathRule : public Rule {
-  public:
+   public:
       static constexpr std::string_view kName = "suspicious_path";
 
       explicit SuspiciousPathRule(RuleConfig cfg);
 
       [[nodiscard]] std::string_view name() const noexcept override;
 
-  protected:
+   protected:
       [[nodiscard]] std::optional<Alert> check(const ProcessInfo& info) override;
+
+      [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
    };
 } // namespace vigil::rules
 

@@ -6,7 +6,7 @@
 
 namespace vigil::platform::windows {
    class EventCollector : public vigil::EventCollector {
-  public:
+   public:
       void start() override;
       void stop() override;
    };

@@ -1,4 +1,6 @@
 
+#include <format>
+
 #include <vigil/rules/PrivilegeEscalationRule.hpp>
 
 namespace vigil::rules {
@@ -16,5 +18,14 @@ namespace vigil::rules {
       }
       it->second = info.privilegeMask;
       return makeAlert(info);
+   }
+
+   Alert PrivilegeEscalationRule::makeAlert(const ProcessInfo& info) const {
+      auto alert = Rule::makeAlert(info);
+      alert.attributes = {
+          {"mask_before", std::format("{:#x}", baseline_.at(info.pid))},
+          {"mask_after", std::format("{:#x}", info.privilegeMask)},
+      };
+      return alert;
    }
 } // namespace vigil::rules

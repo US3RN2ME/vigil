@@ -8,7 +8,7 @@ struct ring_buffer;
 
 namespace vigil::platform::linux {
    class RingBuffer {
-  public:
+   public:
       using Callback = int (*)(void* ctx, void* data, size_t size);
 
       RingBuffer(int mapFd, Callback cb, void* ctx);
@@ -25,7 +25,7 @@ namespace vigil::platform::linux {
 
       int poll(int timeoutMs = 100) const;
 
-  private:
+   private:
       struct ring_buffer* rb_ = nullptr;
    };
 } // namespace vigil::platform::linux

@@ -6,14 +6,14 @@
 
 namespace vigil::rules {
    class AnonRwxRule : public Rule {
-  public:
+   public:
       static constexpr std::string_view kName = "anon_rwx_mapping";
 
       explicit AnonRwxRule(RuleConfig cfg);
 
       [[nodiscard]] std::string_view name() const noexcept override;
 
-  protected:
+   protected:
       [[nodiscard]] std::optional<Alert> check(const ProcessInfo& info) override;
    };
 } // namespace vigil::rules

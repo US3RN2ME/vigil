@@ -9,7 +9,7 @@
 
 namespace vigil {
    class EventCollector {
-  public:
+   public:
       Signal<const ProcessInfo&> onProcess;
 
       virtual void start() = 0;
@@ -19,7 +19,7 @@ namespace vigil {
       EventCollector(const EventCollector&) = delete;
       EventCollector& operator=(const EventCollector&) = delete;
 
-  protected:
+   protected:
       EventCollector() = default;
    };
 

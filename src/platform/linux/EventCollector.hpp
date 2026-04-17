@@ -12,11 +12,11 @@
 
 namespace vigil::platform::linux {
    class EventCollector : public vigil::EventCollector {
-  public:
+   public:
       void start() override;
       void stop() override;
 
-  private:
+   private:
       bool init();
       static int onEvent(void* ctx, void* data, size_t size);
 

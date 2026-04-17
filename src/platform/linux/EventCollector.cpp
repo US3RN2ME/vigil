@@ -6,6 +6,7 @@
 
 #include "BpfEvents.hpp"
 #include "ProcFs.hpp"
+#include "vigil/Logger.hpp"
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {
@@ -15,17 +16,24 @@ namespace vigil {
 
 namespace vigil::platform::linux {
    void EventCollector::start() {
-      if (!init())
+      log::info("event collector starting");
+      if (!init()) {
+         log::error("event collector init failed, eBPF unavailable");
          return;
+      }
       running_ = true;
+      log::info("event collector running");
       while (running_) {
          const int result = ringBuf_->poll(100);
-         if (result < 0 && errno != EINTR)
+         if (result < 0 && errno != EINTR) {
+            log::error("ring buffer poll error: errno={}", errno);
             break;
+         }
       }
    }
 
    void EventCollector::stop() {
+      log::info("event collector stopping");
       running_ = false;
       ringBuf_.reset();
       bpfObj_.reset();

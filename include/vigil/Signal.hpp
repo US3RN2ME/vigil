@@ -9,7 +9,7 @@
 namespace vigil {
    template <class... Ts>
    class Signal {
-  public:
+   public:
       using Slot = std::function<void(Ts...)>;
 
       uint32_t connect(Slot slot) {
@@ -28,7 +28,7 @@ namespace vigil {
          }
       }
 
-  private:
+   private:
       std::unordered_map<uint32_t, Slot> handlers_;
       uint32_t nextId_{1};
    };

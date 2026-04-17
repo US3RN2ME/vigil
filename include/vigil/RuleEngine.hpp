@@ -13,7 +13,7 @@
 
 namespace vigil {
    class RuleEngine {
-  public:
+   public:
       Signal<Alert> onAlert;
 
       explicit RuleEngine(Config cfg);
@@ -21,7 +21,7 @@ namespace vigil {
       void process(const ProcessInfo& info);
       void addRule(std::unique_ptr<rules::Rule> rule);
 
-  private:
+   private:
       Config cfg_;
       std::vector<std::unique_ptr<rules::Rule>> rules_;
    };

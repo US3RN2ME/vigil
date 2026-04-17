@@ -10,7 +10,7 @@
 
 namespace vigil::rules {
    class Rule {
-  public:
+   public:
       explicit Rule(RuleConfig cfg);
 
       virtual ~Rule() = default;
@@ -19,10 +19,10 @@ namespace vigil::rules {
 
       [[nodiscard]] virtual std::string_view name() const noexcept = 0;
 
-  protected:
+   protected:
       [[nodiscard]] virtual std::optional<Alert> check(const ProcessInfo& info) = 0;
 
-      [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const;
+      [[nodiscard]] virtual Alert makeAlert(const ProcessInfo& info) const;
 
       const RuleConfig cfg_;
    };

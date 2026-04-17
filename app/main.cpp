@@ -18,15 +18,20 @@ int main() {
       });
 
       engine->onAlert.connect([](const vigil::Alert& alert) {
-         vigil::log::info("{} {}", alert.rule, alert.severity);
+         std::string attrs;
+         for (const auto& [k, v] : alert.attributes)
+            attrs += std::format(" {}={}", k, v);
+
+         vigil::log::warn("[ALERT] rule={} severity={} pid={} name={}{}", alert.rule, alert.severity, alert.info.pid,
+                          alert.info.name, attrs);
       });
 
       collector->start();
       vigil::log::info("event collector stopped");
 
-   } catch (const vigil::CollectorError &e) {
+   } catch (const vigil::CollectorError& e) {
       vigil::log::error("Collector init failed: {}", e.what());
-   } catch (const vigil::ConfigError &e) {
+   } catch (const vigil::ConfigError& e) {
       vigil::log::error("Bad config: {}", e.what());
    } catch (...) {
       vigil::log::error("Unknown error");

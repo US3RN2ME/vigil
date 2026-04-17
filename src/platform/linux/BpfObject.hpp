@@ -8,7 +8,7 @@ struct bpf_object;
 
 namespace vigil::platform::linux {
    class BpfObject {
-  public:
+   public:
       explicit BpfObject(std::string_view path);
 
       ~BpfObject();
@@ -27,7 +27,7 @@ namespace vigil::platform::linux {
 
       [[nodiscard]] int mapFd(std::string_view mapName) const;
 
-  private:
+   private:
       struct bpf_object* obj_{};
    };
 } // namespace vigil::platform::linux

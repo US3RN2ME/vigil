@@ -3,7 +3,7 @@ IndentWidth: 3
 UseTab: Never
 ColumnLimit: 128
 
-AccessModifierOffset: -4
+AccessModifierOffset: -3
 NamespaceIndentation: All
 IndentCaseLabels: true
 IndentCaseBlocks: false

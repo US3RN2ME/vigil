@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "vigil/Logger.hpp"
+
 namespace vigil::platform::linux {
    std::optional<ProcessInfo> readProcessInfo(int pid) {
       ProcessInfo p;
@@ -17,6 +19,7 @@ namespace vigil::platform::linux {
          p.exeDeleted = p.exePath.ends_with("(deleted)");
          p.isMemfd = p.exePath.contains("/memfd:");
       } catch (...) {
+         log::debug("process {} vanished before snapshot", pid);
          return std::nullopt;
       }
 

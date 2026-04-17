@@ -32,6 +32,7 @@ namespace vigil {
          log::warn("attempted to add null rule");
          return;
       }
+      log::debug("registered rule: {}", rule->name());
       rules_.emplace_back(std::move(rule));
    }
 } // namespace vigil

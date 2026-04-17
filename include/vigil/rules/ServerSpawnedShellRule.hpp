@@ -7,15 +7,17 @@
 
 namespace vigil::rules {
    class ServerSpawnedShellRule : public Rule {
-  public:
+   public:
       static constexpr std::string_view kName = "server_spawned_shell";
 
       explicit ServerSpawnedShellRule(RuleConfig cfg);
 
       [[nodiscard]] std::string_view name() const noexcept override;
 
-  protected:
+   protected:
       [[nodiscard]] std::optional<Alert> check(const ProcessInfo& info) override;
+
+      [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
    };
 } // namespace vigil::rules
 

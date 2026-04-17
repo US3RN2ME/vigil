@@ -21,4 +21,10 @@ namespace vigil::rules {
       }
       return {};
    }
+
+   Alert SuspiciousPathRule::makeAlert(const ProcessInfo& info) const {
+      auto alert = Rule::makeAlert(info);
+      alert.attributes = {{"path", info.exePath}};
+      return alert;
+   }
 } // namespace vigil::rules
