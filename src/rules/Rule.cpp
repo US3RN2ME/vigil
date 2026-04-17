@@ -2,7 +2,8 @@
 #include <vigil/rules/Rule.hpp>
 
 namespace vigil::rules {
-   Rule::Rule(RuleConfig cfg) : cfg_{std::move(cfg)} {}
+   Rule::Rule(RuleConfig cfg)
+       : cfg_{std::move(cfg)} {}
 
    std::optional<Alert> Rule::evaluate(const ProcessInfo& info) {
       if (!cfg_.enabled) {

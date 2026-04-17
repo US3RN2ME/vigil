@@ -2,7 +2,8 @@
 #include <vigil/rules/PrivilegeEscalationRule.hpp>
 
 namespace vigil::rules {
-   PrivilegeEscalationRule::PrivilegeEscalationRule(RuleConfig cfg) : Rule{std::move(cfg)} {}
+   PrivilegeEscalationRule::PrivilegeEscalationRule(RuleConfig cfg)
+       : Rule{std::move(cfg)} {}
 
    std::string_view PrivilegeEscalationRule::name() const noexcept {
       return kName;

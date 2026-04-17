@@ -1,17 +1,20 @@
-
 #include "BpfObject.hpp"
 
 #include <bpf/libbpf.h>
-#include <iostream>
 #include <stdexcept>
 #include <sys/resource.h>
 #include <utility>
+
+#include "vigil/Error.hpp"
+
+#include <vigil/Logger.hpp>
 
 namespace vigil::platform::linux {
    BpfObject::BpfObject(std::string_view path) {
       obj_ = bpf_object__open(path.data());
       if (!obj_)
-         throw std::runtime_error{"bpf_object__open failed"};
+         throw CollectorError{"bpf_object__open failed for " + std::string{path}};
+      log::info("opened BPF object {}", path);
    }
 
    BpfObject::~BpfObject() {
@@ -19,7 +22,8 @@ namespace vigil::platform::linux {
          bpf_object__close(obj_);
    }
 
-   BpfObject::BpfObject(BpfObject&& o) noexcept : obj_{std::exchange(o.obj_, nullptr)} {}
+   BpfObject::BpfObject(BpfObject&& o) noexcept
+       : obj_{std::exchange(o.obj_, nullptr)} {}
 
    BpfObject& BpfObject::operator=(BpfObject&& o) noexcept {
       if (this != &o) {
@@ -33,22 +37,29 @@ namespace vigil::platform::linux {
    void BpfObject::load() {
       const rlimit rl{.rlim_cur = RLIM_INFINITY, .rlim_max = RLIM_INFINITY};
       if (setrlimit(RLIMIT_MEMLOCK, &rl) != 0)
-         std::cerr << "failed to raise RLIMIT_MEMLOCK" << std::endl;
-      if (bpf_object__load(obj_))
-         throw std::runtime_error{"bpf_object__load failed"};
+         log::warn("failed to raise RLIMIT_MEMLOCK");
+
+      if (bpf_object__load(obj_)) {
+         throw CollectorError{"bpf_object__load failed"};
+      }
+      log::info("BPF object loaded successfully");
    }
 
    void BpfObject::attach(std::string_view programName) {
       struct bpf_program* prog = bpf_object__find_program_by_name(obj_, programName.data());
       if (!prog)
-         throw std::runtime_error{"bpf program not found: " + std::string{programName}};
-      bpf_program__attach(prog);
+         throw CollectorError{"bpf program not found: " + std::string{programName}};
+
+      if (bpf_program__attach(prog) == nullptr)
+         throw CollectorError{"bpf_program__attach failed for " + std::string{programName}};
+
+      log::info("attached BPF program {}", programName);
    }
 
    int BpfObject::mapFd(std::string_view mapName) const {
       struct bpf_map* map = bpf_object__find_map_by_name(obj_, mapName.data());
       if (!map)
-         throw std::runtime_error{"bpf map not found: " + std::string{mapName}};
+         throw CollectorError{"bpf map not found: " + std::string{mapName}};
       return bpf_map__fd(map);
    }
 } // namespace vigil::platform::linux

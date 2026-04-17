@@ -10,7 +10,8 @@ namespace {
 } // namespace
 
 namespace vigil::rules {
-   ServerSpawnedShellRule::ServerSpawnedShellRule(RuleConfig cfg) : Rule{std::move(cfg)} {}
+   ServerSpawnedShellRule::ServerSpawnedShellRule(RuleConfig cfg)
+       : Rule{std::move(cfg)} {}
 
    std::string_view ServerSpawnedShellRule::name() const noexcept {
       return kName;

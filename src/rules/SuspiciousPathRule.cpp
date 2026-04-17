@@ -4,7 +4,8 @@
 #include <vigil/rules/SuspiciousPathRule.hpp>
 
 namespace vigil::rules {
-   SuspiciousPathRule::SuspiciousPathRule(RuleConfig cfg) : Rule{std::move(cfg)} {}
+   SuspiciousPathRule::SuspiciousPathRule(RuleConfig cfg)
+       : Rule{std::move(cfg)} {}
 
    std::string_view SuspiciousPathRule::name() const noexcept {
       return kName;

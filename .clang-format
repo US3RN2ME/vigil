@@ -21,6 +21,7 @@ BraceWrapping:
   BeforeCatch: false
   IndentBraces: false
 
+BreakTemplateDeclarations: Yes
 AlignConsecutiveAssignments:
   Enabled: false
 AlignConsecutiveDeclarations:
@@ -37,6 +38,7 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: false
 
+BreakConstructorInitializers: BeforeComma
 BinPackArguments: true
 BinPackParameters: true
 PointerAlignment: Left
@@ -68,3 +70,4 @@ IncludeCategories:
 FixNamespaceComments: true
 ReflowComments: true
 SortUsingDeclarations: LexicographicNumeric
+InsertNewlineAtEOF: true

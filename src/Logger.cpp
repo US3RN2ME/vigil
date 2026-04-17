@@ -1,0 +1,33 @@
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+
+#include <vigil/Logger.hpp>
+
+namespace vigil::log {
+   void init(std::string_view logFile) {
+      std::vector<spdlog::sink_ptr> sinks;
+      sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+      if (!logFile.empty())
+         sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::string{logFile}));
+
+      auto logger = std::make_shared<spdlog::logger>("vigil", sinks.begin(), sinks.end());
+      spdlog::set_default_logger(logger);
+      spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");
+      spdlog::set_level(spdlog::level::debug);
+      spdlog::flush_on(spdlog::level::info);
+   }
+
+   void debug(std::string_view msg) {
+      spdlog::debug("{}", msg);
+   }
+   void info(std::string_view msg) {
+      spdlog::info("{}", msg);
+   }
+   void warn(std::string_view msg) {
+      spdlog::warn("{}", msg);
+   }
+   void error(std::string_view msg) {
+      spdlog::error("{}", msg);
+   }
+} // namespace vigil::log

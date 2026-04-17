@@ -1,9 +1,8 @@
-
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include <stdexcept>
 
 #include <vigil/Config.hpp>
+#include <vigil/Logger.hpp>
 
 namespace {
    constexpr std::string_view kRules = "rules";
@@ -19,34 +18,42 @@ namespace vigil {
 
    Config Config::loadFromFile(const std::string_view path) {
       std::ifstream f{path.data()};
-      if (!f)
-         throw std::runtime_error{std::string{"cannot open config file: "} + path.data()};
-
-      const auto json = nlohmann::json::parse(f, nullptr, true, true);
-
-      Config cfg;
-
-      for (const auto& [name, ruleJson] : json.value(kRules.data(), nlohmann::json::object()).items()) {
-         rules::RuleConfig rc;
-         rc.enabled = ruleJson.value(kEnabled.data(), true);
-         rc.severity = ruleJson.value(kSeverity.data(), "medium");
-
-         if (ruleJson.contains(kServerNames))
-            for (const auto& item : ruleJson.at(kServerNames))
-               rc.serverNames.insert(item.get<std::string>());
-
-         if (ruleJson.contains(kShellNames))
-            for (const auto& item : ruleJson.at(kShellNames))
-               rc.shellNames.insert(item.get<std::string>());
-
-         if (ruleJson.contains(kSuspiciousPaths))
-            for (const auto& item : ruleJson.at(kSuspiciousPaths))
-               rc.suspiciousPaths.push_back(item.get<std::string>());
-
-         cfg.rules_.emplace(name, std::move(rc));
+      if (!f) {
+         log::error("cannot open config file: {}", path);
+         return {};
       }
 
-      return cfg;
+      try {
+         const auto json = nlohmann::json::parse(f, nullptr, true, true);
+
+         Config cfg;
+
+         for (const auto& [name, ruleJson] : json.value(kRules.data(), nlohmann::json::object()).items()) {
+            rules::RuleConfig rc;
+            rc.enabled = ruleJson.value(kEnabled.data(), true);
+            rc.severity = ruleJson.value(kSeverity.data(), "medium");
+
+            if (ruleJson.contains(kServerNames))
+               for (const auto& item : ruleJson.at(kServerNames))
+                  rc.serverNames.insert(item.get<std::string>());
+
+            if (ruleJson.contains(kShellNames))
+               for (const auto& item : ruleJson.at(kShellNames))
+                  rc.shellNames.insert(item.get<std::string>());
+
+            if (ruleJson.contains(kSuspiciousPaths))
+               for (const auto& item : ruleJson.at(kSuspiciousPaths))
+                  rc.suspiciousPaths.push_back(item.get<std::string>());
+
+            cfg.rules_.emplace(name, std::move(rc));
+         }
+
+         log::info("config loaded from {}", path);
+         return cfg;
+      } catch (const std::exception& e) {
+         log::error("failed to parse config {}: {}", path, e.what());
+         return {};
+      }
    }
 
    rules::RuleConfig Config::rule(const std::string_view name) const noexcept {

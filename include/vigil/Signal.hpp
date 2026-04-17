@@ -7,7 +7,8 @@
 #include <unordered_map>
 
 namespace vigil {
-   template <class... Ts> class Signal {
+   template <class... Ts>
+   class Signal {
   public:
       using Slot = std::function<void(Ts...)>;
 

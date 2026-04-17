@@ -1,20 +1,35 @@
-#include <iostream>
+#include "vigil/Error.hpp"
 
 #include <vigil/EventCollector.hpp>
+#include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
 
 int main() {
-   auto collector = vigil::createEventCollector();
-   auto engine = vigil::createRuleEngine(vigil::Config::loadFromFile(VIGIL_CONFIG_PATH));
+   try {
+      vigil::log::init();
 
-   collector->onProcess.connect([&](const vigil::ProcessInfo& info) {
-      engine->process(info);
-   });
+      auto collector = vigil::createEventCollector();
+      auto engine = vigil::createRuleEngine(vigil::Config::loadFromFile(VIGIL_CONFIG_PATH));
 
-   engine->onAlert.connect([](const vigil::Alert& alert) {
-      std::cout << alert.rule << " " << alert.severity << "\n";
-   });
+      vigil::log::info("vigil started");
 
-   collector->start();
+      collector->onProcess.connect([&](const vigil::ProcessInfo& info) {
+         engine->process(info);
+      });
+
+      engine->onAlert.connect([](const vigil::Alert& alert) {
+         vigil::log::info("{} {}", alert.rule, alert.severity);
+      });
+
+      collector->start();
+      vigil::log::info("event collector stopped");
+
+   } catch (const vigil::CollectorError &e) {
+      vigil::log::error("Collector init failed: {}", e.what());
+   } catch (const vigil::ConfigError &e) {
+      vigil::log::error("Bad config: {}", e.what());
+   } catch (...) {
+      vigil::log::error("Unknown error");
+   }
    return 0;
 }
