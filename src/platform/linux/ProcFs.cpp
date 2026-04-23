@@ -10,6 +10,20 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil::platform::linux {
+   std::optional<std::string> readProcessName(int pid) {
+      std::ifstream f{"/proc/" + std::to_string(pid) + "/status"};
+      if (!f)
+         return {};
+
+      for (std::string line; std::getline(f, line);) {
+         if (!line.starts_with("Name:"))
+            continue;
+         const auto start = line.find_first_not_of(" \t", 5); // len("Name:") == 5
+         return start != std::string::npos ? line.substr(start) : std::string{};
+      }
+      return std::nullopt;
+   }
+
    std::optional<ProcessInfo> readProcessInfo(int pid) {
       ProcessInfo p;
       p.pid = static_cast<uint32_t>(pid);
@@ -54,8 +68,10 @@ namespace vigil::platform::linux {
 
             if (line.starts_with("Name:"))
                p.name = val;
-            else if (line.starts_with("PPid:"))
+            else if (line.starts_with("PPid:")) {
                p.ppid = static_cast<uint32_t>(std::stoul(val));
+               p.parentName = readProcessName(p.ppid).value_or("");
+            }
             else if (line.starts_with("Threads:"))
                p.threadCount = static_cast<uint32_t>(std::stoul(val));
             else if (line.starts_with("VmRSS:"))

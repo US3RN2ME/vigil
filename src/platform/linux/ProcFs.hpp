@@ -7,6 +7,8 @@
 #include <vigil/ProcessInfo.hpp>
 
 namespace vigil::platform::linux {
+   std::optional<std::string> readProcessName(int pid);
+
    std::optional<ProcessInfo> readProcessInfo(int pid);
 }
 
