@@ -25,8 +25,9 @@ namespace vigil::platform::linux {
       running_ = true;
       log::info("event collector running");
       while (running_) {
-         const int result = ringBuf_->poll(100);
-         if (result < 0 && errno != EINTR) {
+         const int execveResult = execveRingBuf_->poll(100);
+         const int mmapResult = mmapRingBuf_->poll(100);
+         if ((execveResult < 0 || mmapResult < 0) && errno != EINTR) {
             log::error("ring buffer poll error: errno={}", errno);
             break;
          }
@@ -36,16 +37,27 @@ namespace vigil::platform::linux {
    void EventCollector::stop() {
       log::info("event collector stopping");
       running_ = false;
-      ringBuf_.reset();
-      bpfObj_.reset();
+      execveRingBuf_.reset();
+      bpfExecve_.reset();
+      mmapRingBuf_.reset();
+      bpfMmap_.reset();
    }
 
    bool EventCollector::init() {
       try {
-         bpfObj_.emplace(VIGIL_EXECVE_BPF_OBJECT);
-         bpfObj_->load();
-         bpfObj_->attach("onExecve");
-         ringBuf_.emplace(bpfObj_->mapFd("rb"), onEvent, this);
+         bpfExecve_.emplace(VIGIL_EXECVE_BPF_OBJECT);
+         bpfExecve_->load();
+         bpfExecve_->attach("onExecve");
+         execveRingBuf_.emplace(bpfExecve_->mapFd("rb"), onEvent, this);
+
+         bpfMmap_.emplace(VIGIL_MMAP_BPF_OBJECT);
+         bpfMmap_->load();
+         bpfMmap_->attach("onMmapEnter");
+         bpfMmap_->attach("onMmapExit");
+         bpfMmap_->attach("onMprotectEnter");
+         bpfMmap_->attach("onMprotectExit");
+         mmapRingBuf_.emplace(bpfMmap_->mapFd("mmap_rb"), onMmapEvent, this);
+
          return true;
       } catch (const std::runtime_error&) {
          return false;
@@ -57,6 +69,21 @@ namespace vigil::platform::linux {
       auto* event = static_cast<ExecveEvent*>(data);
 
       auto proc = readProcessInfo(static_cast<int>(event->pid));
+      if (!proc)
+         return 0;
+
+      proc->ppid = event->ppid;
+      proc->name = event->comm;
+
+      self->onProcess.emit(*proc);
+      return 0;
+   }
+
+   int EventCollector::onMmapEvent(void *ctx, void *data, size_t size) {
+      auto* self = static_cast<EventCollector*>(ctx);
+      auto* event = static_cast<MmapEvent*>(data);
+
+      auto proc = readProcessMaps(static_cast<int>(event->pid));
       if (!proc)
          return 0;
 

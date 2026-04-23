@@ -21,7 +21,6 @@ struct {
 // clang-format on
 
 SEC("tracepoint/syscalls/sys_enter_execve")
-
 int onExecve(struct trace_event_raw_sys_enter* ctx) {
    struct ExecveEvent* e = bpf_ringbuf_reserve(&rb, sizeof(*e), 0);
    if (!e)

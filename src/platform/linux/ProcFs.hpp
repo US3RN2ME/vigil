@@ -7,9 +7,16 @@
 #include <vigil/ProcessInfo.hpp>
 
 namespace vigil::platform::linux {
-   std::optional<std::string> readProcessName(int pid);
+   bool readExe(ProcessInfo& p, const std::string& base);
+   bool readStatus(ProcessInfo& p, const std::string& base);
+   void readCmdline(ProcessInfo& p, const std::string& base);
+   void readMaps(ProcessInfo& p, const std::string& base);
+   void readEnviron(ProcessInfo& p, const std::string& base);
+   void readCgroup(ProcessInfo& p, const std::string& base);
 
    std::optional<ProcessInfo> readProcessInfo(int pid);
+   std::optional<ProcessInfo> readProcessMaps(int pid);
+   std::optional<std::string> readProcessName(int pid);
 }
 
 #endif // VIGIL_PLATFORM_LINUX_PROCFS_HPP

@@ -1,4 +1,3 @@
-
 #include "ProcFs.hpp"
 
 #include <algorithm>
@@ -10,69 +9,49 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil::platform::linux {
-   std::optional<std::string> readProcessName(int pid) {
-      std::ifstream f{"/proc/" + std::to_string(pid) + "/status"};
-      if (!f)
-         return {};
-
-      for (std::string line; std::getline(f, line);) {
-         if (!line.starts_with("Name:"))
-            continue;
-         const auto start = line.find_first_not_of(" \t", 5); // len("Name:") == 5
-         return start != std::string::npos ? line.substr(start) : std::string{};
-      }
-      return std::nullopt;
-   }
-
-   std::optional<ProcessInfo> readProcessInfo(int pid) {
-      ProcessInfo p;
-      p.pid = static_cast<uint32_t>(pid);
-      const auto base = std::string("/proc/") + std::to_string(pid) + "/";
-
+   
+   bool readExe(ProcessInfo& p, const std::string& base) {
       try {
-         p.exePath = std::filesystem::read_symlink(base + "exe").string();
+         p.exePath    = std::filesystem::read_symlink(base + "exe").string();
          p.exeDeleted = p.exePath.ends_with("(deleted)");
-         p.isMemfd = p.exePath.contains("/memfd:");
+         p.isMemfd    = p.exePath.contains("/memfd:");
       } catch (...) {
-         log::debug("process {} vanished before snapshot", pid);
-         return {};
+         return false;
       }
 
       if (!p.exeDeleted && !p.isMemfd) {
-         struct stat exeLinkStat{};
-         struct stat exePathStat{};
-
-         const auto exeLink = base + "exe";
-         if (stat(exeLink.c_str(), &exeLinkStat) == 0 && stat(p.exePath.c_str(), &exePathStat) == 0) {
-            p.binaryReplaced = exeLinkStat.st_ino != exePathStat.st_ino;
-         }
+         struct ::stat linkStat{};
+         struct ::stat pathStat{};
+         if (::stat((base + "exe").c_str(), &linkStat) == 0 &&
+             ::stat(p.exePath.c_str(), &pathStat) == 0)
+            p.binaryReplaced = linkStat.st_ino != pathStat.st_ino;
       }
+      return true;
+   }
 
-      if (std::ifstream f{base + "cmdline"}; f) {
-         std::string raw{std::istreambuf_iterator{f}, {}};
-         std::replace(raw.begin(), raw.end(), '\0', ' ');
-         p.cmdline = std::move(raw);
-      }
+   bool readStatus(ProcessInfo& p, const std::string& base) {
+      std::ifstream f{base + "status"};
+      if (!f)
+         return false;
 
-      if (std::ifstream f{base + "status"}; f) {
-         const auto parseValue = [](const std::string& line) -> std::string {
-            const auto colon = line.find(':');
-            if (colon == std::string::npos)
-               return {};
-            const auto start = line.find_first_not_of(" \t", colon + 1);
-            return start != std::string::npos ? line.substr(start) : std::string{};
-         };
+      const auto parseValue = [](const std::string& line) -> std::string {
+         const auto colon = line.find(':');
+         if (colon == std::string::npos)
+            return {};
+         const auto start = line.find_first_not_of(" \t", colon + 1);
+         return start != std::string::npos ? line.substr(start) : std::string{};
+      };
 
-         for (std::string line; std::getline(f, line);) {
-            const auto val = parseValue(line);
-
+      for (std::string line; std::getline(f, line);) {
+         const auto val = parseValue(line);
+         try {
             if (line.starts_with("Name:"))
                p.name = val;
             else if (line.starts_with("PPid:")) {
                p.ppid = static_cast<uint32_t>(std::stoul(val));
-               p.parentName = readProcessName(p.ppid).value_or("");
-            }
-            else if (line.starts_with("Threads:"))
+               if (auto name = readProcessName(static_cast<int>(p.ppid)))
+                  p.parentName = std::move(*name);
+            } else if (line.starts_with("Threads:"))
                p.threadCount = static_cast<uint32_t>(std::stoul(val));
             else if (line.starts_with("VmRSS:"))
                p.rssBytes = std::stoull(val) * 1024ULL;
@@ -84,36 +63,97 @@ namespace vigil::platform::linux {
                std::istringstream ss{val};
                ss >> p.uid >> p.euid;
             }
+         } catch (const std::exception&) {}
+      }
+      return true;
+   }
+
+   void readCmdline(ProcessInfo& p, const std::string& base) {
+      std::ifstream f{base + "cmdline"};
+      if (!f)
+         return;
+      std::string raw{std::istreambuf_iterator{f}, {}};
+      std::replace(raw.begin(), raw.end(), '\0', ' ');
+      p.cmdline = std::move(raw);
+   }
+
+   void readMaps(ProcessInfo& p, const std::string& base) {
+      std::ifstream f{base + "maps"};
+      if (!f)
+         return;
+      for (std::string line; std::getline(f, line);) {
+         std::istringstream ss{line};
+         std::string addr, perms, offset, dev, inode, path;
+         ss >> addr >> perms >> offset >> dev >> inode >> path;
+         if (perms.contains('w') && perms.contains('x') && path.empty()) {
+            p.hasAnonRwx = true;
+            break;
          }
       }
+   }
 
-      if (std::ifstream f{base + "maps"}; f) {
-         for (std::string line; std::getline(f, line);) {
-            std::istringstream ss{line};
-            std::string addr, perms, offset, dev, inode, path;
-            ss >> addr >> perms >> offset >> dev >> inode >> path;
+   void readEnviron(ProcessInfo& p, const std::string& base) {
+      std::ifstream f{base + "environ"};
+      if (!f)
+         return;
+      const std::string raw{std::istreambuf_iterator{f}, {}};
+      p.hasLdPreload = raw.contains("LD_PRELOAD=");
+   }
 
-            const bool isExecutable = perms.contains('x');
-            const bool isWritable = perms.contains('w');
-            const bool isAnonymous = path.empty();
-
-            if (isExecutable && isWritable && isAnonymous) {
-               p.hasAnonRwx = true;
-               break;
-            }
-         }
-      }
-
-      if (std::ifstream f{base + "environ"}; f) {
-         const std::string raw{std::istreambuf_iterator{f}, {}};
-         p.hasLdPreload = raw.contains("LD_PRELOAD=");
-      }
-
-      if (std::ifstream f{base + "cgroup"}; f)
+   void readCgroup(ProcessInfo& p, const std::string& base) {
+      std::ifstream f{base + "cgroup"};
+      if (f)
          std::getline(f, p.containerId);
+   }
+
+   std::optional<ProcessInfo> readProcessInfo(int pid) {
+      ProcessInfo p;
+      p.pid = static_cast<uint32_t>(pid);
+      const auto base = "/proc/" + std::to_string(pid) + "/";
+
+      if (!readExe(p, base)) {
+         log::debug("process {} vanished before snapshot", pid);
+         return {};
+      }
+
+      readStatus(p, base);
+      readCmdline(p, base);
+      readMaps(p, base);
+      readEnviron(p, base);
+      readCgroup(p, base);
 
       p.integrity = ProcessInfo::Integrity::Medium;
+      return p;
+   }
+
+   std::optional<ProcessInfo> readProcessMaps(int pid) {
+      ProcessInfo p;
+      p.pid = static_cast<uint32_t>(pid);
+      const auto base = "/proc/" + std::to_string(pid) + "/";
+
+      if (!readExe(p, base)) {
+         log::debug("process {} vanished before snapshot", pid);
+         return {};
+      }
+
+      readStatus(p, base);
+      readMaps(p, base);
 
       return p;
    }
+
+   std::optional<std::string> readProcessName(int pid) {
+      std::ifstream f{"/proc/" + std::to_string(pid) + "/status"};
+      if (!f)
+         return {};
+
+      for (std::string line; std::getline(f, line);) {
+         if (!line.starts_with("Name:"))
+            continue;
+         const auto start = line.find_first_not_of(" \t", 5);
+         return start != std::string::npos ? line.substr(start) : std::string{};
+      }
+      return {};
+   }
+
 } // namespace vigil::platform::linux

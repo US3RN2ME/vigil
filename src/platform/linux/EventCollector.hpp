@@ -19,9 +19,12 @@ namespace vigil::platform::linux {
    private:
       bool init();
       static int onEvent(void* ctx, void* data, size_t size);
+      static int onMmapEvent(void* ctx, void* data, size_t size);
 
-      std::optional<BpfObject> bpfObj_;
-      std::optional<RingBuffer> ringBuf_;
+      std::optional<BpfObject> bpfMmap_;
+      std::optional<RingBuffer> mmapRingBuf_;
+      std::optional<BpfObject> bpfExecve_;
+      std::optional<RingBuffer> execveRingBuf_;
       std::atomic<bool> running_{false};
    };
 } // namespace vigil::platform::linux
