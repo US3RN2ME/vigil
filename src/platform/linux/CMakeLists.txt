@@ -34,11 +34,15 @@ set(BPF_OUTPUT "${CMAKE_BINARY_DIR}/bpf/events.bpf.o")
 
 add_custom_command(
    OUTPUT ${BPF_OUTPUT}
-   COMMAND
-      /bin/sh -c
-      "${CLANG} -target bpf -O2 -g -fdiagnostics-color=always -I/usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu -c ${BPF_SOURCE} -o ${BPF_OUTPUT} 2>&1"
+   COMMAND ${CLANG} -target bpf -O2 -g -fdiagnostics-color=always -I/usr/include/${CMAKE_SYSTEM_PROCESSOR}-linux-gnu -c
+           ${BPF_SOURCE} -o ${BPF_OUTPUT}
    DEPENDS ${BPF_SOURCE} ${BPF_HEADERS} ${VMLINUX_H}
-   COMMENT "Compiling eBPF: events.bpf.c")
+   COMMENT "Compiling eBPF: events.bpf.c"
+   VERBATIM USES_TERMINAL)
+
+add_custom_target(bpf_programs ALL DEPENDS ${BPF_OUTPUT})
+add_dependencies(vigil_platform bpf_programs)
+target_compile_definitions(vigil_platform PRIVATE VIGIL_EVENTS_BPF_OBJECT="${BPF_OUTPUT}")
 
 add_custom_target(bpf_programs ALL DEPENDS ${BPF_OUTPUT})
 add_dependencies(vigil_platform bpf_programs)
