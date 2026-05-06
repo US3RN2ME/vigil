@@ -156,6 +156,40 @@ namespace vigil {
       /// PIDs of direct child processes at snapshot time.
       /// Populated by the collector after the full process list is collected.
       std::vector<uint32_t> children;
+
+      // ── Network ──────────────────────────────────────────────────────────────
+
+      /// Process called connect(2) to a non-loopback AF_INET/AF_INET6 address.
+      bool hasConnect = false;
+
+      /// Destination port of the connect(2) call, in host byte order.
+      uint16_t connectDport = 0;
+
+      /// Destination address, formatted as a dotted-decimal (IPv4) or
+      /// colon-hex (IPv6) string.
+      std::string connectDaddr;
+
+      // ── Process injection ─────────────────────────────────────────────────────
+
+      /// Process called ptrace(PTRACE_ATTACH) or ptrace(PTRACE_SEIZE) — the
+      /// standard first step of debugger-based code injection on Linux.
+      bool hasPtraceAttach = false;
+
+      /// PID of the process targeted by the ptrace call.
+      uint32_t ptraceTargetPid = 0;
+
+      // ── Privilege escalation ──────────────────────────────────────────────────
+
+      /// A non-root process (real uid != 0) called setuid(0) or setresuid(??,0,??).
+      /// May indicate a successful privilege-escalation exploit or SUID binary abuse.
+      bool hasSetuidToRoot = false;
+
+      // ── Kernel-level persistence ──────────────────────────────────────────────
+
+      /// Process invoked init_module(2) or finit_module(2) to load a kernel module.
+      /// Legitimate module loads are rare at runtime; a suspicious process doing
+      /// this is a strong rootkit / kernel-backdoor indicator.
+      bool hasModuleLoad = false;
    };
 } // namespace vigil
 

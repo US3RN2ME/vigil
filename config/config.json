@@ -43,6 +43,14 @@
     "privilege_escalation": {
       "enabled": true,
       "severity": "critical"
+    },
+    "ld_preload_hijack": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "binary_replaced": {
+      "enabled": true,
+      "severity": "critical"
     }
   }
 }

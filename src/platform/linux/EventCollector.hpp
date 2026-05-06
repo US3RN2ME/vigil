@@ -5,6 +5,7 @@
 #include <atomic>
 #include <optional>
 
+#include "BpfEvents.hpp"
 #include "BpfObject.hpp"
 #include "RingBuffer.hpp"
 
@@ -19,12 +20,16 @@ namespace vigil::platform::linux {
    private:
       bool init();
       static int onEvent(void* ctx, void* data, size_t size);
-      static int onMmapEvent(void* ctx, void* data, size_t size);
 
-      std::optional<BpfObject> bpfMmap_;
-      std::optional<RingBuffer> mmapRingBuf_;
-      std::optional<BpfObject> bpfExecve_;
-      std::optional<RingBuffer> execveRingBuf_;
+      void handleExecve(const ExecveEvent& e);
+      void handleMmap(const MmapEvent& e);
+      void handleConnect(const ConnectEvent& e);
+      void handlePtrace(const PtraceEvent& e);
+      void handleSetuid(const SetuidEvent& e);
+      void handleModule(const ModuleEvent& e);
+
+      std::optional<BpfObject> bpf_;
+      std::optional<RingBuffer> ringBuf_;
       std::atomic<bool> running_{false};
    };
 } // namespace vigil::platform::linux

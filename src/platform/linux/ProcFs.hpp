@@ -17,6 +17,6 @@ namespace vigil::platform::linux {
    std::optional<ProcessInfo> readProcessInfo(int pid);
    std::optional<ProcessInfo> readProcessMaps(int pid);
    std::optional<std::string> readProcessName(int pid);
-}
+} // namespace vigil::platform::linux
 
 #endif // VIGIL_PLATFORM_LINUX_PROCFS_HPP

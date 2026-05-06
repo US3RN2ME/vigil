@@ -9,12 +9,12 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil::platform::linux {
-   
+
    bool readExe(ProcessInfo& p, const std::string& base) {
       try {
-         p.exePath    = std::filesystem::read_symlink(base + "exe").string();
+         p.exePath = std::filesystem::read_symlink(base + "exe").string();
          p.exeDeleted = p.exePath.ends_with("(deleted)");
-         p.isMemfd    = p.exePath.contains("/memfd:");
+         p.isMemfd = p.exePath.contains("/memfd:");
       } catch (...) {
          return false;
       }
@@ -22,8 +22,7 @@ namespace vigil::platform::linux {
       if (!p.exeDeleted && !p.isMemfd) {
          struct ::stat linkStat{};
          struct ::stat pathStat{};
-         if (::stat((base + "exe").c_str(), &linkStat) == 0 &&
-             ::stat(p.exePath.c_str(), &pathStat) == 0)
+         if (::stat((base + "exe").c_str(), &linkStat) == 0 && ::stat(p.exePath.c_str(), &pathStat) == 0)
             p.binaryReplaced = linkStat.st_ino != pathStat.st_ino;
       }
       return true;
@@ -63,7 +62,8 @@ namespace vigil::platform::linux {
                std::istringstream ss{val};
                ss >> p.uid >> p.euid;
             }
-         } catch (const std::exception&) {}
+         } catch (const std::exception&) {
+         }
       }
       return true;
    }
