@@ -1,5 +1,5 @@
 
-#include <vigil/rules/ServerSpawnedShellRule.hpp>
+#include <vigil/rules/ServerSpawnedShellRuleTest.hpp>
 
 namespace {
    [[nodiscard]] std::string stripExe(std::string_view name) noexcept {

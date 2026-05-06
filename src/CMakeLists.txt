@@ -8,12 +8,8 @@ add_library(vigil_core ${CORE_SOURCES} ${CORE_RULES_SOURCES})
 
 target_link_libraries(vigil_core PRIVATE nlohmann_json::nlohmann_json spdlog::spdlog)
 
+# TODO: Replace with: $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
 target_include_directories(vigil_core PUBLIC "${CMAKE_SOURCE_DIR}/include")
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-   add_subdirectory(platform/linux)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-   add_subdirectory(platform/windows)
-else()
-   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
+add_subdirectory(platform/${VIGIL_PLATFORM_DIR})
+

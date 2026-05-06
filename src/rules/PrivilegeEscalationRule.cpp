@@ -1,7 +1,7 @@
 
 #include <format>
 
-#include <vigil/rules/PrivilegeEscalationRule.hpp>
+#include <vigil/rules/PrivilegeEscalationRuleTest.hpp>
 
 namespace vigil::rules {
    PrivilegeEscalationRule::PrivilegeEscalationRule(RuleConfig cfg)

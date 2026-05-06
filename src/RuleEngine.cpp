@@ -1,9 +1,9 @@
 #include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
-#include <vigil/rules/AnonRwxRule.hpp>
-#include <vigil/rules/PrivilegeEscalationRule.hpp>
-#include <vigil/rules/ServerSpawnedShellRule.hpp>
-#include <vigil/rules/SuspiciousPathRule.hpp>
+#include <vigil/rules/AnonRwxRuleTest.hpp>
+#include <vigil/rules/PrivilegeEscalationRuleTest.hpp>
+#include <vigil/rules/ServerSpawnedShellRuleTest.hpp>
+#include <vigil/rules/SuspiciousPathRuleTest.hpp>
 
 namespace vigil {
    RuleEngine::RuleEngine(Config cfg)

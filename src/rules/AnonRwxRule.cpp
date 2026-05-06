@@ -1,5 +1,5 @@
 
-#include <vigil/rules/AnonRwxRule.hpp>
+#include <vigil/rules/AnonRwxRuleTest.hpp>
 
 namespace vigil::rules {
    AnonRwxRule::AnonRwxRule(RuleConfig cfg)

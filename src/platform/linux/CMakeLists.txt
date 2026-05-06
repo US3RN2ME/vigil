@@ -27,8 +27,6 @@ add_dependencies(vigil_platform vmlinux_h)
 target_include_directories(vigil_platform PRIVATE ${LIBBPF_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(vigil_platform PRIVATE vigil_core ${LIBBPF_LIBRARIES} ${LIBELF_LIBRARY} ${LIBZ_LIBRARY})
 
-target_compile_definitions(vigil_platform PRIVATE VIGIL_PLATFORM_LINUX)
-
 set(BPF_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/bpf/events.bpf.c")
 set(BPF_OUTPUT "${CMAKE_BINARY_DIR}/bpf/events.bpf.o")
 

@@ -1,7 +1,7 @@
 
 #include <algorithm>
 
-#include <vigil/rules/SuspiciousPathRule.hpp>
+#include <vigil/rules/SuspiciousPathRuleTest.hpp>
 
 namespace vigil::rules {
    SuspiciousPathRule::SuspiciousPathRule(RuleConfig cfg)
