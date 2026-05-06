@@ -9,6 +9,13 @@ namespace vigil::platform::linux::rules {
       return kName;
    }
 
+   std::optional<Alert> PtraceInjectRule::check(const ProcessInfo& info) {
+      if (info.hasPtraceAttach) {
+         return makeAlert(info);
+      }
+      return {};
+   }
+
    Alert PtraceInjectRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {

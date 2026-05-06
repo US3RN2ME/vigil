@@ -1,6 +1,7 @@
 
 #include "EventCollector.hpp"
 
+#include <arpa/inet.h>
 #include <optional>
 #include <stdexcept>
 

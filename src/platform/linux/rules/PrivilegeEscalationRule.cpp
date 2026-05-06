@@ -9,6 +9,13 @@ namespace vigil::platform::linux::rules {
       return kName;
    }
 
+   std::optional<Alert> PrivilegeEscalationRule::check(const ProcessInfo& info) {
+      if (info.hasSetuidToRoot) {
+         return makeAlert(info);
+      }
+      return {};
+   }
+
    Alert PrivilegeEscalationRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {

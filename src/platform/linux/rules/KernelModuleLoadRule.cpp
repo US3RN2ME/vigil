@@ -9,6 +9,13 @@ namespace vigil::platform::linux::rules {
       return kName;
    }
 
+   std::optional<Alert> KernelModuleLoadRule::check(const ProcessInfo& info) {
+      if (info.hasModuleLoad) {
+         return makeAlert(info);
+      }
+      return {};
+   }
+
    Alert KernelModuleLoadRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {

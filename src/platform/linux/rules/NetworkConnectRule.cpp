@@ -9,6 +9,13 @@ namespace vigil::platform::linux::rules {
       return kName;
    }
 
+   std::optional<Alert> NetworkConnectRule::check(const ProcessInfo& info) {
+      if (info.hasConnect) {
+         return makeAlert(info);
+      }
+      return {};
+   }
+
    Alert NetworkConnectRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
