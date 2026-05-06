@@ -2,7 +2,7 @@
 #define VIGIL_PLATFORM_LINUX_PTRACE_BPF_H
 
 #define PTRACE_ATTACH 16
-#define PTRACE_SEIZE 16900
+#define PTRACE_SEIZE 16902
 
 SEC("tracepoint/syscalls/sys_enter_ptrace")
 int onPtrace(struct trace_event_raw_sys_enter* ctx) {

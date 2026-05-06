@@ -51,7 +51,8 @@ namespace vigil::platform::linux {
          bpf_->attach("onMmapExit");
          bpf_->attach("onMprotectEnter");
          bpf_->attach("onMprotectExit");
-         bpf_->attach("onConnect");
+         bpf_->attach("onConnectEnter");
+         bpf_->attach("onConnectExit");
          bpf_->attach("onPtrace");
          bpf_->attach("onSetuid");
          bpf_->attach("onSetresuid");
