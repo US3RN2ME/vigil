@@ -2,6 +2,7 @@
 #include "EventCollector.hpp"
 
 #include <arpa/inet.h>
+#include <filesystem>
 #include <optional>
 #include <stdexcept>
 
@@ -25,11 +26,17 @@ namespace vigil::platform::linux {
       }
       running_ = true;
       log::info("event collector running");
+
       while (running_) {
          const int result = ringBuf_->poll(100);
          if ((result < 0) && errno != EINTR) {
             log::error("ring buffer poll error: errno={}", errno);
             break;
+         }
+         const auto now = std::chrono::steady_clock::now();
+         if (now >= nextScanTime_) {
+            scanProc();
+            nextScanTime_ = now + kScanInterval;
          }
       }
    }
@@ -64,6 +71,33 @@ namespace vigil::platform::linux {
          log::error("BPF init error: {}", e.what());
          return false;
       }
+   }
+
+   void EventCollector::scanProc() {
+      log::debug("proc scan starting");
+      int count = 0;
+      try {
+         for (const auto& entry : std::filesystem::directory_iterator("/proc")) {
+            try {
+               if (!entry.is_directory())
+                  continue;
+               const auto fname = entry.path().filename().string();
+               if (fname.empty() || !std::all_of(fname.begin(), fname.end(), ::isdigit))
+                  continue;
+               const int pid = std::stoi(fname);
+               auto proc = readProcessInfo(pid);
+               if (!proc)
+                  continue;
+               onProcess.emit(*proc);
+               ++count;
+            } catch (const std::exception& ex) {
+               log::debug("proc scan skipped entry: {}", ex.what());
+            }
+         }
+      } catch (const std::exception& ex) {
+         log::error("proc scan failed: {}", ex.what());
+      }
+      log::debug("proc scan complete: {} processes", count);
    }
 
    int EventCollector::onEvent(void* ctx, void* data, size_t /*size*/) {

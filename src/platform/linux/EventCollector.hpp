@@ -3,6 +3,7 @@
 #define VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
 
 #include <atomic>
+#include <chrono>
 #include <optional>
 
 #include "BpfEvents.hpp"
@@ -13,6 +14,8 @@
 
 namespace vigil::platform::linux {
    class EventCollector : public vigil::EventCollector {
+      static constexpr std::chrono::seconds kScanInterval{30};
+
    public:
       void start() override;
       void stop() override;
@@ -27,10 +30,12 @@ namespace vigil::platform::linux {
       void handlePtrace(const PtraceEvent& e);
       void handleSetuid(const SetuidEvent& e);
       void handleModule(const ModuleEvent& e);
+      void scanProc();
 
       std::optional<BpfObject> bpf_;
       std::optional<RingBuffer> ringBuf_;
       std::atomic<bool> running_{false};
+      std::chrono::steady_clock::time_point nextScanTime_{std::chrono::steady_clock::now()};
    };
 } // namespace vigil::platform::linux
 
