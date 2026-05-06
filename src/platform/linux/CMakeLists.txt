@@ -43,8 +43,3 @@ add_custom_command(
 add_custom_target(bpf_programs ALL DEPENDS ${BPF_OUTPUT})
 add_dependencies(vigil_platform bpf_programs)
 target_compile_definitions(vigil_platform PRIVATE VIGIL_EVENTS_BPF_OBJECT="${BPF_OUTPUT}")
-
-add_custom_target(bpf_programs ALL DEPENDS ${BPF_OUTPUT})
-add_dependencies(vigil_platform bpf_programs)
-
-target_compile_definitions(vigil_platform PRIVATE VIGIL_EVENTS_BPF_OBJECT="${BPF_OUTPUT}")
