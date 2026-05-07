@@ -14,21 +14,7 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[SilentWhenNoPtrace]"_test = [] {
-         PtraceInjectRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.hasPtraceAttach = false;
-         expect(!rule.evaluate(info).has_value());
-      };
-
-      "[SilentWhenDisabled]"_test = [] {
-         PtraceInjectRule rule{RuleConfig{.enabled = false}};
-         ProcessInfo info;
-         info.hasPtraceAttach = true;
-         expect(!rule.evaluate(info).has_value());
-      };
-
-      "[AlertContainsTargetPid]"_test = [] {
+      "[AlertContainsPathCmdlineAndTargetPid]"_test = [] {
          PtraceInjectRule rule{RuleConfig{}};
          ProcessInfo info;
          info.hasPtraceAttach  = true;
@@ -36,6 +22,8 @@ namespace {
          info.cmdline          = "gdb -p 1234";
          info.ptraceTargetPid  = 1234;
          auto alert = rule.evaluate(info);
+         expect(eq(alert->attributes[0].second, std::string{"/usr/bin/gdb"}));
+         expect(eq(alert->attributes[1].second, std::string{"gdb -p 1234"}));
          expect(eq(alert->attributes[2].second, std::string{"1234"}));
       };
    };

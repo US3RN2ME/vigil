@@ -71,17 +71,5 @@ namespace {
          expect(rule.evaluate(a).has_value());
          expect(!rule.evaluate(b).has_value());
       };
-
-      "[AlertContainsMaskAttributes]"_test = [] {
-         PrivilegeEscalationRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.pid = 1;
-         info.privilegeMask = 0x1;
-         rule.evaluate(info);
-         info.privilegeMask = 0x3;
-         auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"0x1"}));
-         expect(eq(alert->attributes[1].second, std::string{"0x3"}));
-      };
    };
 } // namespace

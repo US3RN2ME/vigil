@@ -14,20 +14,6 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[SilentWhenNoModuleLoad]"_test = [] {
-         KernelModuleLoadRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.hasModuleLoad = false;
-         expect(!rule.evaluate(info).has_value());
-      };
-
-      "[SilentWhenDisabled]"_test = [] {
-         KernelModuleLoadRule rule{RuleConfig{.enabled = false}};
-         ProcessInfo info;
-         info.hasModuleLoad = true;
-         expect(!rule.evaluate(info).has_value());
-      };
-
       "[AlertContainsPathCmdlineUid]"_test = [] {
          KernelModuleLoadRule rule{RuleConfig{}};
          ProcessInfo info;

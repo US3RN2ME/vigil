@@ -2,10 +2,10 @@
 #include <vigil/rules/ServerSpawnedShellRuleTest.hpp>
 
 namespace {
-   [[nodiscard]] std::string stripExe(std::string_view name) noexcept {
+   [[nodiscard]] std::string stripExe(const std::string& name) noexcept {
       if (name.ends_with(".exe"))
-         return name.substr(0, name.size() - 4).data();
-      return name.data();
+         return name.substr(0, name.size() - 4);
+      return name;
    }
 } // namespace
 

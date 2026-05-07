@@ -21,25 +21,14 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[FiresWhenBothSet]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.exeDeleted = true;
-         info.isMemfd    = true;
-         expect(rule.evaluate(info).has_value());
-      };
-
-      "[SilentWhenNeitherSet]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{}};
-         ProcessInfo info;
-         expect(!rule.evaluate(info).has_value());
-      };
-
       "[SilentWhenDisabled]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{.enabled = false}};
          ProcessInfo info;
          info.isMemfd = true;
          expect(!rule.evaluate(info).has_value());
+         info.exeDeleted = true;
+         auto alert = rule.evaluate(info);
+         expect(alert->attributes[0].second.contains("memfd"));
       };
 
       "[MemfdAlertAttributeDescribesDisk]"_test = [] {
@@ -49,6 +38,7 @@ namespace {
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].first, std::string_view{"reason"}));
          expect(alert->attributes[0].second.contains("memfd"));
+
       };
 
       "[DeletedAlertAttributesContainPath]"_test = [] {

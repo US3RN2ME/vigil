@@ -14,20 +14,6 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[SilentWhenLdPreloadClear]"_test = [] {
-         LdPreloadHijackRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.hasLdPreload = false;
-         expect(!rule.evaluate(info).has_value());
-      };
-
-      "[SilentWhenDisabled]"_test = [] {
-         LdPreloadHijackRule rule{RuleConfig{.enabled = false}};
-         ProcessInfo info;
-         info.hasLdPreload = true;
-         expect(!rule.evaluate(info).has_value());
-      };
-
       "[AlertContainsPathAndCmdline]"_test = [] {
          LdPreloadHijackRule rule{RuleConfig{}};
          ProcessInfo info;

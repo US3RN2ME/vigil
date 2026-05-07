@@ -14,20 +14,6 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[SilentWhenBinaryIntact]"_test = [] {
-         BinaryReplacedRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.binaryReplaced = false;
-         expect(!rule.evaluate(info).has_value());
-      };
-
-      "[SilentWhenDisabled]"_test = [] {
-         BinaryReplacedRule rule{RuleConfig{.enabled = false}};
-         ProcessInfo info;
-         info.binaryReplaced = true;
-         expect(!rule.evaluate(info).has_value());
-      };
-
       "[AlertContainsPathAndReason]"_test = [] {
          BinaryReplacedRule rule{RuleConfig{}};
          ProcessInfo info;

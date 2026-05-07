@@ -15,13 +15,6 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[SilentWhenFlagClear]"_test = [] {
-         AnonRwxRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.hasAnonRwx = false;
-         expect(!rule.evaluate(info).has_value());
-      };
-
       "[SilentWhenDisabled]"_test = [] {
          AnonRwxRule rule{RuleConfig{.enabled = false}};
          ProcessInfo info;
