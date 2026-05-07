@@ -1,5 +1,6 @@
-#include "main.hpp"
 #include "rules/FilelessExecutionRule.hpp"
+
+#include "main.hpp"
 
 namespace {
    suite<"[FilelessExecutionRule]"> _ = [] {
@@ -38,14 +39,13 @@ namespace {
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].first, std::string_view{"reason"}));
          expect(alert->attributes[0].second.contains("memfd"));
-
       };
 
       "[DeletedAlertAttributesContainPath]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{}};
          ProcessInfo info;
          info.exeDeleted = true;
-         info.exePath    = "/tmp/payload (deleted)";
+         info.exePath = "/tmp/payload (deleted)";
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[1].second, std::string{"/tmp/payload (deleted)"}));
       };

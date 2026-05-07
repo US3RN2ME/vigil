@@ -10,14 +10,14 @@ namespace {
 
       const RuleConfig cfg{
           .serverNames = {"nginx", "apache"},
-          .shellNames  = {"bash", "sh"},
+          .shellNames = {"bash", "sh"},
       };
 
       "[FiresWhenServerSpawnsShell]"_test = [&] {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "nginx";
-         info.name       = "bash";
+         info.name = "bash";
          expect(rule.evaluate(info).has_value());
       };
 
@@ -25,7 +25,7 @@ namespace {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "python";
-         info.name       = "bash";
+         info.name = "bash";
          expect(!rule.evaluate(info).has_value());
       };
 
@@ -33,7 +33,7 @@ namespace {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "nginx";
-         info.name       = "python";
+         info.name = "python";
          expect(!rule.evaluate(info).has_value());
       };
 
@@ -41,7 +41,7 @@ namespace {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "nginx.exe";
-         info.name       = "bash";
+         info.name = "bash";
          expect(rule.evaluate(info).has_value());
       };
 
@@ -49,7 +49,7 @@ namespace {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "nginx";
-         info.name       = "bash.exe";
+         info.name = "bash.exe";
          expect(rule.evaluate(info).has_value());
       };
 
@@ -57,7 +57,7 @@ namespace {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "nginx";
-         info.name       = "bash";
+         info.name = "bash";
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].second, std::string{"nginx"}));
          expect(eq(alert->attributes[1].second, std::string{"bash"}));

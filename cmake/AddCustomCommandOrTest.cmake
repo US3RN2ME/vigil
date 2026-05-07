@@ -11,7 +11,10 @@ function(ut_add_custom_command_or_test)
    target_link_libraries(${PARSE_TARGET} PRIVATE Boost::ut)
 
    if(BOOST_UT_ENABLE_RUN_AFTER_BUILD)
-      add_custom_command(TARGET ${PARSE_TARGET} COMMAND ${PARSE_COMMAND} POST_BUILD)
+      add_custom_command(
+         TARGET ${PARSE_TARGET}
+         COMMAND ${PARSE_COMMAND}
+         POST_BUILD)
    else()
       add_test(NAME ${PARSE_TARGET} COMMAND ${PARSE_COMMAND})
    endif()
@@ -28,9 +31,9 @@ function(ut_add_run_all_target)
    if(BOOST_UT_ENABLE_RUN_AFTER_BUILD)
       add_custom_target(${PARSE_TARGET_NAME} DEPENDS ${PARSE_TARGETS})
    else()
-      add_custom_target(${PARSE_TARGET_NAME}
-              COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-              DEPENDS ${PARSE_TARGETS}
-      )
+      add_custom_target(
+         ${PARSE_TARGET_NAME}
+         COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+         DEPENDS ${PARSE_TARGETS})
    endif()
 endfunction()

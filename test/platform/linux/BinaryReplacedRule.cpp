@@ -1,5 +1,6 @@
-#include "main.hpp"
 #include "rules/BinaryReplacedRule.hpp"
+
+#include "main.hpp"
 
 namespace {
    suite<"[BinaryReplacedRule]"> _ = [] {
@@ -18,7 +19,7 @@ namespace {
          BinaryReplacedRule rule{RuleConfig{}};
          ProcessInfo info;
          info.binaryReplaced = true;
-         info.exePath        = "/usr/bin/sshd";
+         info.exePath = "/usr/bin/sshd";
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].second, std::string{"/usr/bin/sshd"}));
          expect(!alert->attributes[1].second.empty());

@@ -1,5 +1,6 @@
-#include "main.hpp"
 #include "rules/PtraceInjectRule.hpp"
+
+#include "main.hpp"
 
 namespace {
    suite<"[PtraceInjectRule]"> _ = [] {
@@ -17,10 +18,10 @@ namespace {
       "[AlertContainsPathCmdlineAndTargetPid]"_test = [] {
          PtraceInjectRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasPtraceAttach  = true;
-         info.exePath          = "/usr/bin/gdb";
-         info.cmdline          = "gdb -p 1234";
-         info.ptraceTargetPid  = 1234;
+         info.hasPtraceAttach = true;
+         info.exePath = "/usr/bin/gdb";
+         info.cmdline = "gdb -p 1234";
+         info.ptraceTargetPid = 1234;
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].second, std::string{"/usr/bin/gdb"}));
          expect(eq(alert->attributes[1].second, std::string{"gdb -p 1234"}));

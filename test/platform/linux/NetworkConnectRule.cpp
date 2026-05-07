@@ -1,5 +1,6 @@
-#include "main.hpp"
 #include "rules/NetworkConnectRule.hpp"
+
+#include "main.hpp"
 
 namespace {
    suite<"[NetworkConnectRule]"> _ = [] {
@@ -17,8 +18,8 @@ namespace {
       "[AlertContainsPathDestAddrAndPort]"_test = [] {
          NetworkConnectRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasConnect   = true;
-         info.exePath      = "/usr/bin/curl";
+         info.hasConnect = true;
+         info.exePath = "/usr/bin/curl";
          info.connectDaddr = "1.2.3.4";
          info.connectDport = 443;
          auto alert = rule.evaluate(info);

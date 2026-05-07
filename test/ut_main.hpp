@@ -10,4 +10,4 @@ int main() {
    return cfg<override>.run();
 }
 
-#endif //VIGIL_TEST_UT_MAIN_HPP
+#endif // VIGIL_TEST_UT_MAIN_HPP
