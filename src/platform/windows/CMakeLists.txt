@@ -5,5 +5,5 @@ add_library(vigil_platform ${WINDOWS_SOURCES} ${WINDOWS_HEADERS})
 
 target_include_directories(vigil_platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(vigil_platform PUBLIC vigil_core ntdll)
+target_link_libraries(vigil_platform PUBLIC vigil_core ntdll psapi)
 target_compile_definitions(vigil_platform PUBLIC VIGIL_PLATFORM_WINDOWS WIN32_LEAN_AND_MEAN)

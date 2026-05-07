@@ -12,4 +12,3 @@ target_link_libraries(vigil_core PRIVATE nlohmann_json::nlohmann_json spdlog::sp
 target_include_directories(vigil_core PUBLIC "${CMAKE_SOURCE_DIR}/include")
 
 add_subdirectory(platform/${VIGIL_PLATFORM_DIR})
-
