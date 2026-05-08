@@ -6,7 +6,7 @@
 #include <optional>
 #include <string>
 
-#include "ProcessSnapshot.hpp"
+#include "vigil/ProcessInfo.hpp"
 
 namespace vigil::platform::windows {
    class ProcessInfoReader {

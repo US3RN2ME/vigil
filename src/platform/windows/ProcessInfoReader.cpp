@@ -1,11 +1,11 @@
 #include "ProcessInfoReader.hpp"
 
 #include <cstdint>
+#include <windows.h>
+#include <winternl.h>
 #include <psapi.h>
 #include <tlhelp32.h>
 #include <vector>
-#include <windows.h>
-#include <winternl.h>
 
 #include "Handle.hpp"
 #include "Process.hpp"
@@ -17,8 +17,8 @@
 namespace vigil::platform::windows {
    namespace {
 
-      inline const auto kProcessCommandLineInformation = static_cast<PROCESSINFOCLASS>(60);
-      constexpr NTSTATUS kStatusInfoLengthMismatch = static_cast<NTSTATUS>(0xC0000004L);
+      constexpr auto kProcessCommandLineInformation = static_cast<PROCESSINFOCLASS>(60);
+      constexpr auto kStatusInfoLengthMismatch = static_cast<NTSTATUS>(0xC0000004L);
 
       constexpr bool ntSuccess(NTSTATUS status) noexcept {
          return status >= 0;
@@ -217,7 +217,7 @@ namespace vigil::platform::windows {
 
       if (!readExePath(info, nativeProcess)) {
          log::debug("process {} vanished before snapshot", pid);
-         return std::nullopt;
+         return {};
       }
 
       readBasicInfo(info, nativeProcess, *this);
@@ -237,13 +237,13 @@ namespace vigil::platform::windows {
       auto process = Process::open(pid);
 
       if (!process)
-         return std::nullopt;
+         return {};
 
       wchar_t buffer[MAX_PATH + 1]{};
       DWORD length = MAX_PATH;
 
       if (!QueryFullProcessImageNameW(static_cast<HANDLE>(process.native()), 0, buffer, &length)) {
-         return std::nullopt;
+         return {};
       }
 
       auto path = StringUtils::wideToUtf8(buffer, static_cast<int>(length));
