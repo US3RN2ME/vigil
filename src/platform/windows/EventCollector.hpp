@@ -9,6 +9,11 @@ namespace vigil::platform::windows {
    public:
       void start() override;
       void stop() override;
+
+   private:
+      bool init();
+
+      bool running_{false};
    };
 } // namespace vigil::platform::windows
 

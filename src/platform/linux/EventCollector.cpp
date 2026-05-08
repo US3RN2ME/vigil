@@ -8,10 +8,14 @@
 
 #include "BpfEvents.hpp"
 #include "ProcFs.hpp"
+#include "ProcessInfoReader.hpp"
 
 #include <vigil/Logger.hpp>
 
 namespace vigil {
+   // TODO: proper injection
+   platform::linux::ProcessInfoReader processInfoReader;
+
    std::unique_ptr<EventCollector> createEventCollector() {
       return std::make_unique<platform::linux::EventCollector>();
    }
@@ -85,7 +89,7 @@ namespace vigil::platform::linux {
                if (fname.empty() || !std::all_of(fname.begin(), fname.end(), ::isdigit))
                   continue;
                const int pid = std::stoi(fname);
-               auto proc = readProcessInfo(pid);
+               auto proc = processInfoReader.read(pid);
                if (!proc)
                   continue;
                onProcess.emit(*proc);
@@ -129,7 +133,7 @@ namespace vigil::platform::linux {
    }
 
    void EventCollector::handleExecve(const ExecveEvent& e) {
-      auto proc = readProcessInfo(static_cast<int>(e.hdr.pid));
+      auto proc = processInfoReader.read(static_cast<int>(e.hdr.pid));
       if (!proc)
          return;
       proc->ppid = e.hdr.ppid;
@@ -138,7 +142,7 @@ namespace vigil::platform::linux {
    }
 
    void EventCollector::handleMmap(const MmapEvent& e) {
-      auto proc = readProcessMaps(static_cast<int>(e.hdr.pid));
+      auto proc = processInfoReader.read(static_cast<int>(e.hdr.pid));
       if (!proc)
          return;
       proc->ppid = e.hdr.ppid;
@@ -147,7 +151,7 @@ namespace vigil::platform::linux {
    }
 
    void EventCollector::handleConnect(const ConnectEvent& e) {
-      auto proc = readProcessInfo(static_cast<int>(e.hdr.pid));
+      auto proc = processInfoReader.read(static_cast<int>(e.hdr.pid));
       if (!proc)
          return;
       proc->ppid = e.hdr.ppid;
@@ -166,7 +170,7 @@ namespace vigil::platform::linux {
    }
 
    void EventCollector::handlePtrace(const PtraceEvent& e) {
-      auto proc = readProcessInfo(static_cast<int>(e.hdr.pid));
+      auto proc = processInfoReader.read(static_cast<int>(e.hdr.pid));
       if (!proc)
          return;
       proc->ppid = e.hdr.ppid;
@@ -177,7 +181,7 @@ namespace vigil::platform::linux {
    }
 
    void EventCollector::handleSetuid(const SetuidEvent& e) {
-      auto proc = readProcessInfo(static_cast<int>(e.hdr.pid));
+      auto proc = processInfoReader.read(static_cast<int>(e.hdr.pid));
       if (!proc)
          return;
       proc->ppid = e.hdr.ppid;
@@ -187,7 +191,7 @@ namespace vigil::platform::linux {
    }
 
    void EventCollector::handleModule(const ModuleEvent& e) {
-      auto proc = readProcessInfo(static_cast<int>(e.hdr.pid));
+      auto proc = processInfoReader.read(static_cast<int>(e.hdr.pid));
       if (!proc)
          return;
       proc->ppid = e.hdr.ppid;
