@@ -1,6 +1,6 @@
 #include "ProcessToken.hpp"
 
-#include <windows.h>
+#include "WinApi.hpp"
 
 namespace vigil::platform::windows {
    namespace {

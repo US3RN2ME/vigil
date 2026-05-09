@@ -1,6 +1,6 @@
 #include "StringUtils.hpp"
 
-#include <windows.h>
+#include "WinApi.hpp"
 
 namespace vigil::platform::windows {
    std::string StringUtils::wideToUtf8(const wchar_t* wide, int size) {

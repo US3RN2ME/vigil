@@ -1,6 +1,6 @@
 #include "Process.hpp"
 
-#include <windows.h>
+#include "WinApi.hpp"
 
 namespace vigil::platform::windows {
    Handle Process::open(uint32_t pid) {

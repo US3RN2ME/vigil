@@ -1,16 +1,12 @@
 #include "ProcessInfoReader.hpp"
 
 #include <cstdint>
-#include <windows.h>
-#include <winternl.h>
-#include <psapi.h>
-#include <tlhelp32.h>
-#include <vector>
 
 #include "Handle.hpp"
 #include "Process.hpp"
 #include "ProcessToken.hpp"
 #include "StringUtils.hpp"
+#include "WinApi.hpp"
 
 #include <vigil/Logger.hpp>
 

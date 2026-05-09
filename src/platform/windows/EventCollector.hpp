@@ -1,20 +1,41 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
-#define VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
+#ifndef VIGIL_PLATFORM_WINDOWS_EVENTCOLLECTOR_HPP
+#define VIGIL_PLATFORM_WINDOWS_EVENTCOLLECTOR_HPP
+
+#include <chrono>
+#include <thread>
+#include <unordered_set>
+
+#include "EtwSession.hpp"
+#include "Handle.hpp"
 
 #include <vigil/EventCollector.hpp>
 
 namespace vigil::platform::windows {
    class EventCollector : public vigil::EventCollector {
+      static constexpr std::chrono::seconds kScanInterval{30};
+      static constexpr std::chrono::seconds kNetScanInterval{5};
+
    public:
       void start() override;
       void stop() override;
 
    private:
       bool init();
+      void scanProcesses();
+      void scanNetwork();
 
-      bool running_{false};
+      std::optional<EtwSession> etwSession_;
+      std::thread etwThread_;
+      std::atomic<bool> running_{false};
+
+      Handle stopEvent_;
+
+      std::chrono::steady_clock::time_point nextScanTime_;
+      std::chrono::steady_clock::time_point nextNetScanTime_;
+
+      std::unordered_set<std::string> seenConnections_;
    };
 } // namespace vigil::platform::windows
 
-#endif // VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
+#endif // VIGIL_PLATFORM_WINDOWS_EVENTCOLLECTOR_HPP

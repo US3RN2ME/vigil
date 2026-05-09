@@ -2,7 +2,8 @@
 #include "Handle.hpp"
 
 #include <utility>
-#include <windows.h>
+
+#include "WinApi.hpp"
 
 namespace vigil::platform::windows {
    Handle::Handle(NativeType handle) noexcept
