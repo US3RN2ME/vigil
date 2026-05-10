@@ -40,7 +40,7 @@ namespace vigil::platform::windows {
       log::info("event collector running");
 
       while (running_) {
-         if (WaitForSingleObject(static_cast<HANDLE>(stopEvent_.native()), 100) == WAIT_OBJECT_0)
+         if (stopEvent_.wait(100) == WaitResult::Signaled)
             break;
 
          const auto now = std::chrono::steady_clock::now();
@@ -61,7 +61,7 @@ namespace vigil::platform::windows {
       log::info("event collector stopping");
       running_ = false;
 
-      SetEvent(static_cast<HANDLE>(stopEvent_.native()));
+      stopEvent_.set();
 
       if (etwSession_)
          etwSession_->stop();
@@ -71,11 +71,13 @@ namespace vigil::platform::windows {
    }
 
    bool EventCollector::init() {
-      stopEvent_.reset(CreateEventW(nullptr, TRUE, FALSE, nullptr));
-      if (!stopEvent_) {
+      auto event = Event::create(true, false);
+      if (!event) {
          log::error("CreateEvent failed: {}", GetLastError());
          return false;
       }
+
+      stopEvent_ = std::move(*event);
 
       const auto now = std::chrono::steady_clock::now();
       nextScanTime_ = now;

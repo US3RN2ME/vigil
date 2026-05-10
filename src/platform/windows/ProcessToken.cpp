@@ -41,6 +41,9 @@ namespace vigil::platform::windows {
        : handle_{std::move(token)} {}
 
    std::vector<std::byte> ProcessToken::query(InfoClass infoClass) const {
+      if (!handle_.isValid())
+         return {};
+
       DWORD needed = 0;
       const auto nativeClass = toNative(infoClass);
 

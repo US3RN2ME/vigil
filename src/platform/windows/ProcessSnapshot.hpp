@@ -12,13 +12,13 @@ namespace vigil::platform::windows {
 
    class ProcessSnapshot {
    public:
+      explicit ProcessSnapshot(Handle handle) noexcept;
+
       static std::optional<ProcessSnapshot> create();
 
       void forEach(const std::function<void(uint32_t pid)>& callback) const;
 
    private:
-      explicit ProcessSnapshot(Handle handle) noexcept;
-
       Handle handle_;
    };
 

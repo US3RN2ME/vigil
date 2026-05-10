@@ -7,7 +7,7 @@
 #include <unordered_set>
 
 #include "EtwSession.hpp"
-#include "Handle.hpp"
+#include "Event.hpp"
 
 #include <vigil/EventCollector.hpp>
 
@@ -29,7 +29,7 @@ namespace vigil::platform::windows {
       std::thread etwThread_;
       std::atomic<bool> running_{false};
 
-      Handle stopEvent_;
+      Event stopEvent_;
 
       std::chrono::steady_clock::time_point nextScanTime_;
       std::chrono::steady_clock::time_point nextNetScanTime_;
