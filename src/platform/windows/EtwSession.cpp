@@ -1,6 +1,7 @@
 #include "EtwSession.hpp"
 
 #include "WinApi.hpp"
+#include "vigil/SystemError.hpp"
 
 #include <vigil/Logger.hpp>
 
@@ -56,7 +57,7 @@ namespace vigil::platform::windows {
       auto props = makeProperties(session.name_);
       const ULONG startErr = StartTraceW(&sessionHandle, session.name_.c_str(), &props.props);
       if (startErr != ERROR_SUCCESS) {
-         log::error("ETW StartTrace failed: {}", startErr);
+         log::error("ETW StartTrace failed: '{}'", error::message(startErr));
          return {};
       }
       session.sessionHandle_ = static_cast<uint64_t>(sessionHandle);
@@ -69,7 +70,7 @@ namespace vigil::platform::windows {
                                              keyword, 0, 0, &params);
 
       if (enableErr != ERROR_SUCCESS) {
-         log::error("ETW EnableTraceEx2 failed: {}", enableErr);
+         log::error("ETW EnableTraceEx2 failed: '{}'", error::message(enableErr));
          auto stopProps = makeProperties(session.name_);
          ControlTraceW(sessionHandle, nullptr, &stopProps.props, EVENT_TRACE_CONTROL_STOP);
          session.sessionHandle_ = kInvalid;
@@ -123,7 +124,7 @@ namespace vigil::platform::windows {
 
       PROCESSTRACE_HANDLE consumerHandle = OpenTraceW(&logfile);
       if (consumerHandle == static_cast<TRACEHANDLE>(kInvalid)) {
-         log::error("ETW OpenTrace failed: {}", GetLastError());
+         log::error("ETW OpenTrace failed: '{}'", error::lastMessage());
          return;
       }
       consumerHandle_ = static_cast<uint64_t>(consumerHandle);

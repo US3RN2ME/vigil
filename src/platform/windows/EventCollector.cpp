@@ -4,6 +4,7 @@
 #include "ProcessSnapshot.hpp"
 #include "TcpTable.hpp"
 #include "WinApi.hpp"
+#include "vigil/SystemError.hpp"
 
 #include <vigil/Logger.hpp>
 
@@ -73,7 +74,7 @@ namespace vigil::platform::windows {
    bool EventCollector::init() {
       auto event = Event::create(true, false);
       if (!event) {
-         log::error("CreateEvent failed: {}", GetLastError());
+         log::error("CreateEvent failed: '{}'", error::lastMessage());
          return false;
       }
 

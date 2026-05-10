@@ -13,6 +13,8 @@ struct _EVENT_RECORD;
 namespace vigil::platform::windows {
 
    class EtwSession {
+      static constexpr auto kInvalid = static_cast<uint64_t>(-1);
+
    public:
       using EventCallback = std::function<void(const _EVENT_RECORD&)>;
 
@@ -32,8 +34,6 @@ namespace vigil::platform::windows {
 
    private:
       EtwSession() = default;
-
-      static constexpr uint64_t kInvalid = static_cast<uint64_t>(-1);
 
       std::wstring name_;
       std::array<uint8_t, 16> providerGuid_{};

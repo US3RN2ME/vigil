@@ -9,6 +9,7 @@
 #include "BpfEvents.hpp"
 #include "ProcFs.hpp"
 #include "ProcessInfoReader.hpp"
+#include "vigil/SystemError.hpp"
 
 #include <vigil/Logger.hpp>
 
@@ -33,8 +34,8 @@ namespace vigil::platform::linux {
 
       while (running_) {
          const int result = ringBuf_->poll(100);
-         if ((result < 0) && errno != EINTR) {
-            log::error("ring buffer poll error: errno={}", errno);
+         if ((result < 0) && error::lastCode() != EINTR) {
+            log::error("ring buffer poll error: error:'{}'", error::lastMessage());
             break;
          }
          const auto now = std::chrono::steady_clock::now();

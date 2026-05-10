@@ -1,5 +1,6 @@
 
 #include "Event.hpp"
+
 #include "WinApi.hpp"
 
 namespace vigil::platform::windows {
@@ -24,6 +25,5 @@ namespace vigil::platform::windows {
    }
 
    Event::Event(Handle handle) noexcept
-      : handle_{std::move(handle)} {
-   }
+       : handle_{std::move(handle)} {}
 } // namespace vigil::platform::windows

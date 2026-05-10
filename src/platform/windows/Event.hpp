@@ -34,6 +34,6 @@ namespace vigil::platform::windows {
    private:
       Handle handle_;
    };
-}
+} // namespace vigil::platform::windows
 
 #endif // VIGIL_PLATFORM_WINDOWS_EVENT_HPP
