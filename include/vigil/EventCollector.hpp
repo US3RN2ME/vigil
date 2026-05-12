@@ -5,8 +5,8 @@
 #include <memory>
 
 #include <vigil/ProcessInfo.hpp>
-#include <vigil/Signal.hpp>
 #include <vigil/ProcessInfoReader.hpp>
+#include <vigil/Signal.hpp>
 
 namespace vigil {
    class EventCollector {

@@ -10,8 +10,8 @@
 #include "BpfObject.hpp"
 #include "RingBuffer.hpp"
 
-#include <vigil/ProcessInfoReader.hpp>
 #include <vigil/EventCollector.hpp>
+#include <vigil/ProcessInfoReader.hpp>
 
 namespace vigil::platform::linux {
    class EventCollector : public vigil::EventCollector {

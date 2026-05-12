@@ -15,9 +15,7 @@
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {
-      return std::make_unique<platform::linux::EventCollector>(
-      std::make_unique<platform::linux::ProcessInfoReader>()
-  );
+      return std::make_unique<platform::linux::EventCollector>(std::make_unique<platform::linux::ProcessInfoReader>());
    }
 } // namespace vigil
 

@@ -10,9 +10,7 @@
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {
-      return std::make_unique<platform::windows::EventCollector>(
-      std::make_unique<platform::windows::ProcessInfoReader>()
-  );
+      return std::make_unique<platform::windows::EventCollector>(std::make_unique<platform::windows::ProcessInfoReader>());
    }
 
 } // namespace vigil
@@ -30,7 +28,7 @@ namespace vigil::platform::windows {
    static constexpr uint64_t kProcessKeyword = 0x10; // process-lifecycle only
 
    EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader) {
-         processInfoReader_ = std::move(reader);
+      processInfoReader_ = std::move(reader);
    }
 
    void EventCollector::start() {

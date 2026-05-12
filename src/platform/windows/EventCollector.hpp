@@ -9,8 +9,8 @@
 #include "EtwSession.hpp"
 #include "Event.hpp"
 
-#include <vigil/ProcessInfoReader.hpp>
 #include <vigil/EventCollector.hpp>
+#include <vigil/ProcessInfoReader.hpp>
 
 namespace vigil::platform::windows {
    class EventCollector : public vigil::EventCollector {
