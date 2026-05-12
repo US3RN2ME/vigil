@@ -9,6 +9,7 @@
 #include "EtwSession.hpp"
 #include "Event.hpp"
 
+#include <vigil/ProcessInfoReader.hpp>
 #include <vigil/EventCollector.hpp>
 
 namespace vigil::platform::windows {
@@ -17,6 +18,8 @@ namespace vigil::platform::windows {
       static constexpr std::chrono::seconds kNetScanInterval{5};
 
    public:
+      explicit EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader);
+
       void start() override;
       void stop() override;
 

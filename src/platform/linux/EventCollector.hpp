@@ -10,6 +10,7 @@
 #include "BpfObject.hpp"
 #include "RingBuffer.hpp"
 
+#include <vigil/ProcessInfoReader.hpp>
 #include <vigil/EventCollector.hpp>
 
 namespace vigil::platform::linux {
@@ -17,6 +18,8 @@ namespace vigil::platform::linux {
       static constexpr std::chrono::seconds kScanInterval{30};
 
    public:
+      explicit EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader);
+
       void start() override;
       void stop() override;
 

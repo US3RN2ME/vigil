@@ -6,6 +6,7 @@
 
 #include <vigil/ProcessInfo.hpp>
 #include <vigil/Signal.hpp>
+#include <vigil/ProcessInfoReader.hpp>
 
 namespace vigil {
    class EventCollector {
@@ -21,6 +22,8 @@ namespace vigil {
 
    protected:
       EventCollector() = default;
+
+      std::unique_ptr<ProcessInfoReader> processInfoReader_;
    };
 
    std::unique_ptr<EventCollector> createEventCollector();

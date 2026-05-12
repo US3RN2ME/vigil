@@ -9,12 +9,10 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil {
-
-   // TODO: proper injection
-   platform::windows::ProcessInfoReader processInfoReader;
-
    std::unique_ptr<EventCollector> createEventCollector() {
-      return std::make_unique<platform::windows::EventCollector>();
+      return std::make_unique<platform::windows::EventCollector>(
+      std::make_unique<platform::windows::ProcessInfoReader>()
+  );
    }
 
 } // namespace vigil
@@ -30,6 +28,10 @@ namespace vigil::platform::windows {
 
    static constexpr USHORT kEventIdProcessStart = 1;
    static constexpr uint64_t kProcessKeyword = 0x10; // process-lifecycle only
+
+   EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader) {
+         processInfoReader_ = std::move(reader);
+   }
 
    void EventCollector::start() {
       log::info("event collector starting");
@@ -93,7 +95,7 @@ namespace vigil::platform::windows {
                if (r.EventHeader.EventDescriptor.Id != kEventIdProcessStart)
                   return;
                const auto pid = static_cast<uint32_t>(r.EventHeader.ProcessId);
-               auto proc = processInfoReader.read(pid);
+               auto proc = processInfoReader_->read(pid);
                if (!proc)
                   return;
                onProcess.emit(*proc);
@@ -115,7 +117,7 @@ namespace vigil::platform::windows {
       }
 
       snapshot->forEach([&](uint32_t pid) {
-         auto proc = processInfoReader.read(pid);
+         auto proc = processInfoReader_->read(pid);
          if (!proc)
             return;
          onProcess.emit(*proc);
@@ -132,7 +134,7 @@ namespace vigil::platform::windows {
          if (!seenConnections_.insert(key).second)
             return;
 
-         auto proc = processInfoReader.read(conn.pid);
+         auto proc = processInfoReader_->read(conn.pid);
          if (!proc)
             return;
 
