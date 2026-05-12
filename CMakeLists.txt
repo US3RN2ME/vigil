@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 option(VIGIL_ENABLE_INSTALL "Create installable target" ON)
 option(VIGIL_BUILD_TESTS "Build tests" ON)
+option(VIGIL_BUILD_APP "Build the vigil application" ON)
 
 if(VIGIL_BUILD_TESTS)
    list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -36,7 +37,9 @@ if(VIGIL_BUILD_TESTS)
    add_subdirectory(test)
 endif()
 
-add_subdirectory(app)
+if(VIGIL_BUILD_APP)
+   add_subdirectory(app)
+endif()
 
 if(VIGIL_ENABLE_INSTALL)
    include(GNUInstallDirs)
