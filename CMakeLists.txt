@@ -13,6 +13,8 @@ project(
    DESCRIPTION "Cross-platform EDR agent"
    LANGUAGES CXX)
 
+configure_file("${CMAKE_SOURCE_DIR}/cmake/version.hpp.in" "${PROJECT_BINARY_DIR}/include/vigil/version.hpp" @ONLY)
+
 add_library(vigil_options INTERFACE)
 target_compile_features(vigil_options INTERFACE cxx_std_23)
 set_target_properties(vigil_options PROPERTIES INTERFACE_CXX_EXTENSIONS OFF)

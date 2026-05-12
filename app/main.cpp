@@ -2,10 +2,13 @@
 #include <vigil/EventCollector.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
+#include <vigil/version.hpp>
 
 int main() {
    try {
       vigil::log::init();
+
+      vigil::log::info("vigil starting, version = {}", vigil::kVersion);
 
       auto collector = vigil::createEventCollector();
       auto engine = vigil::createRuleEngine(vigil::Config::loadFromFile(VIGIL_CONFIG_PATH));

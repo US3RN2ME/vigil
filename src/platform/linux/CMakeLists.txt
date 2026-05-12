@@ -26,7 +26,7 @@ target_sources(vigil_core PRIVATE ${LINUX_SOURCES} ${LINUX_HEADERS})
 
 add_dependencies(vigil_core vigil_vmlinux_h)
 
-target_include_directories(vigil_core PRIVATE${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(vigil_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(vigil_core PRIVATE PkgConfig::libbpf PkgConfig::libelf PkgConfig::zlib)
 
 set(BPF_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/bpf/events.bpf.c")
