@@ -4,11 +4,12 @@ file(GLOB CORE_RULES_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/rule
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-add_library(vigil_core ${CORE_SOURCES} ${CORE_RULES_SOURCES})
+add_library(vigil_core)
 
-target_link_libraries(vigil_core PRIVATE nlohmann_json::nlohmann_json spdlog::spdlog)
+target_sources(vigil_core PRIVATE ${CORE_SOURCES} ${CORE_RULES_SOURCES})
 
-# TODO: Replace with: $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-target_include_directories(vigil_core PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_link_libraries(vigil_core PRIVATE vigil_options nlohmann_json::nlohmann_json spdlog::spdlog)
+
+target_include_directories(vigil_core PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 
 add_subdirectory(platform/${VIGIL_PLATFORM_DIR})

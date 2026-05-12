@@ -1,5 +1,7 @@
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBBPF REQUIRED libbpf)
+ind_package(PkgConfig REQUIRED)
+pkg_check_modules(libbpf REQUIRED IMPORTED_TARGET libbpf)
+pkg_check_modules(libelf REQUIRED IMPORTED_TARGET libelf)
+pkg_check_modules(zlib REQUIRED IMPORTED_TARGET zlib)
 
 find_library(LIBELF_LIBRARY REQUIRED NAMES elf)
 find_library(LIBZ_LIBRARY REQUIRED NAMES z)
@@ -15,17 +17,17 @@ add_custom_command(
    COMMENT "Generating vmlinux.h from running kernel BTF"
    VERBATIM)
 
-add_custom_target(vmlinux_h DEPENDS ${VMLINUX_H})
+add_custom_target(vigil_vmlinux_h DEPENDS ${VMLINUX_H})
 
 file(GLOB_RECURSE LINUX_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE LINUX_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 
 target_sources(vigil_core PRIVATE ${LINUX_SOURCES} ${LINUX_HEADERS})
 
-add_dependencies(vigil_core vmlinux_h)
+add_dependencies(vigil_core vigil_vmlinux_h)
 
-target_include_directories(vigil_core PRIVATE ${LIBBPF_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(vigil_core PRIVATE ${LIBBPF_LIBRARIES} ${LIBELF_LIBRARY} ${LIBZ_LIBRARY})
+target_include_directories(vigil_core PRIVATE${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(vigil_core PRIVATE PkgConfig::libbpf PkgConfig::libelf PkgConfig::zlib)
 
 set(BPF_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/bpf/events.bpf.c")
 set(BPF_OUTPUT "${CMAKE_BINARY_DIR}/bpf/events.bpf.o")
@@ -38,6 +40,9 @@ add_custom_command(
    COMMENT "Compiling eBPF: events.bpf.c"
    VERBATIM USES_TERMINAL)
 
-add_custom_target(bpf_programs ALL DEPENDS ${BPF_OUTPUT})
-add_dependencies(vigil_core bpf_programs)
-target_compile_definitions(vigil_core PRIVATE VIGIL_EVENTS_BPF_OBJECT="${BPF_OUTPUT}")
+add_custom_target(vigil_bpf_programs ALL DEPENDS ${BPF_OUTPUT})
+add_dependencies(vigil_core vigil_bpf_programs)
+target_compile_definitions(
+   vigil_core
+   PRIVATE VIGIL_EVENTS_BPF_OBJECT="${BPF_OUTPUT}"
+   PUBLIC VIGIL_PLATFORM_LINUX)

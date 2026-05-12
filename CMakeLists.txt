@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 
 option(VIGIL_ENABLE_INSTALL "Create installable target" ON) # TODO
 option(VIGIL_BUILD_TESTS "Build tests" ON)
@@ -13,16 +13,11 @@ project(
    DESCRIPTION "Cross-platform EDR agent"
    LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries instead of static libraries" OFF)
-
-if(MSVC)
-   add_compile_options(/W4 /permissive- /EHsc)
-else()
-   add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+add_library(vigil_options INTERFACE)
+target_compile_features(vigil_options INTERFACE cxx_std_23)
+set_target_properties(vigil_options PROPERTIES INTERFACE_CXX_EXTENSIONS OFF)
+target_compile_options(vigil_options INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /EHsc>
+                                               $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
    set(VIGIL_PLATFORM_DIR "linux")
@@ -35,6 +30,7 @@ endif()
 add_subdirectory(src)
 
 if(VIGIL_BUILD_TESTS)
+   enable_testing()
    add_subdirectory(test)
 endif()
 

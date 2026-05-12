@@ -6,6 +6,6 @@ configure_file("${CMAKE_SOURCE_DIR}/config/config.json" ${VIGIL_CONFIG_PATH} COP
 
 add_executable(vigil ${APP_SOURCES})
 
-target_link_libraries(vigil PRIVATE vigil_core)
+target_link_libraries(vigil PRIVATE vigil_core vigil_options)
 
 target_compile_definitions(vigil PRIVATE VIGIL_CONFIG_PATH="${VIGIL_CONFIG_PATH}")
