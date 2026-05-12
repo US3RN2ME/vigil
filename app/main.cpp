@@ -2,7 +2,7 @@
 #include <vigil/EventCollector.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
-#include <vigil/version.hpp>
+#include <vigil/Version.hpp>
 
 int main() {
    try {

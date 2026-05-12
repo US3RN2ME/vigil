@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-option(VIGIL_ENABLE_INSTALL "Create installable target" ON) # TODO
+option(VIGIL_ENABLE_INSTALL "Create installable target" ON)
 option(VIGIL_BUILD_TESTS "Build tests" ON)
 
 if(VIGIL_BUILD_TESTS)
@@ -13,7 +13,7 @@ project(
    DESCRIPTION "Cross-platform EDR agent"
    LANGUAGES CXX)
 
-configure_file("${CMAKE_SOURCE_DIR}/cmake/version.hpp.in" "${PROJECT_BINARY_DIR}/include/vigil/version.hpp" @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/cmake/Version.hpp.in" "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" @ONLY)
 
 add_library(vigil_options INTERFACE)
 target_compile_features(vigil_options INTERFACE cxx_std_23)
@@ -37,3 +37,35 @@ if(VIGIL_BUILD_TESTS)
 endif()
 
 add_subdirectory(app)
+
+if(VIGIL_ENABLE_INSTALL)
+   include(GNUInstallDirs)
+   include(CMakePackageConfigHelpers)
+
+   install(TARGETS vigil_options EXPORT vigil-targets)
+
+   install(
+      DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+      FILES_MATCHING
+      PATTERN "*.hpp")
+
+   install(FILES "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vigil)
+
+   configure_package_config_file("${CMAKE_SOURCE_DIR}/cmake/VigilConfig.cmake.in" "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
+                                 INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
+
+   write_basic_package_version_file(
+      "${PROJECT_BINARY_DIR}/VigilConfigVersion.cmake"
+      VERSION ${PROJECT_VERSION}
+      COMPATIBILITY SameMajorVersion)
+
+   install(FILES "${PROJECT_BINARY_DIR}/VigilConfig.cmake" "${PROJECT_BINARY_DIR}/VigilConfigVersion.cmake"
+           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
+
+   install(
+      EXPORT vigil-targets
+      FILE vigil-targets.cmake
+      NAMESPACE vigil::
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
+endif()
