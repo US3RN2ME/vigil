@@ -7,7 +7,7 @@
 #include <optional>
 
 #include "BpfEvents.hpp"
-#include "BpfObject.hpp"
+#include "BpfSkeleton.hpp"
 #include "RingBuffer.hpp"
 
 #include <vigil/EventCollector.hpp>
@@ -35,7 +35,7 @@ namespace vigil::platform::linux {
       void handleModule(const ModuleEvent& e);
       void scanProc();
 
-      std::optional<BpfObject> bpf_;
+      std::optional<BpfSkeleton> bpf_;
       std::optional<RingBuffer> ringBuf_;
       std::atomic<bool> running_{false};
       std::chrono::steady_clock::time_point nextScanTime_{std::chrono::steady_clock::now()};

@@ -53,22 +53,9 @@ namespace vigil::platform::linux {
 
    bool EventCollector::init() {
       try {
-         bpf_.emplace(VIGIL_EVENTS_BPF_OBJECT);
+         bpf_.emplace();
          bpf_->load();
-         bpf_->attach("onExecveEnter");
-         bpf_->attach("onExecveExit");
-         bpf_->attach("onMmapEnter");
-         bpf_->attach("onMmapExit");
-         bpf_->attach("onMprotectEnter");
-         bpf_->attach("onMprotectExit");
-         bpf_->attach("onConnectEnter");
-         bpf_->attach("onConnectExit");
-         bpf_->attach("onPtrace");
-         bpf_->attach("onSetuid");
-         bpf_->attach("onSetresuid");
-         bpf_->attach("onInitModule");
-         bpf_->attach("onFinitModule");
-         ringBuf_.emplace(bpf_->mapFd("rb"), onEvent, this);
+         ringBuf_.emplace(bpf_->ringBufFd(), onEvent, this);
          return true;
       } catch (const std::runtime_error& e) {
          log::error("BPF init error: {}", e.what());

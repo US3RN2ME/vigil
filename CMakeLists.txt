@@ -22,10 +22,7 @@ else()
    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(VIGIL_ENABLE_INSTALL)
-   include(GNUInstallDirs)
-   include(CMakePackageConfigHelpers)
-endif()
+include(GNUInstallDirs)
 
 configure_file("${CMAKE_SOURCE_DIR}/cmake/Version.hpp.in" "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" @ONLY)
 
@@ -47,7 +44,7 @@ if(VIGIL_BUILD_APP)
 endif()
 
 if(VIGIL_ENABLE_INSTALL)
-   install(TARGETS vigil_options EXPORT vigil-targets)
+   include(CMakePackageConfigHelpers)
 
    install(
       DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
@@ -57,8 +54,10 @@ if(VIGIL_ENABLE_INSTALL)
 
    install(FILES "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vigil)
 
-   configure_package_config_file("${CMAKE_SOURCE_DIR}/cmake/VigilConfig.cmake.in" "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
-                                 INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
+   configure_package_config_file(
+           "${CMAKE_SOURCE_DIR}/cmake/VigilConfig.cmake.in"
+           "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
+           INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 
    write_basic_package_version_file(
       "${PROJECT_BINARY_DIR}/VigilConfigVersion.cmake"
@@ -69,8 +68,8 @@ if(VIGIL_ENABLE_INSTALL)
            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 
    install(
-      EXPORT vigil-targets
-      FILE vigil-targets.cmake
+      EXPORT VigilTargets
+      FILE VigilTargets.cmake
       NAMESPACE vigil::
       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 endif()
