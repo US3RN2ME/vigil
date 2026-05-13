@@ -12,7 +12,6 @@ target_link_libraries(vigil PRIVATE vigil_core vigil_options)
 target_compile_definitions(vigil PRIVATE VIGIL_CONFIG_PATH="${VIGIL_CONFIG_PATH}")
 
 if(VIGIL_ENABLE_INSTALL)
-   include(GNUInstallDirs)
    install(TARGETS vigil RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
    install(FILES "${CMAKE_SOURCE_DIR}/config/config.json" DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/vigil")
 endif()

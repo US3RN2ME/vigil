@@ -14,14 +14,6 @@ project(
    DESCRIPTION "Cross-platform EDR agent"
    LANGUAGES CXX)
 
-configure_file("${CMAKE_SOURCE_DIR}/cmake/Version.hpp.in" "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" @ONLY)
-
-add_library(vigil_options INTERFACE)
-target_compile_features(vigil_options INTERFACE cxx_std_23)
-set_target_properties(vigil_options PROPERTIES INTERFACE_CXX_EXTENSIONS OFF)
-target_compile_options(vigil_options INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /EHsc>
-                                               $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
    set(VIGIL_PLATFORM_DIR "linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -29,6 +21,19 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 else()
    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
+
+if(VIGIL_ENABLE_INSTALL)
+   include(GNUInstallDirs)
+   include(CMakePackageConfigHelpers)
+endif()
+
+configure_file("${CMAKE_SOURCE_DIR}/cmake/Version.hpp.in" "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" @ONLY)
+
+add_library(vigil_options INTERFACE)
+target_compile_features(vigil_options INTERFACE cxx_std_23)
+set_target_properties(vigil_options PROPERTIES INTERFACE_CXX_EXTENSIONS OFF)
+target_compile_options(vigil_options INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /EHsc>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
 
 add_subdirectory(src)
 
@@ -42,9 +47,6 @@ if(VIGIL_BUILD_APP)
 endif()
 
 if(VIGIL_ENABLE_INSTALL)
-   include(GNUInstallDirs)
-   include(CMakePackageConfigHelpers)
-
    install(TARGETS vigil_options EXPORT vigil-targets)
 
    install(
