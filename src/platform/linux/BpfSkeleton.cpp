@@ -1,9 +1,9 @@
 #include "BpfSkeleton.hpp"
 
-#include "events.skel.h"
-
 #include <sys/resource.h>
 #include <utility>
+
+#include "events.skel.h"
 
 #include <vigil/Error.hpp>
 #include <vigil/Logger.hpp>

@@ -9,8 +9,8 @@
 #include "BpfEvents.hpp"
 #include "ProcessInfoReader.hpp"
 
-#include <vigil/SystemError.hpp>
 #include <vigil/Logger.hpp>
+#include <vigil/SystemError.hpp>
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {
@@ -20,8 +20,7 @@ namespace vigil {
 
 namespace vigil::platform {
    EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader)
-      : vigil::EventCollector{std::move(reader)} {
-   }
+       : vigil::EventCollector{std::move(reader)} {}
 
    void EventCollector::start() {
       log::info("event collector starting");

@@ -3,5 +3,5 @@
 
 namespace vigil {
    EventCollector::EventCollector(std::unique_ptr<ProcessInfoReader> reader)
-      : processInfoReader_(std::move(reader)) {}
-}
+       : processInfoReader_(std::move(reader)) {}
+} // namespace vigil

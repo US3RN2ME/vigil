@@ -28,8 +28,7 @@ namespace vigil::platform {
    static constexpr uint64_t kProcessKeyword = 0x10; // process-lifecycle only
 
    EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader)
-      : vigil::EventCollector{std::move(reader)} {
-   }
+       : vigil::EventCollector{std::move(reader)} {}
 
    void EventCollector::start() {
       log::info("event collector starting");
