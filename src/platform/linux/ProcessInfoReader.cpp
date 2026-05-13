@@ -8,7 +8,7 @@
 
 #include <vigil/Logger.hpp>
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    namespace {
 
       bool readExe(ProcessInfo& p, const std::string& base) {
@@ -151,4 +151,4 @@ namespace vigil::platform::linux {
       return readProcessName(pid);
    }
 
-} // namespace vigil::platform::linux
+} // namespace vigil::platform

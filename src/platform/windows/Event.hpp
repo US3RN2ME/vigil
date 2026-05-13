@@ -1,12 +1,12 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_EVENT_HPP
-#define VIGIL_PLATFORM_WINDOWS_EVENT_HPP
+#ifndef VIGIL_PLATFORM_EVENT_HPP
+#define VIGIL_PLATFORM_EVENT_HPP
 
 #include <optional>
 
 #include "Handle.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    enum class WaitResult {
       Signaled,
       Timeout,
@@ -34,6 +34,6 @@ namespace vigil::platform::windows {
    private:
       Handle handle_;
    };
-} // namespace vigil::platform::windows
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_WINDOWS_EVENT_HPP
+#endif // VIGIL_PLATFORM_EVENT_HPP

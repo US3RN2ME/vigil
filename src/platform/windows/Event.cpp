@@ -3,7 +3,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    std::optional<Event> Event::create(bool manualReset, bool initialState) noexcept {
       Handle handle{CreateEventW(nullptr, manualReset, initialState, nullptr)};
       if (!handle) {
@@ -26,4 +26,4 @@ namespace vigil::platform::windows {
 
    Event::Event(Handle handle) noexcept
        : handle_{std::move(handle)} {}
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

@@ -7,20 +7,22 @@
 #include <stdexcept>
 
 #include "BpfEvents.hpp"
-#include "ProcFs.hpp"
 #include "ProcessInfoReader.hpp"
-#include "vigil/SystemError.hpp"
 
+#include <vigil/SystemError.hpp>
 #include <vigil/Logger.hpp>
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {
-      return std::make_unique<platform::linux::EventCollector>(std::make_unique<platform::linux::ProcessInfoReader>());
+      return std::make_unique<platform::EventCollector>(std::make_unique<platform::ProcessInfoReader>());
    }
 } // namespace vigil
 
-namespace vigil::platform::linux {
-   EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader) {}
+namespace vigil::platform {
+   EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader)
+      : vigil::EventCollector{std::move(reader)} {
+   }
+
    void EventCollector::start() {
       log::info("event collector starting");
       if (!init()) {
@@ -186,4 +188,4 @@ namespace vigil::platform::linux {
       onProcess.emit(*proc);
    }
 
-} // namespace vigil::platform::linux
+} // namespace vigil::platform

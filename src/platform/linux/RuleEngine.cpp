@@ -11,7 +11,7 @@
 
 namespace vigil {
    std::unique_ptr<RuleEngine> createRuleEngine(Config cfg) {
-      using namespace platform::linux::rules;
+      using namespace platform::rules;
       auto engine = std::make_unique<RuleEngine>(std::move(cfg));
       engine->addRule(std::make_unique<BinaryReplacedRule>(cfg.rule(BinaryReplacedRule::kName)));
       engine->addRule(std::make_unique<FilelessExecutionRule>(cfg.rule(FilelessExecutionRule::kName)));

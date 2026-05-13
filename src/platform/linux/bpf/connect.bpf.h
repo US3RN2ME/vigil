@@ -1,5 +1,5 @@
-#ifndef VIGIL_PLATFORM_LINUX_CONNECT_BPF_H
-#define VIGIL_PLATFORM_LINUX_CONNECT_BPF_H
+#ifndef VIGIL_PLATFORM_CONNECT_BPF_H
+#define VIGIL_PLATFORM_CONNECT_BPF_H
 
 #define AF_INET 2
 #define AF_INET6 10
@@ -86,4 +86,4 @@ int onConnectExit(struct trace_event_raw_sys_exit* ctx) {
    return 0;
 }
 
-#endif // VIGIL_PLATFORM_LINUX_CONNECT_BPF_H
+#endif // VIGIL_PLATFORM_CONNECT_BPF_H

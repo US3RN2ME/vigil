@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_EVENTCOLLECTOR_HPP
-#define VIGIL_PLATFORM_WINDOWS_EVENTCOLLECTOR_HPP
+#ifndef VIGIL_PLATFORM_EVENTCOLLECTOR_HPP
+#define VIGIL_PLATFORM_EVENTCOLLECTOR_HPP
 
 #include <chrono>
 #include <thread>
@@ -12,7 +12,7 @@
 #include <vigil/EventCollector.hpp>
 #include <vigil/ProcessInfoReader.hpp>
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    class EventCollector : public vigil::EventCollector {
       static constexpr std::chrono::seconds kScanInterval{30};
       static constexpr std::chrono::seconds kNetScanInterval{5};
@@ -39,6 +39,6 @@ namespace vigil::platform::windows {
 
       std::unordered_set<std::string> seenConnections_;
    };
-} // namespace vigil::platform::windows
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_WINDOWS_EVENTCOLLECTOR_HPP
+#endif // VIGIL_PLATFORM_EVENTCOLLECTOR_HPP

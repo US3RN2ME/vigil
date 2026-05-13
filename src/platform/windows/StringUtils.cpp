@@ -2,7 +2,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    std::string StringUtils::wideToUtf8(const wchar_t* wide, int size) {
       if (!wide || size <= 0)
          return {};
@@ -27,4 +27,4 @@ namespace vigil::platform::windows {
          return std::string{path.substr(sep + 1)};
       return std::string{path};
    }
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

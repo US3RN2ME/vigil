@@ -1,10 +1,10 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_BPFSKELETON_HPP
-#define VIGIL_PLATFORM_LINUX_BPFSKELETON_HPP
+#ifndef VIGIL_PLATFORM_BPFSKELETON_HPP
+#define VIGIL_PLATFORM_BPFSKELETON_HPP
 
 struct events_bpf;
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    class BpfSkeleton {
    public:
       BpfSkeleton();
@@ -22,6 +22,6 @@ namespace vigil::platform::linux {
    private:
       struct events_bpf* skel_{};
    };
-} // namespace vigil::platform::linux
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_LINUX_BPFSKELETON_HPP
+#endif // VIGIL_PLATFORM_BPFSKELETON_HPP

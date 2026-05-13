@@ -5,7 +5,7 @@
 namespace {
    suite<"[PtraceInjectRule]"> _ = [] {
       using vigil::ProcessInfo;
-      using vigil::platform::linux::rules::PtraceInjectRule;
+      using vigil::platform::rules::PtraceInjectRule;
       using vigil::rules::RuleConfig;
 
       "[FiresWhenPtraceAttach]"_test = [] {

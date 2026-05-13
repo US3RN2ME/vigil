@@ -1,6 +1,6 @@
 #include "DebugPrivilegeRule.hpp"
 
-namespace vigil::platform::windows::rules {
+namespace vigil::platform::rules {
 
    DebugPrivilegeRule::DebugPrivilegeRule(vigil::rules::RuleConfig cfg)
        : Rule{std::move(cfg)} {}
@@ -25,4 +25,4 @@ namespace vigil::platform::windows::rules {
       return alert;
    }
 
-} // namespace vigil::platform::windows::rules
+} // namespace vigil::platform::rules

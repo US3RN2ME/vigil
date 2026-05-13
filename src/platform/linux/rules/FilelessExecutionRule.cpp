@@ -1,7 +1,7 @@
 
 #include "FilelessExecutionRule.hpp"
 
-namespace vigil::platform::linux::rules {
+namespace vigil::platform::rules {
    FilelessExecutionRule::FilelessExecutionRule(vigil::rules::RuleConfig cfg)
        : Rule{std::move(cfg)} {}
 
@@ -23,4 +23,4 @@ namespace vigil::platform::linux::rules {
          alert.attributes = {{"reason", "binary unlinked after exec"}, {"path", info.exePath}};
       return alert;
    }
-} // namespace vigil::platform::linux::rules
+} // namespace vigil::platform::rules

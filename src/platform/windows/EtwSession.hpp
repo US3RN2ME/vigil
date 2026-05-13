@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_ETWSESSION_HPP
-#define VIGIL_PLATFORM_WINDOWS_ETWSESSION_HPP
+#ifndef VIGIL_PLATFORM_ETWSESSION_HPP
+#define VIGIL_PLATFORM_ETWSESSION_HPP
 
 #include <array>
 #include <cstdint>
@@ -10,7 +10,7 @@
 
 struct _EVENT_RECORD;
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
 
    class EtwSession {
       static constexpr auto kInvalid = static_cast<uint64_t>(-1);
@@ -42,6 +42,6 @@ namespace vigil::platform::windows {
       EventCallback callback_;
    };
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_WINDOWS_ETWSESSION_HPP
+#endif // VIGIL_PLATFORM_ETWSESSION_HPP

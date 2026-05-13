@@ -5,7 +5,7 @@
 namespace {
    suite<"[NetworkConnectRule]"> _ = [] {
       using vigil::ProcessInfo;
-      using vigil::platform::linux::rules::NetworkConnectRule;
+      using vigil::platform::rules::NetworkConnectRule;
       using vigil::rules::RuleConfig;
 
       "[FiresWhenConnectObserved]"_test = [] {

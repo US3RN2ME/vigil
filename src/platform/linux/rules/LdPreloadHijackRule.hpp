@@ -1,10 +1,10 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_LDPRELOADHIJACKRULE_HPP
-#define VIGIL_PLATFORM_LINUX_LDPRELOADHIJACKRULE_HPP
+#ifndef VIGIL_PLATFORM_LDPRELOADHIJACKRULE_HPP
+#define VIGIL_PLATFORM_LDPRELOADHIJACKRULE_HPP
 
 #include <vigil/rules/Rule.hpp>
 
-namespace vigil::platform::linux::rules {
+namespace vigil::platform::rules {
    class LdPreloadHijackRule : public vigil::rules::Rule {
    public:
       static constexpr std::string_view kName = "ld_preload_hijack_rule";
@@ -18,6 +18,6 @@ namespace vigil::platform::linux::rules {
 
       [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
    };
-} // namespace vigil::platform::linux::rules
+} // namespace vigil::platform::rules
 
-#endif // VIGIL_PLATFORM_LINUX_LDPRELOADHIJACKRULE_HPP
+#endif // VIGIL_PLATFORM_LDPRELOADHIJACKRULE_HPP

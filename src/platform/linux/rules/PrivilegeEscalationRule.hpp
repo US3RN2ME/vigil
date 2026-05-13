@@ -1,10 +1,10 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_RULES_PRIVILEGEESCALATIONRULE_HPP
-#define VIGIL_PLATFORM_LINUX_RULES_PRIVILEGEESCALATIONRULE_HPP
+#ifndef VIGIL_PLATFORM_RULES_PRIVILEGEESCALATIONRULE_HPP
+#define VIGIL_PLATFORM_RULES_PRIVILEGEESCALATIONRULE_HPP
 
 #include "vigil/rules/Rule.hpp"
 
-namespace vigil::platform::linux::rules {
+namespace vigil::platform::rules {
    class PrivilegeEscalationRule : public vigil::rules::Rule {
    public:
       static constexpr std::string_view kName = "privilege_escalation_rule";
@@ -18,6 +18,6 @@ namespace vigil::platform::linux::rules {
 
       [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
    };
-} // namespace vigil::platform::linux::rules
+} // namespace vigil::platform::rules
 
-#endif // VIGIL_PLATFORM_LINUX_RULES_PRIVILEGEESCALATIONRULE_HPP
+#endif // VIGIL_PLATFORM_RULES_PRIVILEGEESCALATIONRULE_HPP

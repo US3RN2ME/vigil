@@ -2,7 +2,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    namespace {
       TOKEN_INFORMATION_CLASS toNative(ProcessToken::InfoClass infoClass) {
          switch (infoClass) {
@@ -61,4 +61,4 @@ namespace vigil::platform::windows {
       return buffer;
    }
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

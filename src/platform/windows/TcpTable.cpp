@@ -5,7 +5,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
 
    namespace {
 
@@ -91,4 +91,4 @@ namespace vigil::platform::windows {
       scanTcp<MIB_TCP6TABLE_OWNER_PID, MIB_TCP6ROW_OWNER_PID>(AF_INET6, callback, extractIPv6);
    }
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

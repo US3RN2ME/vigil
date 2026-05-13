@@ -1,5 +1,5 @@
-#ifndef VIGIL_PLATFORM_LINUX_PTRACE_BPF_H
-#define VIGIL_PLATFORM_LINUX_PTRACE_BPF_H
+#ifndef VIGIL_PLATFORM_PTRACE_BPF_H
+#define VIGIL_PLATFORM_PTRACE_BPF_H
 
 #define PTRACE_ATTACH 16
 #define PTRACE_SEIZE 16902
@@ -22,4 +22,4 @@ int onPtrace(struct trace_event_raw_sys_enter* ctx) {
    return 0;
 }
 
-#endif // VIGIL_PLATFORM_LINUX_PTRACE_BPF_H
+#endif // VIGIL_PLATFORM_PTRACE_BPF_H

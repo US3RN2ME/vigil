@@ -1,10 +1,10 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_BPFEVENTS_HPP
-#define VIGIL_PLATFORM_LINUX_BPFEVENTS_HPP
+#ifndef VIGIL_PLATFORM_BPFEVENTS_HPP
+#define VIGIL_PLATFORM_BPFEVENTS_HPP
 
 #include <cstdint>
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    enum class EventType : uint32_t {
       Execve = 1,
       Mmap = 2,
@@ -57,6 +57,6 @@ namespace vigil::platform::linux {
    struct ModuleEvent {
       EventHeader hdr;
    };
-} // namespace vigil::platform::linux
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_LINUX_BPFEVENTS_HPP
+#endif // VIGIL_PLATFORM_BPFEVENTS_HPP

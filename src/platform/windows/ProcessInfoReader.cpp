@@ -10,7 +10,7 @@
 
 #include <vigil/Logger.hpp>
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    namespace {
 
       constexpr auto kProcessCommandLineInformation = static_cast<PROCESSINFOCLASS>(60);
@@ -247,4 +247,4 @@ namespace vigil::platform::windows {
       return StringUtils::filenameFromPath(path);
    }
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

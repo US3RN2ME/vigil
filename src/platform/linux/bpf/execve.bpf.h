@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_EXECVE_BPF_H
-#define VIGIL_PLATFORM_LINUX_EXECVE_BPF_H
+#ifndef VIGIL_PLATFORM_EXECVE_BPF_H
+#define VIGIL_PLATFORM_EXECVE_BPF_H
 
 struct ExecveArgs {
    char filename[256];
@@ -49,4 +49,4 @@ int onExecveExit(struct trace_event_raw_sys_exit* ctx) {
    return 0;
 }
 
-#endif // VIGIL_PLATFORM_LINUX_EXECVE_BPF_H
+#endif // VIGIL_PLATFORM_EXECVE_BPF_H

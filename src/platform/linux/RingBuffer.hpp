@@ -1,12 +1,12 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_RINGBUFFER_HPP
-#define VIGIL_PLATFORM_LINUX_RINGBUFFER_HPP
+#ifndef VIGIL_PLATFORM_RINGBUFFER_HPP
+#define VIGIL_PLATFORM_RINGBUFFER_HPP
 
 #include <cstddef>
 
 struct ring_buffer;
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    class RingBuffer {
    public:
       using Callback = int (*)(void* ctx, void* data, size_t size);
@@ -28,6 +28,6 @@ namespace vigil::platform::linux {
    private:
       struct ring_buffer* rb_ = nullptr;
    };
-} // namespace vigil::platform::linux
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_LINUX_RINGBUFFER_HPP
+#endif // VIGIL_PLATFORM_RINGBUFFER_HPP

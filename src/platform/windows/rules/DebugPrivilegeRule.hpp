@@ -1,10 +1,10 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_RULES_DEBUGPRIVILEGERULE_HPP
-#define VIGIL_PLATFORM_WINDOWS_RULES_DEBUGPRIVILEGERULE_HPP
+#ifndef VIGIL_PLATFORM_RULES_DEBUGPRIVILEGERULE_HPP
+#define VIGIL_PLATFORM_RULES_DEBUGPRIVILEGERULE_HPP
 
 #include <vigil/rules/Rule.hpp>
 
-namespace vigil::platform::windows::rules {
+namespace vigil::platform::rules {
 
    class DebugPrivilegeRule : public vigil::rules::Rule {
    public:
@@ -23,6 +23,6 @@ namespace vigil::platform::windows::rules {
       static constexpr uint64_t kSeDebugPrivilege = 1ULL << 20;
    };
 
-} // namespace vigil::platform::windows::rules
+} // namespace vigil::platform::rules
 
-#endif // VIGIL_PLATFORM_WINDOWS_RULES_DEBUGPRIVILEGERULE_HPP
+#endif // VIGIL_PLATFORM_RULES_DEBUGPRIVILEGERULE_HPP

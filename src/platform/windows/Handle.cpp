@@ -5,7 +5,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    Handle::Handle(NativeType handle) noexcept
        : handle_{handle} {}
 
@@ -47,4 +47,4 @@ namespace vigil::platform::windows {
    Handle::NativeType Handle::release() noexcept {
       return std::exchange(handle_, nullptr);
    }
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

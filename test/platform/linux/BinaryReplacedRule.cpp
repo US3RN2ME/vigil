@@ -5,7 +5,7 @@
 namespace {
    suite<"[BinaryReplacedRule]"> _ = [] {
       using vigil::ProcessInfo;
-      using vigil::platform::linux::rules::BinaryReplacedRule;
+      using vigil::platform::rules::BinaryReplacedRule;
       using vigil::rules::RuleConfig;
 
       "[FiresWhenBinaryReplaced]"_test = [] {

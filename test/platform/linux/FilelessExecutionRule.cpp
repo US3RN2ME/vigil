@@ -5,7 +5,7 @@
 namespace {
    suite<"[FilelessExecutionRule]"> _ = [] {
       using vigil::ProcessInfo;
-      using vigil::platform::linux::rules::FilelessExecutionRule;
+      using vigil::platform::rules::FilelessExecutionRule;
       using vigil::rules::RuleConfig;
 
       "[FiresWhenExeDeleted]"_test = [] {

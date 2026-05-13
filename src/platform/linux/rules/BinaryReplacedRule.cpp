@@ -1,7 +1,7 @@
 
 #include "BinaryReplacedRule.hpp"
 
-namespace vigil::platform::linux::rules {
+namespace vigil::platform::rules {
    BinaryReplacedRule::BinaryReplacedRule(vigil::rules::RuleConfig cfg)
        : Rule{std::move(cfg)} {}
 
@@ -23,4 +23,4 @@ namespace vigil::platform::linux::rules {
       };
       return alert;
    }
-} // namespace vigil::platform::linux::rules
+} // namespace vigil::platform::rules

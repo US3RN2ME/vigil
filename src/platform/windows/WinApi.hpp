@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_WINAPI_HPP
-#define VIGIL_PLATFORM_WINDOWS_WINAPI_HPP
+#ifndef VIGIL_PLATFORM_WINAPI_HPP
+#define VIGIL_PLATFORM_WINAPI_HPP
 
 // clang-format off
 #include <winsock2.h>
@@ -14,4 +14,4 @@
 #include <tlhelp32.h>   // CreateToolhelp32Snapshot, PROCESSENTRY32W
 // clang-format on
 
-#endif // VIGIL_PLATFORM_WINDOWS_WINAPI_HPP
+#endif // VIGIL_PLATFORM_WINAPI_HPP

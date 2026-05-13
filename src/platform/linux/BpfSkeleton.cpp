@@ -8,7 +8,7 @@
 #include <vigil/Error.hpp>
 #include <vigil/Logger.hpp>
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    BpfSkeleton::BpfSkeleton() {
       skel_ = events_bpf__open();
       if (!skel_)
@@ -53,4 +53,4 @@ namespace vigil::platform::linux {
    int BpfSkeleton::ringBufFd() const {
       return bpf_map__fd(skel_->maps.rb);
    }
-} // namespace vigil::platform::linux
+} // namespace vigil::platform

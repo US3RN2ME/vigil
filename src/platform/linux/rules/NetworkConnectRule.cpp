@@ -1,7 +1,7 @@
 
 #include "NetworkConnectRule.hpp"
 
-namespace vigil::platform::linux::rules {
+namespace vigil::platform::rules {
    NetworkConnectRule::NetworkConnectRule(vigil::rules::RuleConfig cfg)
        : Rule{std::move(cfg)} {}
 
@@ -26,4 +26,4 @@ namespace vigil::platform::linux::rules {
       return alert;
    }
 
-} // namespace vigil::platform::linux::rules
+} // namespace vigil::platform::rules

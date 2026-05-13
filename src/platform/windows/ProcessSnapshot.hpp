@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_PROCESSSNAPSHOT_HPP
-#define VIGIL_PLATFORM_WINDOWS_PROCESSSNAPSHOT_HPP
+#ifndef VIGIL_PLATFORM_PROCESSSNAPSHOT_HPP
+#define VIGIL_PLATFORM_PROCESSSNAPSHOT_HPP
 
 #include <cstdint>
 #include <functional>
@@ -8,7 +8,7 @@
 
 #include "Handle.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
 
    class ProcessSnapshot {
    public:
@@ -22,6 +22,6 @@ namespace vigil::platform::windows {
       Handle handle_;
    };
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_WINDOWS_PROCESSSNAPSHOT_HPP
+#endif // VIGIL_PLATFORM_PROCESSSNAPSHOT_HPP

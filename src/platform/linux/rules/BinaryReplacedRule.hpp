@@ -1,10 +1,10 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_BINARYREPLACEDRULE_HPP
-#define VIGIL_PLATFORM_LINUX_BINARYREPLACEDRULE_HPP
+#ifndef VIGIL_PLATFORM_BINARYREPLACEDRULE_HPP
+#define VIGIL_PLATFORM_BINARYREPLACEDRULE_HPP
 
 #include <vigil/rules/Rule.hpp>
 
-namespace vigil::platform::linux::rules {
+namespace vigil::platform::rules {
    class BinaryReplacedRule : public vigil::rules::Rule {
    public:
       static constexpr std::string_view kName = "binary_replaced_rule";
@@ -18,6 +18,6 @@ namespace vigil::platform::linux::rules {
 
       [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
    };
-} // namespace vigil::platform::linux::rules
+} // namespace vigil::platform::rules
 
-#endif // VIGIL_PLATFORM_LINUX_BINARYREPLACEDRULE_HPP
+#endif // VIGIL_PLATFORM_BINARYREPLACEDRULE_HPP

@@ -23,6 +23,8 @@ namespace vigil {
    protected:
       EventCollector() = default;
 
+      explicit EventCollector(std::unique_ptr<ProcessInfoReader>);
+
       std::unique_ptr<ProcessInfoReader> processInfoReader_;
    };
 

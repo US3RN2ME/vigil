@@ -2,7 +2,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    ProcessSnapshot::ProcessSnapshot(Handle handle) noexcept
        : handle_{std::move(handle)} {}
 
@@ -30,4 +30,4 @@ namespace vigil::platform::windows {
             callback(static_cast<uint32_t>(entry.th32ProcessID));
       } while (Process32NextW(h, &entry));
    }
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

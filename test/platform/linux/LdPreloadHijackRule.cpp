@@ -5,7 +5,7 @@
 namespace {
    suite<"[LdPreloadHijackRule]"> _ = [] {
       using vigil::ProcessInfo;
-      using vigil::platform::linux::rules::LdPreloadHijackRule;
+      using vigil::platform::rules::LdPreloadHijackRule;
       using vigil::rules::RuleConfig;
 
       "[FiresWhenLdPreloadSet]"_test = [] {

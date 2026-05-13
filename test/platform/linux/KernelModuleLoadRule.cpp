@@ -5,7 +5,7 @@
 namespace {
    suite<"[KernelModuleLoadRule]"> _ = [] {
       using vigil::ProcessInfo;
-      using vigil::platform::linux::rules::KernelModuleLoadRule;
+      using vigil::platform::rules::KernelModuleLoadRule;
       using vigil::rules::RuleConfig;
 
       "[FiresWhenModuleLoaded]"_test = [] {

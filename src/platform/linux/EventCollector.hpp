@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
-#define VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
+#ifndef VIGIL_PLATFORM_EVENTCOLLECTOR_HPP
+#define VIGIL_PLATFORM_EVENTCOLLECTOR_HPP
 
 #include <atomic>
 #include <chrono>
@@ -13,7 +13,7 @@
 #include <vigil/EventCollector.hpp>
 #include <vigil/ProcessInfoReader.hpp>
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    class EventCollector : public vigil::EventCollector {
       static constexpr std::chrono::seconds kScanInterval{30};
 
@@ -40,6 +40,6 @@ namespace vigil::platform::linux {
       std::atomic<bool> running_{false};
       std::chrono::steady_clock::time_point nextScanTime_{std::chrono::steady_clock::now()};
    };
-} // namespace vigil::platform::linux
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_LINUX_EVENTCOLLECTOR_HPP
+#endif // VIGIL_PLATFORM_EVENTCOLLECTOR_HPP

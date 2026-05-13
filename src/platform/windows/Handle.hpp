@@ -1,8 +1,8 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_HANDLE_HPP
-#define VIGIL_PLATFORM_WINDOWS_HANDLE_HPP
+#ifndef VIGIL_PLATFORM_HANDLE_HPP
+#define VIGIL_PLATFORM_HANDLE_HPP
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    class Handle {
    public:
       using NativeType = void*;
@@ -27,6 +27,6 @@ namespace vigil::platform::windows {
    private:
       NativeType handle_{nullptr};
    };
-} // namespace vigil::platform::windows
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_WINDOWS_HANDLE_HPP
+#endif // VIGIL_PLATFORM_HANDLE_HPP

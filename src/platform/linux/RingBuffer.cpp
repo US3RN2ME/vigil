@@ -6,7 +6,7 @@
 #include <vigil/Error.hpp>
 #include <vigil/Logger.hpp>
 
-namespace vigil::platform::linux {
+namespace vigil::platform {
    RingBuffer::RingBuffer(int mapFd, Callback cb, void* ctx) {
       rb_ = ring_buffer__new(mapFd, cb, ctx, nullptr);
       if (!rb_)
@@ -37,4 +37,4 @@ namespace vigil::platform::linux {
          log::warn("ring_buffer__poll returned {}", rc);
       return rc;
    }
-} // namespace vigil::platform::linux
+} // namespace vigil::platform

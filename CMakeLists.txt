@@ -30,7 +30,7 @@ add_library(vigil_options INTERFACE)
 target_compile_features(vigil_options INTERFACE cxx_std_23)
 set_target_properties(vigil_options PROPERTIES INTERFACE_CXX_EXTENSIONS OFF)
 target_compile_options(vigil_options INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /EHsc>
-        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
+                                               $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
 
 add_subdirectory(src)
 
@@ -46,6 +46,8 @@ endif()
 if(VIGIL_ENABLE_INSTALL)
    include(CMakePackageConfigHelpers)
 
+   install(TARGETS vigil_options EXPORT VigilTargets)
+
    install(
       DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -54,10 +56,8 @@ if(VIGIL_ENABLE_INSTALL)
 
    install(FILES "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vigil)
 
-   configure_package_config_file(
-           "${CMAKE_SOURCE_DIR}/cmake/VigilConfig.cmake.in"
-           "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
-           INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
+   configure_package_config_file("${CMAKE_SOURCE_DIR}/cmake/VigilConfig.cmake.in" "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
+                                 INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 
    write_basic_package_version_file(
       "${PROJECT_BINARY_DIR}/VigilConfigVersion.cmake"

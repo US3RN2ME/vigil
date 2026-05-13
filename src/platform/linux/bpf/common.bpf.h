@@ -1,5 +1,5 @@
-#ifndef VIGIL_PLATFORM_LINUX_COMMON_BPF_H
-#define VIGIL_PLATFORM_LINUX_COMMON_BPF_H
+#ifndef VIGIL_PLATFORM_COMMON_BPF_H
+#define VIGIL_PLATFORM_COMMON_BPF_H
 
 // clang-format off
 #include "vmlinux.h"
@@ -70,4 +70,4 @@ static __always_inline void fillHeader(struct EventHeader* hdr, __u32 type) {
    bpf_get_current_comm(hdr->comm, sizeof(hdr->comm));
 }
 
-#endif // VIGIL_PLATFORM_LINUX_COMMON_BPF_H
+#endif // VIGIL_PLATFORM_COMMON_BPF_H

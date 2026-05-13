@@ -10,12 +10,12 @@
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {
-      return std::make_unique<platform::windows::EventCollector>(std::make_unique<platform::windows::ProcessInfoReader>());
+      return std::make_unique<platform::EventCollector>(std::make_unique<platform::ProcessInfoReader>());
    }
 
 } // namespace vigil
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
 
    // Microsoft-Windows-Kernel-Process — available on Windows 8+.
    // Byte layout of GUID {0x22fb2cd6,0x0e7b,0x422b,{0xa0,0xc7,...}} in memory
@@ -27,8 +27,8 @@ namespace vigil::platform::windows {
    static constexpr USHORT kEventIdProcessStart = 1;
    static constexpr uint64_t kProcessKeyword = 0x10; // process-lifecycle only
 
-   EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader) {
-      processInfoReader_ = std::move(reader);
+   EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader)
+      : vigil::EventCollector{std::move(reader)} {
    }
 
    void EventCollector::start() {
@@ -143,4 +143,4 @@ namespace vigil::platform::windows {
       });
    }
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_LINUX_MODULE_BPF_H
-#define VIGIL_PLATFORM_LINUX_MODULE_BPF_H
+#ifndef VIGIL_PLATFORM_MODULE_BPF_H
+#define VIGIL_PLATFORM_MODULE_BPF_H
 
 static __always_inline int emitModuleEvent(void) {
    struct ModuleEvent* e = bpf_ringbuf_reserve(&rb, sizeof(*e), 0);
@@ -21,4 +21,4 @@ int onFinitModule(struct trace_event_raw_sys_enter* ctx) {
    return emitModuleEvent();
 }
 
-#endif // VIGIL_PLATFORM_LINUX_MODULE_BPF_H
+#endif // VIGIL_PLATFORM_MODULE_BPF_H

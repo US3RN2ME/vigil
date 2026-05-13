@@ -5,7 +5,7 @@
 
 #include <vigil/Logger.hpp>
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    namespace {
 
       // EVENT_TRACE_PROPERTIES must be followed by the session name in the same
@@ -142,4 +142,4 @@ namespace vigil::platform::windows {
          ControlTraceW(static_cast<TRACEHANDLE>(sessionHandle_), nullptr, &props.props, EVENT_TRACE_CONTROL_STOP);
       }
    }
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

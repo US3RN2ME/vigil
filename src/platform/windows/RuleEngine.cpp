@@ -5,7 +5,7 @@
 
 namespace vigil {
    std::unique_ptr<RuleEngine> createRuleEngine(Config cfg) {
-      using namespace platform::windows::rules;
+      using namespace platform::rules;
       auto engine = std::make_unique<RuleEngine>(std::move(cfg));
       engine->addRule(std::make_unique<DebugPrivilegeRule>(cfg.rule(DebugPrivilegeRule::kName)));
       return engine;

@@ -2,7 +2,7 @@
 
 #include "WinApi.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
    Handle Process::open(uint32_t pid) {
       Handle handle{OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid)};
 
@@ -12,4 +12,4 @@ namespace vigil::platform::windows {
 
       return handle;
    }
-} // namespace vigil::platform::windows
+} // namespace vigil::platform

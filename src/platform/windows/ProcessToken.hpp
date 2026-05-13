@@ -1,6 +1,6 @@
 
-#ifndef VIGIL_PLATFORM_WINDOWS_PROCESSTOKEN_HPP
-#define VIGIL_PLATFORM_WINDOWS_PROCESSTOKEN_HPP
+#ifndef VIGIL_PLATFORM_PROCESSTOKEN_HPP
+#define VIGIL_PLATFORM_PROCESSTOKEN_HPP
 
 #include <cstddef>
 #include <optional>
@@ -8,7 +8,7 @@
 
 #include "Handle.hpp"
 
-namespace vigil::platform::windows {
+namespace vigil::platform {
 
    class ProcessToken {
    public:
@@ -31,6 +31,6 @@ namespace vigil::platform::windows {
       Handle handle_;
    };
 
-} // namespace vigil::platform::windows
+} // namespace vigil::platform
 
-#endif // VIGIL_PLATFORM_WINDOWS_PROCESSTOKEN_HPP
+#endif // VIGIL_PLATFORM_PROCESSTOKEN_HPP
