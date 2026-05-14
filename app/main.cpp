@@ -2,6 +2,7 @@
 #include <vigil/EventCollector.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
+#include <vigil/SignalHandler.hpp>
 #include <vigil/Version.hpp>
 
 int main() {
@@ -28,9 +29,24 @@ int main() {
                           alert.info.name, attrs);
       });
 
-      collector->start();
+      std::thread collectorThread([&] {
+         collector->start();
+      });
+
+      vigil::SignalHandler signalHandler;
+
+      signalHandler.wait();
+
+      collector->stop();
+
+      if (collectorThread.joinable()) {
+         collectorThread.join();
+      }
+
       vigil::log::info("event collector stopped");
 
+   } catch (const vigil::SignalHandlerError& e) {
+      vigil::log::error("Signal handler failed: {}", e.what());
    } catch (const vigil::CollectorError& e) {
       vigil::log::error("Collector init failed: {}", e.what());
    } catch (const vigil::ConfigError& e) {

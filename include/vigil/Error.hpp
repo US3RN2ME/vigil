@@ -21,6 +21,10 @@ namespace vigil {
    struct ConfigError : Error {
       using Error::Error;
    };
+
+   struct SignalHandlerError : Error {
+      using Error::Error;
+   };
 } // namespace vigil
 
 #endif // VIGIL_ERROR_HPP
