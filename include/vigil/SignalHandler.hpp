@@ -2,7 +2,6 @@
 #ifndef VIGIL_SIGNALHANDLER_HPP
 #define VIGIL_SIGNALHANDLER_HPP
 
-#include <condition_variable>
 #include <mutex>
 #include <string_view>
 
@@ -31,10 +30,9 @@ namespace vigil {
    private:
       void install();
       void uninstall();
+      void notifyStopRequested();
 
       mutable std::mutex mutex_;
-      std::condition_variable cv_;
-
       bool stopRequested_{false};
       StopReason reason_{StopReason::None};
    };

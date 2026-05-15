@@ -43,14 +43,6 @@ namespace vigil {
       uninstall();
    }
 
-   void SignalHandler::wait() {
-      std::unique_lock lock(mutex_);
-
-      cv_.wait(lock, [this] {
-         return stopRequested_;
-      });
-   }
-
    void SignalHandler::requestStop(StopReason reason) {
       {
          std::lock_guard lock(mutex_);
@@ -62,7 +54,8 @@ namespace vigil {
          stopRequested_ = true;
          reason_ = reason;
       }
-      cv_.notify_all();
+
+      notifyStopRequested();
    }
 
    bool SignalHandler::stopRequested() const {
@@ -74,4 +67,5 @@ namespace vigil {
       std::lock_guard lock(mutex_);
       return reason_;
    }
+
 } // namespace vigil

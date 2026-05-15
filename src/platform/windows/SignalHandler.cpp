@@ -1,13 +1,15 @@
+#include <atomic>
+#include <condition_variable>
+
 #include "WinApi.hpp"
 
 #include <vigil/Error.hpp>
 #include <vigil/SignalHandler.hpp>
 
-#include <atomic>
-
 namespace vigil {
    namespace {
       std::atomic<SignalHandler*> activeHandler{nullptr};
+      std::condition_variable stopRequestedCv;
 
       StopReason toStopReason(DWORD event) {
          switch (event) {
@@ -37,6 +39,14 @@ namespace vigil {
 
    } // namespace
 
+   void SignalHandler::wait() {
+      std::unique_lock lock(mutex_);
+
+      stopRequestedCv.wait(lock, [this] {
+         return stopRequested_;
+      });
+   }
+
    void SignalHandler::install() {
       SignalHandler* expected = nullptr;
       if (!activeHandler.compare_exchange_strong(expected, this, std::memory_order_acq_rel)) {
@@ -56,5 +66,9 @@ namespace vigil {
       }
 
       SetConsoleCtrlHandler(consoleHandler, FALSE);
+   }
+
+   void SignalHandler::notifyStopRequested() {
+      stopRequestedCv.notify_all();
    }
 } // namespace vigil

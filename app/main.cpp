@@ -1,11 +1,11 @@
+#include <thread>
+
 #include <vigil/Error.hpp>
 #include <vigil/EventCollector.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/RuleEngine.hpp>
 #include <vigil/SignalHandler.hpp>
 #include <vigil/Version.hpp>
-
-#include <thread>
 
 int main() {
    try {

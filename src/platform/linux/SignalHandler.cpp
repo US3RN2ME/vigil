@@ -1,10 +1,7 @@
-
 #include <atomic>
 #include <csignal>
 #include <mutex>
 #include <pthread.h>
-#include <stdexcept>
-#include <thread>
 
 #include <vigil/Error.hpp>
 #include <vigil/SignalHandler.hpp>
@@ -12,98 +9,112 @@
 namespace vigil {
    namespace {
 
-      std::mutex activeHandlerMutex;
-      SignalHandler* activeHandler = nullptr;
+      constexpr int kWakeSignal = SIGUSR1;
 
-      sigset_t g_signals{};
-      std::thread g_thread;
-      std::atomic_bool g_stopping{false};
+      std::atomic_bool active{false};
+      std::mutex platformMutex;
+      sigset_t signals{};
+      sigset_t previousMask{};
+      pthread_t waiterThread{};
+      bool waiterRegistered{false};
+      bool maskInstalled{false};
 
-      SignalHandler::Reason toReason(int signal) {
+      StopReason toStopReason(int signal) {
          switch (signal) {
             case SIGINT:
-               return SignalHandler::Reason::Interrupt;
+               return StopReason::Interrupt;
             case SIGTERM:
-               return SignalHandler::Reason::Terminate;
+               return StopReason::Terminate;
             case SIGQUIT:
-               return SignalHandler::Reason::Quit;
+               return StopReason::Quit;
             case SIGHUP:
-               return SignalHandler::Reason::Hangup;
+               return StopReason::Hangup;
             default:
-               return SignalHandler::Reason::Terminate;
+               return StopReason::Terminate;
          }
-      }
-
-      SignalHandler* currentHandler() {
-         std::lock_guard lock(activeHandlerMutex);
-         return activeHandler;
       }
 
    } // namespace
 
-   void SignalHandler::install() {
+   void SignalHandler::wait() {
       {
-         std::lock_guard lock(activeHandlerMutex);
+         std::lock_guard lock(mutex_);
 
-         if (activeHandler != nullptr) {
-            throw SignalHandlerError{"Only one ShutdownSignal may be active per process"};
+         if (stopRequested_) {
+            return;
          }
-
-         activeHandler = this;
       }
 
-      g_stopping = false;
+      {
+         std::lock_guard lock(platformMutex);
+         waiterThread = pthread_self();
+         waiterRegistered = true;
+      }
 
-      sigemptyset(&g_signals);
+      while (!stopRequested()) {
+         int signal = 0;
+         if (sigwait(&signals, &signal) != 0) {
+            continue;
+         }
 
-      sigaddset(&g_signals, SIGINT);
-      sigaddset(&g_signals, SIGTERM);
-      sigaddset(&g_signals, SIGQUIT);
-      sigaddset(&g_signals, SIGHUP);
+         if (signal == kWakeSignal) {
+            continue;
+         }
 
-      // Internal signal used to unblock sigwait() in destructor.
-      sigaddset(&g_signals, SIGUSR1);
+         requestStop(toStopReason(signal));
+      }
 
-      if (pthread_sigmask(SIG_BLOCK, &g_signals, nullptr) != 0) {
-         std::lock_guard lock(activeHandlerMutex);
-         activeHandler = nullptr;
+      std::lock_guard lock(platformMutex);
+      waiterRegistered = false;
+   }
 
+   void SignalHandler::install() {
+      bool expected = false;
+      if (!active.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+         throw SignalHandlerError{"Only one SignalHandler may be active per process"};
+      }
+
+      sigemptyset(&signals);
+
+      sigaddset(&signals, SIGINT);
+      sigaddset(&signals, SIGTERM);
+      sigaddset(&signals, SIGQUIT);
+      sigaddset(&signals, SIGHUP);
+      sigaddset(&signals, kWakeSignal);
+
+      if (pthread_sigmask(SIG_BLOCK, &signals, &previousMask) != 0) {
+         active.store(false, std::memory_order_release);
          throw SignalHandlerError{"Failed to block shutdown signals"};
       }
 
-      g_thread = std::thread([] {
-         while (true) {
-            int signal = 0;
-
-            if (sigwait(&g_signals, &signal) != 0) {
-               continue;
-            }
-
-            if (signal == SIGUSR1 && g_stopping.load()) {
-               break;
-            }
-
-            if (auto* handler = currentHandler()) {
-               handler->requestStop(toReason(signal));
-            }
-
-            break;
-         }
-      });
+      maskInstalled = true;
    }
 
    void SignalHandler::uninstall() {
-      g_stopping = true;
+      {
+         std::lock_guard lock(platformMutex);
 
-      if (g_thread.joinable()) {
-         pthread_kill(g_thread.native_handle(), SIGUSR1);
-         g_thread.join();
+         if (waiterRegistered && !pthread_equal(waiterThread, pthread_self())) {
+            pthread_kill(waiterThread, kWakeSignal);
+         }
+
+         waiterRegistered = false;
+         active.store(false, std::memory_order_release);
       }
 
-      std::lock_guard lock(activeHandlerMutex);
-
-      if (activeHandler == this) {
-         activeHandler = nullptr;
+      if (maskInstalled) {
+         pthread_sigmask(SIG_SETMASK, &previousMask, nullptr);
+         maskInstalled = false;
       }
+   }
+
+   void SignalHandler::notifyStopRequested() {
+      std::lock_guard lock(platformMutex);
+
+      if (!waiterRegistered || pthread_equal(waiterThread, pthread_self())) {
+         return;
+      }
+
+      pthread_kill(waiterThread, kWakeSignal);
    }
 } // namespace vigil
