@@ -1,8 +1,40 @@
+
+#include <cstdio>
 #include <mutex>
 
 #include <vigil/SignalHandler.hpp>
 
 namespace vigil {
+   std::string_view toStringView(StopReason reason) {
+      switch (reason) {
+         case StopReason::Interrupt:
+            return "interrupt";
+         case StopReason::Terminate:
+            return "terminate";
+         case StopReason::Quit:
+            return "quit";
+         case StopReason::Hangup:
+            return "hangup";
+         case StopReason::ConsoleClose:
+            return "console close";
+         case StopReason::Logoff:
+            return "logoff";
+         case StopReason::Shutdown:
+            return "shutdown";
+         case StopReason::Programmatic:
+            return "programmatic";
+         case StopReason::None:
+            return "none";
+      }
+      return "unknown";
+   }
+
+   void waitForExitAcknowledgement(std::string_view prompt) {
+      std::fwrite(prompt.data(), sizeof(char), prompt.size(), stdout);
+      std::fflush(stdout);
+      std::getchar();
+   }
+
    SignalHandler::SignalHandler() {
       install();
    }
@@ -19,7 +51,7 @@ namespace vigil {
       });
    }
 
-   void SignalHandler::requestStop(Reason reason) {
+   void SignalHandler::requestStop(StopReason reason) {
       {
          std::lock_guard lock(mutex_);
 
@@ -30,7 +62,6 @@ namespace vigil {
          stopRequested_ = true;
          reason_ = reason;
       }
-      onStopRequested.emit(reason);
       cv_.notify_all();
    }
 
@@ -39,7 +70,7 @@ namespace vigil {
       return stopRequested_;
    }
 
-   SignalHandler::Reason SignalHandler::reason() const {
+   StopReason SignalHandler::reason() const {
       std::lock_guard lock(mutex_);
       return reason_;
    }

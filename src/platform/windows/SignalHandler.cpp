@@ -1,72 +1,60 @@
-
 #include "WinApi.hpp"
 
 #include <vigil/Error.hpp>
 #include <vigil/SignalHandler.hpp>
 
+#include <atomic>
+
 namespace vigil {
    namespace {
+      std::atomic<SignalHandler*> activeHandler{nullptr};
 
-      std::mutex activeHandlerMutex;
-      SignalHandler* activeHandler = nullptr;
-
-      SignalHandler::Reason toReason(DWORD event) {
+      StopReason toStopReason(DWORD event) {
          switch (event) {
             case CTRL_C_EVENT:
             case CTRL_BREAK_EVENT:
-               return SignalHandler::Reason::Interrupt;
-
+               return StopReason::Interrupt;
             case CTRL_CLOSE_EVENT:
-               return SignalHandler::Reason::ConsoleClose;
-
+               return StopReason::ConsoleClose;
             case CTRL_LOGOFF_EVENT:
-               return SignalHandler::Reason::Logoff;
-
+               return StopReason::Logoff;
             case CTRL_SHUTDOWN_EVENT:
-               return SignalHandler::Reason::Shutdown;
-
+               return StopReason::Shutdown;
             default:
-               return SignalHandler::Reason::Terminate;
+               return StopReason::Terminate;
          }
-      }
-
-      SignalHandler* currentHandler() {
-         std::lock_guard lock(activeHandlerMutex);
-         return activeHandler;
       }
 
       BOOL WINAPI consoleHandler(DWORD event) {
-         if (auto* handler = currentHandler()) {
-            handler->requestStop(toReason(event));
-            return true;
+         auto* handler = activeHandler.load(std::memory_order_acquire);
+         if (handler == nullptr) {
+            return FALSE;
          }
 
-         return false;
+         handler->requestStop(toStopReason(event));
+         return TRUE;
       }
 
    } // namespace
 
    void SignalHandler::install() {
-      std::lock_guard lock(activeHandlerMutex);
-
-      if (activeHandler != nullptr) {
-         throw SignalHandlerError{"Only one ShutdownSignal may be active per process"};
+      SignalHandler* expected = nullptr;
+      if (!activeHandler.compare_exchange_strong(expected, this, std::memory_order_acq_rel)) {
+         throw SignalHandlerError{"Only one SignalHandler may be active per process"};
       }
 
-      activeHandler = this;
-
       if (!SetConsoleCtrlHandler(consoleHandler, TRUE)) {
-         activeHandler = nullptr;
+         activeHandler.store(nullptr, std::memory_order_release);
          throw SignalHandlerError{"Failed to install console control handler"};
       }
    }
 
    void SignalHandler::uninstall() {
-      std::lock_guard lock(activeHandlerMutex);
-
-      if (activeHandler == this) {
-         SetConsoleCtrlHandler(consoleHandler, FALSE);
-         activeHandler = nullptr;
+      SignalHandler* expected = this;
+      if (!activeHandler.compare_exchange_strong(expected, nullptr, std::memory_order_acq_rel)) {
+         return;
       }
+
+      SetConsoleCtrlHandler(consoleHandler, FALSE);
    }
 } // namespace vigil

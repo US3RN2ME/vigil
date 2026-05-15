@@ -5,11 +5,15 @@
 #include <vigil/SignalHandler.hpp>
 #include <vigil/Version.hpp>
 
+#include <thread>
+
 int main() {
    try {
       vigil::log::init();
 
-      vigil::log::info("vigil starting, version = {}", vigil::kVersion);
+      vigil::log::info("vigil {} starting...", vigil::kVersion);
+
+      vigil::SignalHandler signalHandler;
 
       auto collector = vigil::createEventCollector();
       auto engine = vigil::createRuleEngine(vigil::Config::loadFromFile(VIGIL_CONFIG_PATH));
@@ -33,9 +37,9 @@ int main() {
          collector->start();
       });
 
-      vigil::SignalHandler signalHandler;
-
       signalHandler.wait();
+
+      vigil::log::info("Received signal '{}', stopping...", vigil::toStringView(signalHandler.reason()));
 
       collector->stop();
 
@@ -43,8 +47,7 @@ int main() {
          collectorThread.join();
       }
 
-      vigil::log::info("event collector stopped");
-
+      vigil::waitForExitAcknowledgement();
    } catch (const vigil::SignalHandlerError& e) {
       vigil::log::error("Signal handler failed: {}", e.what());
    } catch (const vigil::CollectorError& e) {
