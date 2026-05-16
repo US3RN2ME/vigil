@@ -10,6 +10,7 @@ Common requirements:
 
 - CMake 3.28 or newer
 - A C++23 compiler
+- Doxygen, optional, for API documentation
 - vcpkg manifest mode, or otherwise available CMake packages for:
   - `spdlog`
   - `nlohmann-json`
@@ -40,8 +41,9 @@ Configure and build with CMake:
 cmake -B build \
   -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake \
   -DVIGIL_BUILD_TESTS=OFF \
+  -DVIGIL_BUILD_DOCS=OFF \
   -DVIGIL_ENABLE_INSTALL=OFF
-cmake --build build
+cmake --build build --parallel
 ```
 On Linux, the build generates `src/platform/linux/bpf/vmlinux.h`, compiles `events.bpf.c`, and generates the BPF skeleton with `bpftool`.
 
@@ -49,7 +51,22 @@ On Linux, the build generates `src/platform/linux/bpf/vmlinux.h`, compiles `even
 
 - `VIGIL_BUILD_APP=ON` builds the `vigil` executable.
 - `VIGIL_BUILD_TESTS=ON` builds tests and enables the vcpkg `tests` feature.
+- `VIGIL_BUILD_DOCS=ON` enables the Doxygen `docs` target when Doxygen is available.
 - `VIGIL_ENABLE_INSTALL=ON` enables install rules for the library, executable, headers, package config files, and default config.
+
+## API Documentation
+
+Generate the Doxygen API reference with:
+
+```sh
+cmake --build build --target docs
+```
+
+The generated HTML entry point is:
+
+```text
+build/docs/html/index.html
+```
 
 ## Usage
 
