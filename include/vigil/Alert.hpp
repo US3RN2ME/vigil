@@ -7,10 +7,31 @@
 #include <vigil/ProcessInfo.hpp>
 
 namespace vigil {
+   /**
+    * @brief Security finding produced by a rule evaluation.
+    *
+    * Alerts borrow the ProcessInfo supplied to RuleEngine::process(), so
+    * consumers should copy any data they need after the callback returns.
+    */
    struct Alert {
+      /**
+       * @brief Stable rule identifier, matching the rule key in the JSON config.
+       */
       std::string_view rule;
+
+      /**
+       * @brief Configured alert severity, such as "low", "medium", "high", or "critical".
+       */
       std::string_view severity;
+
+      /**
+       * @brief Process snapshot that caused the rule to fire.
+       */
       const ProcessInfo& info;
+
+      /**
+       * @brief Rule-specific context fields for logging, telemetry, or UI display.
+       */
       std::vector<std::pair<std::string_view, std::string>> attributes{};
    };
 } // namespace vigil

@@ -4,10 +4,22 @@
 #include <vigil/rules/Rule.hpp>
 
 namespace vigil::rules {
+   /**
+    * @brief Detects outbound connections to configured suspicious destination ports.
+    */
    class SuspiciousPortRule : public Rule {
    public:
+      /**
+       * @brief Rule id used in configuration and alerts.
+       */
       static constexpr std::string_view kName = "suspicious_port";
 
+      /**
+       * @brief Construct the rule from parsed configuration.
+       *
+       * @param cfg Parsed configuration for
+       * this rule.
+       */
       explicit SuspiciousPortRule(RuleConfig cfg);
 
       [[nodiscard]] std::string_view name() const noexcept override;

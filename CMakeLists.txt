@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.28)
 option(VIGIL_ENABLE_INSTALL "Create installable target" ON)
 option(VIGIL_BUILD_TESTS "Build tests" ON)
 option(VIGIL_BUILD_APP "Build the vigil application" ON)
+option(VIGIL_BUILD_DOCS "Build API documentation with Doxygen" ON)
 
 if(VIGIL_BUILD_TESTS)
    list(APPEND VCPKG_MANIFEST_FEATURES "tests")
@@ -41,6 +42,24 @@ endif()
 
 if(VIGIL_BUILD_APP)
    add_subdirectory(app)
+endif()
+
+if(VIGIL_BUILD_DOCS)
+   find_package(Doxygen QUIET)
+   if(DOXYGEN_FOUND)
+      set(DOXYGEN_INPUT_DIR "${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/docs")
+      set(DOXYGEN_OUTPUT_DIR "${PROJECT_BINARY_DIR}/docs")
+      configure_file("${CMAKE_SOURCE_DIR}/cmake/Doxyfile.in" "${PROJECT_BINARY_DIR}/Doxyfile" @ONLY)
+
+      add_custom_target(
+         docs
+         COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/Doxyfile"
+         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+         COMMENT "Generating API documentation with Doxygen"
+         VERBATIM)
+   else()
+      message(STATUS "Doxygen not found; docs target disabled")
+   endif()
 endif()
 
 if(VIGIL_ENABLE_INSTALL)

@@ -6,10 +6,22 @@
 #include <vigil/rules/RuleConfig.hpp>
 
 namespace vigil::rules {
+   /**
+    * @brief Detects configured server processes spawning interactive shells.
+    */
    class ServerSpawnedShellRule : public Rule {
    public:
+      /**
+       * @brief Rule id used in configuration and alerts.
+       */
       static constexpr std::string_view kName = "server_spawned_shell";
 
+      /**
+       * @brief Construct the rule from parsed configuration.
+       *
+       * @param cfg Parsed configuration for
+       * this rule.
+       */
       explicit ServerSpawnedShellRule(RuleConfig cfg);
 
       [[nodiscard]] std::string_view name() const noexcept override;
