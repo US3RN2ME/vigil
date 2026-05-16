@@ -11,7 +11,7 @@ namespace {
       "[FiresWhenSetuidToRootObserved]"_test = [] {
          PrivilegeEscalationRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasSetuidToRoot = true;
+         info.platform.hasSetuidToRoot = true;
 
          expect(rule.evaluate(info).has_value());
       };
@@ -26,11 +26,11 @@ namespace {
       "[AlertContainsIdentityContext]"_test = [] {
          PrivilegeEscalationRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasSetuidToRoot = true;
+         info.platform.hasSetuidToRoot = true;
          info.exePath = "/usr/bin/sudo";
          info.cmdline = "sudo id";
-         info.uid = 1000;
-         info.euid = 0;
+         info.platform.uid = 1000;
+         info.platform.euid = 0;
 
          const auto alert = rule.evaluate(info);
 

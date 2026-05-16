@@ -11,14 +11,14 @@ namespace {
       "[FiresWhenBinaryReplaced]"_test = [] {
          BinaryReplacedRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.binaryReplaced = true;
+         info.platform.binaryReplaced = true;
          expect(rule.evaluate(info).has_value());
       };
 
       "[AlertContainsPathAndReason]"_test = [] {
          BinaryReplacedRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.binaryReplaced = true;
+         info.platform.binaryReplaced = true;
          info.exePath = "/usr/bin/sshd";
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].second, std::string{"/usr/bin/sshd"}));

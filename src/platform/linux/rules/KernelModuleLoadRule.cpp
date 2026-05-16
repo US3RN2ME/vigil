@@ -10,7 +10,7 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> KernelModuleLoadRule::check(const ProcessInfo& info) {
-      if (info.hasModuleLoad) {
+      if (info.platform.hasModuleLoad) {
          return makeAlert(info);
       }
       return {};
@@ -21,7 +21,7 @@ namespace vigil::platform::rules {
       alert.attributes = {
           {"path", info.exePath},
           {"cmdline", info.cmdline},
-          {"uid", std::to_string(info.uid)},
+          {"uid", std::to_string(info.platform.uid)},
       };
       return alert;
    }

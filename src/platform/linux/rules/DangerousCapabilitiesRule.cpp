@@ -23,7 +23,7 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> DangerousCapabilitiesRule::check(const ProcessInfo& info) {
-      if (info.euid == 0)
+      if (info.platform.euid == 0)
          return {};
 
       matchedMask_ = info.privilegeMask & kDangerousCaps;
@@ -38,8 +38,8 @@ namespace vigil::platform::rules {
       alert.attributes = {
           {"path", info.exePath},
           {"cmdline", info.cmdline},
-          {"uid", std::to_string(info.uid)},
-          {"euid", std::to_string(info.euid)},
+          {"uid", std::to_string(info.platform.uid)},
+          {"euid", std::to_string(info.platform.euid)},
           {"capability_mask", std::format("{:#x}", matchedMask_)},
       };
       return alert;

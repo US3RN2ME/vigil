@@ -11,7 +11,7 @@ namespace {
       "[FiresForNonRootWithSysAdminCapability]"_test = [] {
          DangerousCapabilitiesRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.euid = 1000;
+         info.platform.euid = 1000;
          info.privilegeMask = 1ULL << 21;
 
          expect(rule.evaluate(info).has_value());
@@ -20,7 +20,7 @@ namespace {
       "[DoesNotFireForRoot]"_test = [] {
          DangerousCapabilitiesRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.euid = 0;
+         info.platform.euid = 0;
          info.privilegeMask = 1ULL << 21;
 
          expect(!rule.evaluate(info).has_value());

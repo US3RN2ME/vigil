@@ -11,17 +11,17 @@ namespace {
       "[FiresWhenModuleLoaded]"_test = [] {
          KernelModuleLoadRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasModuleLoad = true;
+         info.platform.hasModuleLoad = true;
          expect(rule.evaluate(info).has_value());
       };
 
       "[AlertContainsPathCmdlineUid]"_test = [] {
          KernelModuleLoadRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasModuleLoad = true;
+         info.platform.hasModuleLoad = true;
          info.exePath = "/usr/bin/insmod";
          info.cmdline = "insmod rootkit.ko";
-         info.uid = 1000;
+         info.platform.uid = 1000;
          auto alert = rule.evaluate(info);
          expect(eq(alert->attributes[0].second, std::string{"/usr/bin/insmod"}));
          expect(eq(alert->attributes[1].second, std::string{"insmod rootkit.ko"}));

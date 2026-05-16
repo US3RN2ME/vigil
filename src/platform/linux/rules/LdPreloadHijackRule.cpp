@@ -10,7 +10,7 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> LdPreloadHijackRule::check(const ProcessInfo& info) {
-      if (info.hasLdPreload) {
+      if (info.platform.hasLdPreload) {
          return makeAlert(info);
       }
       return {};

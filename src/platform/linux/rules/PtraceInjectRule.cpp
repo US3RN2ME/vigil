@@ -10,7 +10,7 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> PtraceInjectRule::check(const ProcessInfo& info) {
-      if (info.hasPtraceAttach) {
+      if (info.platform.hasPtraceAttach) {
          return makeAlert(info);
       }
       return {};
@@ -21,7 +21,7 @@ namespace vigil::platform::rules {
       alert.attributes = {
           {"path", info.exePath},
           {"cmdline", info.cmdline},
-          {"target_pid", std::to_string(info.ptraceTargetPid)},
+          {"target_pid", std::to_string(info.platform.ptraceTargetPid)},
       };
       return alert;
    }

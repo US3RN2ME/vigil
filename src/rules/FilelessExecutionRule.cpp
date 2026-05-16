@@ -1,5 +1,25 @@
 #include <vigil/rules/FilelessExecutionRule.hpp>
 
+namespace {
+   bool isMemfd(const vigil::ProcessInfo& info) {
+#if defined(__linux__)
+      return info.platform.isMemfd;
+#else
+      (void)info;
+      return false;
+#endif
+   }
+
+   bool isDeletedExecutable(const vigil::ProcessInfo& info) {
+#if defined(__linux__)
+      return info.platform.exeDeleted;
+#else
+      (void)info;
+      return false;
+#endif
+   }
+} // namespace
+
 namespace vigil::rules {
    FilelessExecutionRule::FilelessExecutionRule(RuleConfig cfg)
        : Rule{std::move(cfg)} {}
@@ -9,7 +29,7 @@ namespace vigil::rules {
    }
 
    std::optional<Alert> FilelessExecutionRule::check(const ProcessInfo& info) {
-      if (info.isMemfd || info.exeDeleted || info.imageMissingFromDisk)
+      if (isMemfd(info) || isDeletedExecutable(info) || info.imageMissingFromDisk)
          return makeAlert(info);
 
       return {};
@@ -19,8 +39,8 @@ namespace vigil::rules {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
           {"path", info.exePath},
-          {"memfd", info.isMemfd ? "true" : "false"},
-          {"deleted", info.exeDeleted ? "true" : "false"},
+          {"memfd", isMemfd(info) ? "true" : "false"},
+          {"deleted", isDeletedExecutable(info) ? "true" : "false"},
           {"missing_from_disk", info.imageMissingFromDisk ? "true" : "false"},
       };
       return alert;

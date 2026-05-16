@@ -11,7 +11,7 @@ namespace {
       "[FiresForContainerWithSysPtrace]"_test = [] {
          ContainerEscapeIndicatorRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.containerId = "docker/abc";
+         info.platform.containerId = "docker/abc";
          info.privilegeMask = 1ULL << 19;
 
          expect(rule.evaluate(info).has_value());

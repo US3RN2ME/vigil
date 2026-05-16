@@ -10,7 +10,7 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> BinaryReplacedRule::check(const ProcessInfo& info) {
-      if (info.binaryReplaced) {
+      if (info.platform.binaryReplaced) {
          return makeAlert(info);
       }
       return {};

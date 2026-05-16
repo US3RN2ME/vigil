@@ -8,10 +8,11 @@ namespace {
       using vigil::rules::FilelessExecutionRule;
       using vigil::rules::RuleConfig;
 
+#if defined(__linux__)
       "[FiresWhenExeDeleted]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.exeDeleted = true;
+         info.platform.exeDeleted = true;
 
          expect(rule.evaluate(info).has_value());
       };
@@ -19,10 +20,11 @@ namespace {
       "[FiresWhenMemfd]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.isMemfd = true;
+         info.platform.isMemfd = true;
 
          expect(rule.evaluate(info).has_value());
       };
+#endif
 
       "[FiresWhenImageMissingFromDisk]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{}};
@@ -35,7 +37,11 @@ namespace {
       "[SilentWhenDisabled]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{.enabled = false}};
          ProcessInfo info;
-         info.isMemfd = true;
+#if defined(__linux__)
+         info.platform.isMemfd = true;
+#else
+         info.imageMissingFromDisk = true;
+#endif
 
          expect(!rule.evaluate(info).has_value());
       };
@@ -43,7 +49,9 @@ namespace {
       "[AlertAttributesDescribeImageBacking]"_test = [] {
          FilelessExecutionRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.exeDeleted = true;
+#if defined(__linux__)
+         info.platform.exeDeleted = true;
+#endif
          info.imageMissingFromDisk = true;
          info.exePath = "/tmp/payload (deleted)";
 
@@ -51,7 +59,11 @@ namespace {
 
          expect(alert.has_value());
          expect(eq(alert->attributes[0].second, info.exePath));
+#if defined(__linux__)
          expect(eq(alert->attributes[2].second, std::string{"true"}));
+#else
+         expect(eq(alert->attributes[2].second, std::string{"false"}));
+#endif
          expect(eq(alert->attributes[3].second, std::string{"true"}));
       };
    };

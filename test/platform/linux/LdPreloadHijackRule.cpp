@@ -11,14 +11,14 @@ namespace {
       "[FiresWhenLdPreloadSet]"_test = [] {
          LdPreloadHijackRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasLdPreload = true;
+         info.platform.hasLdPreload = true;
          expect(rule.evaluate(info).has_value());
       };
 
       "[AlertContainsPathAndCmdline]"_test = [] {
          LdPreloadHijackRule rule{RuleConfig{}};
          ProcessInfo info;
-         info.hasLdPreload = true;
+         info.platform.hasLdPreload = true;
          info.exePath = "/usr/bin/curl";
          info.cmdline = "curl https://example.com";
          auto alert = rule.evaluate(info);

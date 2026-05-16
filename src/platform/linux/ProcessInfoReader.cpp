@@ -14,18 +14,18 @@ namespace vigil::platform {
       bool readExe(ProcessInfo& p, const std::string& base) {
          try {
             p.exePath = std::filesystem::read_symlink(base + "exe").string();
-            p.exeDeleted = p.exePath.ends_with("(deleted)");
-            p.imageMissingFromDisk = p.exeDeleted;
-            p.isMemfd = p.exePath.find("/memfd:") != std::string::npos;
+            p.platform.exeDeleted = p.exePath.ends_with("(deleted)");
+            p.imageMissingFromDisk = p.platform.exeDeleted;
+            p.platform.isMemfd = p.exePath.find("/memfd:") != std::string::npos;
          } catch (...) {
             return false;
          }
 
-         if (!p.exeDeleted && !p.isMemfd) {
+         if (!p.platform.exeDeleted && !p.platform.isMemfd) {
             struct ::stat linkStat{};
             struct ::stat pathStat{};
             if (::stat((base + "exe").c_str(), &linkStat) == 0 && ::stat(p.exePath.c_str(), &pathStat) == 0)
-               p.binaryReplaced = linkStat.st_ino != pathStat.st_ino;
+               p.platform.binaryReplaced = linkStat.st_ino != pathStat.st_ino;
          }
          return true;
       }
@@ -76,7 +76,7 @@ namespace vigil::platform {
                   p.privilegeMask = std::stoull(val, nullptr, 16);
                else if (line.starts_with("Uid:")) {
                   std::istringstream ss{val};
-                  ss >> p.uid >> p.euid;
+                  ss >> p.platform.uid >> p.platform.euid;
                }
             } catch (const std::exception&) {
             }
@@ -113,13 +113,13 @@ namespace vigil::platform {
          if (!f)
             return;
          const std::string raw{std::istreambuf_iterator{f}, {}};
-         p.hasLdPreload = raw.find("LD_PRELOAD=") != std::string::npos;
+         p.platform.hasLdPreload = raw.find("LD_PRELOAD=") != std::string::npos;
       }
 
       void readCgroup(ProcessInfo& p, const std::string& base) {
          std::ifstream f{base + "cgroup"};
          if (f)
-            std::getline(f, p.containerId);
+            std::getline(f, p.platform.containerId);
       }
 
    } // namespace
@@ -144,7 +144,6 @@ namespace vigil::platform {
       readEnviron(p, base);
       readCgroup(p, base);
 
-      p.integrity = ProcessInfo::Integrity::Medium;
       return p;
    }
 

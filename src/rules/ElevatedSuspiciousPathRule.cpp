@@ -4,27 +4,56 @@
 
 namespace {
    bool isElevated(const vigil::ProcessInfo& info) {
-      if (info.euid == 0)
-         return true;
-
-      return info.integrity == vigil::ProcessInfo::Integrity::High || info.integrity == vigil::ProcessInfo::Integrity::System;
+#if defined(__linux__)
+      return info.platform.euid == 0;
+#elif defined(_WIN32)
+      using Integrity = vigil::ProcessInfo::PlatformInfo::Integrity;
+      return info.platform.integrity == Integrity::High || info.platform.integrity == Integrity::System;
+#else
+      (void)info;
+      return false;
+#endif
    }
 
-   std::string integrityToString(vigil::ProcessInfo::Integrity integrity) {
-      switch (integrity) {
-         case vigil::ProcessInfo::Integrity::Low:
+   std::string uidToString(const vigil::ProcessInfo& info) {
+#if defined(__linux__)
+      return std::to_string(info.platform.uid);
+#else
+      (void)info;
+      return "n/a";
+#endif
+   }
+
+   std::string euidToString(const vigil::ProcessInfo& info) {
+#if defined(__linux__)
+      return std::to_string(info.platform.euid);
+#else
+      (void)info;
+      return "n/a";
+#endif
+   }
+
+   std::string integrityToString(const vigil::ProcessInfo& info) {
+#if defined(_WIN32)
+      using Integrity = vigil::ProcessInfo::PlatformInfo::Integrity;
+      switch (info.platform.integrity) {
+         case Integrity::Low:
             return "low";
-         case vigil::ProcessInfo::Integrity::Medium:
+         case Integrity::Medium:
             return "medium";
-         case vigil::ProcessInfo::Integrity::High:
+         case Integrity::High:
             return "high";
-         case vigil::ProcessInfo::Integrity::System:
+         case Integrity::System:
             return "system";
-         case vigil::ProcessInfo::Integrity::Unknown:
+         case Integrity::Unknown:
             return "unknown";
       }
-      return "unknown";
+#else
+      (void)info;
+#endif
+      return "n/a";
    }
+
 } // namespace
 
 namespace vigil::rules {
@@ -52,12 +81,8 @@ namespace vigil::rules {
    Alert ElevatedSuspiciousPathRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"parent", info.parentName},
-          {"uid", std::to_string(info.uid)},
-          {"euid", std::to_string(info.euid)},
-          {"integrity", integrityToString(info.integrity)},
+          {"path", info.exePath},     {"cmdline", info.cmdline},    {"parent", info.parentName},
+          {"uid", uidToString(info)}, {"euid", euidToString(info)}, {"integrity", integrityToString(info)},
       };
       return alert;
    }

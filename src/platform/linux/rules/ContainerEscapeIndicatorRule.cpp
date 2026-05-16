@@ -17,10 +17,10 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> ContainerEscapeIndicatorRule::check(const ProcessInfo& info) {
-      if (info.containerId.empty())
+      if (info.platform.containerId.empty())
          return {};
 
-      if ((info.privilegeMask & kEscapeRelevantCaps) != 0 || info.hasModuleLoad || info.hasPtraceAttach)
+      if ((info.privilegeMask & kEscapeRelevantCaps) != 0 || info.platform.hasModuleLoad || info.platform.hasPtraceAttach)
          return makeAlert(info);
 
       return {};
@@ -31,7 +31,7 @@ namespace vigil::platform::rules {
       alert.attributes = {
           {"path", info.exePath},
           {"cmdline", info.cmdline},
-          {"container", info.containerId},
+          {"container", info.platform.containerId},
           {"capability_mask", std::to_string(info.privilegeMask)},
       };
       return alert;

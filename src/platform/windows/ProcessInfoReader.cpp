@@ -143,13 +143,13 @@ namespace vigil::platform {
          const DWORD rid = *GetSidSubAuthority(label->Label.Sid, *GetSidSubAuthorityCount(label->Label.Sid) - 1);
 
          if (rid < SECURITY_MANDATORY_MEDIUM_RID)
-            p.integrity = ProcessInfo::Integrity::Low;
+            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::Low;
          else if (rid < SECURITY_MANDATORY_HIGH_RID)
-            p.integrity = ProcessInfo::Integrity::Medium;
+            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::Medium;
          else if (rid < SECURITY_MANDATORY_SYSTEM_RID)
-            p.integrity = ProcessInfo::Integrity::High;
+            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::High;
          else
-            p.integrity = ProcessInfo::Integrity::System;
+            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::System;
       }
 
       void readAnonRwx(ProcessInfo& p, HANDLE process) {
@@ -197,7 +197,7 @@ namespace vigil::platform {
          BOOL inJob = FALSE;
 
          if (IsProcessInJob(process, nullptr, &inJob) && inJob)
-            p.containerId = "<job>";
+            p.platform.jobObjectName = "<job>";
       }
 
    } // namespace

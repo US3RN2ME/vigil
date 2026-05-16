@@ -10,7 +10,7 @@ namespace vigil::platform::rules {
    }
 
    std::optional<Alert> PrivilegeEscalationRule::check(const ProcessInfo& info) {
-      if (info.hasSetuidToRoot) {
+      if (info.platform.hasSetuidToRoot) {
          return makeAlert(info);
       }
       return {};
@@ -21,8 +21,8 @@ namespace vigil::platform::rules {
       alert.attributes = {
           {"path", info.exePath},
           {"cmdline", info.cmdline},
-          {"uid", std::to_string(info.uid)},
-          {"euid", std::to_string(info.euid)},
+          {"uid", std::to_string(info.platform.uid)},
+          {"euid", std::to_string(info.platform.euid)},
       };
       return alert;
    }
