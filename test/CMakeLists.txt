@@ -13,6 +13,8 @@ foreach(TEST_SOURCE IN LISTS TEST_SOURCES PLATFORM_SOURCES)
    set(TARGET "vigil_${TEST_NAME}")
    add_executable(${TARGET} ${TEST_SOURCE})
    target_link_libraries(${TARGET} PRIVATE vigil_core vigil_options)
+   target_include_directories(${TARGET} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
+                                                "${CMAKE_SOURCE_DIR}/src/platform/${VIGIL_PLATFORM_DIR}")
    ut_add_custom_command_or_test(TARGET ${TARGET} COMMAND ${TARGET})
    list(APPEND ALL_TEST_TARGETS ${TARGET})
 endforeach()

@@ -1,4 +1,6 @@
 
+#include <tuple>
+
 #include "ut_main.hpp"
 
 #include <vigil/rules/PrivilegeEscalationRuleTest.hpp>
@@ -22,7 +24,7 @@ namespace {
          ProcessInfo info;
          info.pid = 1;
          info.privilegeMask = 0x1;
-         rule.evaluate(info);
+         std::ignore = rule.evaluate(info);
          info.privilegeMask = 0x3;
          expect(rule.evaluate(info).has_value());
       };
@@ -32,7 +34,7 @@ namespace {
          ProcessInfo info;
          info.pid = 1;
          info.privilegeMask = 0x3;
-         rule.evaluate(info);
+         std::ignore = rule.evaluate(info);
          expect(!rule.evaluate(info).has_value());
       };
 
@@ -41,7 +43,7 @@ namespace {
          ProcessInfo info;
          info.pid = 1;
          info.privilegeMask = 0x3;
-         rule.evaluate(info);
+         std::ignore = rule.evaluate(info);
          info.privilegeMask = 0x1;
          expect(!rule.evaluate(info).has_value());
       };
@@ -51,10 +53,23 @@ namespace {
          ProcessInfo info;
          info.pid = 1;
          info.privilegeMask = 0x1;
-         rule.evaluate(info);
+         std::ignore = rule.evaluate(info);
          info.privilegeMask = 0x3;
-         rule.evaluate(info);
+         std::ignore = rule.evaluate(info);
          expect(!rule.evaluate(info).has_value());
+      };
+
+      "[AlertContainsPreviousAndCurrentMask]"_test = [] {
+         PrivilegeEscalationRule rule{RuleConfig{}};
+         ProcessInfo info;
+         info.pid = 1;
+         info.privilegeMask = 0x1;
+         std::ignore = rule.evaluate(info);
+         info.privilegeMask = 0x3;
+         const auto alert = rule.evaluate(info);
+         expect(alert.has_value());
+         expect(eq(alert->attributes[0].second, std::string{"0x1"}));
+         expect(eq(alert->attributes[1].second, std::string{"0x3"}));
       };
 
       "[TracksPerPidIndependently]"_test = [] {
@@ -65,8 +80,8 @@ namespace {
          ProcessInfo b;
          b.pid = 2;
          b.privilegeMask = 0x1;
-         rule.evaluate(a);
-         rule.evaluate(b);
+         std::ignore = rule.evaluate(a);
+         std::ignore = rule.evaluate(b);
          a.privilegeMask = 0x3;
          expect(rule.evaluate(a).has_value());
          expect(!rule.evaluate(b).has_value());

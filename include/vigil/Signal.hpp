@@ -23,7 +23,8 @@ namespace vigil {
       }
 
       void emit(const Ts&... args) {
-         for (const auto& [_, slot] : handlers_) {
+         for (const auto& [id, slot] : handlers_) {
+            (void)id;
             slot(args...);
          }
       }

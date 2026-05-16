@@ -24,7 +24,7 @@ namespace vigil::platform {
             case ProcessToken::InfoClass::ElevationType:
                return TokenElevationType;
          }
-         std::unreachable();
+         return TokenUser;
       }
    } // namespace
 
