@@ -53,7 +53,7 @@ On Linux, the build generates `src/platform/linux/bpf/vmlinux.h`, compiles `even
 
 ## Usage
 
-The default config is copied from `config/config.json` into the application build directory as `config.json`. Run the built executable:
+The default config is copied from `config/platform/<platform>/config.json` into the application build directory as `config.json`. Run the built executable:
 
 ```sh
 ./build/app/vigil

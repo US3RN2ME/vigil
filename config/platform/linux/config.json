@@ -1,0 +1,112 @@
+{
+  "rules": {
+    "server_spawned_shell": {
+      "enabled": true,
+      "severity": "critical",
+      "serverNames": [
+        "nginx",
+        "apache2",
+        "httpd",
+        "node",
+        "python3",
+        "java",
+        "ruby"
+      ],
+      "shellNames": [
+        "bash",
+        "sh",
+        "zsh",
+        "dash",
+        "fish",
+        "cmd",
+        "powershell",
+        "pwsh"
+      ]
+    },
+    "suspicious_path": {
+      "enabled": true,
+      "severity": "high",
+      "suspiciousPaths": [
+        "/tmp/",
+        "/dev/shm/",
+        "/var/tmp/"
+      ]
+    },
+    "suspicious_cmdline": {
+      "enabled": true,
+      "severity": "high",
+      "cmdlinePatterns": [
+        "curl ",
+        "wget ",
+        "base64 -d",
+        "chmod +x",
+        "nc ",
+        "ncat ",
+        "socat ",
+        "/dev/tcp/",
+        "bash -i"
+      ]
+    },
+    "suspicious_port": {
+      "enabled": true,
+      "severity": "medium",
+      "suspiciousPorts": [
+        4444,
+        5555,
+        6666,
+        7777,
+        8080,
+        9001
+      ]
+    },
+    "elevated_suspicious_path": {
+      "enabled": true,
+      "severity": "critical",
+      "suspiciousPaths": [
+        "/tmp/",
+        "/dev/shm/",
+        "/var/tmp/"
+      ]
+    },
+    "fileless_execution": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "anon_rwx_mapping": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "privilege_escalation": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "privilege_escalation_rule": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "dangerous_capabilities": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "container_escape_indicator": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "ld_preload_hijack_rule": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "binary_replaced_rule": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "kernel_module_load_rule": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "ptrace_inject_rule": {
+      "enabled": true,
+      "severity": "critical"
+    }
+  }
+}

@@ -1,7 +1,9 @@
 
 #include "EventCollector.hpp"
 
+#include <algorithm>
 #include <arpa/inet.h>
+#include <cctype>
 #include <filesystem>
 #include <optional>
 #include <stdexcept>
@@ -73,7 +75,9 @@ namespace vigil::platform {
                if (!entry.is_directory())
                   continue;
                const auto fname = entry.path().filename().string();
-               if (fname.empty() || !std::all_of(fname.begin(), fname.end(), ::isdigit))
+               if (fname.empty() || !std::ranges::all_of(fname, [](unsigned char ch) {
+                      return std::isdigit(ch);
+                   }))
                   continue;
                const int pid = std::stoi(fname);
                auto proc = processInfoReader_->read(pid);

@@ -12,7 +12,7 @@ namespace vigil::rules {
    }
 
    std::optional<Alert> SuspiciousPathRule::check(const ProcessInfo& info) {
-      auto matches = std::any_of(cfg_.suspiciousPaths.begin(), cfg_.suspiciousPaths.end(), [&info](const auto& prefix) {
+      auto matches = std::ranges::any_of(cfg_.suspiciousPaths, [&info](const auto& prefix) {
          return info.exePath.starts_with(prefix);
       });
 

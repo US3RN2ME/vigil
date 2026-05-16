@@ -16,6 +16,7 @@ namespace vigil::rules {
       if (inserted || info.privilegeMask <= it->second) {
          return {};
       }
+      alertBaseline_ = it->second;
       it->second = info.privilegeMask;
       return makeAlert(info);
    }
@@ -23,7 +24,7 @@ namespace vigil::rules {
    Alert PrivilegeEscalationRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
-          {"mask_before", std::format("{:#x}", baseline_.at(info.pid))},
+          {"mask_before", std::format("{:#x}", alertBaseline_)},
           {"mask_after", std::format("{:#x}", info.privilegeMask)},
       };
       return alert;

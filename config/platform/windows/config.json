@@ -1,0 +1,115 @@
+{
+  "rules": {
+    "server_spawned_shell": {
+      "enabled": true,
+      "severity": "critical",
+      "serverNames": [
+        "nginx",
+        "apache2",
+        "httpd",
+        "node",
+        "python3",
+        "java",
+        "ruby",
+        "w3wp.exe",
+        "iisexpress.exe"
+      ],
+      "shellNames": [
+        "bash",
+        "sh",
+        "zsh",
+        "dash",
+        "fish",
+        "cmd",
+        "cmd.exe",
+        "powershell",
+        "powershell.exe",
+        "pwsh",
+        "pwsh.exe"
+      ]
+    },
+    "suspicious_path": {
+      "enabled": true,
+      "severity": "high",
+      "suspiciousPaths": [
+        "C:\\Users\\Public\\",
+        "C:\\Windows\\Temp\\",
+        "C:\\ProgramData\\"
+      ]
+    },
+    "elevated_suspicious_path": {
+      "enabled": true,
+      "severity": "critical",
+      "suspiciousPaths": [
+        "C:\\Users\\Public\\",
+        "C:\\Windows\\Temp\\",
+        "C:\\ProgramData\\"
+      ]
+    },
+    "fileless_execution": {
+      "enabled": true,
+      "severity": "critical"
+    },
+    "debug_privilege_rule": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "system_process_impersonation": {
+      "enabled": true,
+      "severity": "critical",
+      "protectedProcessNames": [
+        "csrss.exe",
+        "lsass.exe",
+        "services.exe",
+        "smss.exe",
+        "svchost.exe",
+        "wininit.exe",
+        "winlogon.exe"
+      ]
+    },
+    "lolbin_execution": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "suspicious_powershell": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "suspicious_cmdline": {
+      "enabled": true,
+      "severity": "high",
+      "cmdlinePatterns": [
+        "-EncodedCommand",
+        "FromBase64String",
+        "Invoke-Expression",
+        "IEX ",
+        "DownloadString",
+        "rundll32",
+        "regsvr32",
+        "mshta",
+        "certutil -decode",
+        "bitsadmin"
+      ]
+    },
+    "suspicious_port": {
+      "enabled": true,
+      "severity": "medium",
+      "suspiciousPorts": [
+        4444,
+        5555,
+        6666,
+        7777,
+        8080,
+        9001
+      ]
+    },
+    "anon_rwx_mapping": {
+      "enabled": true,
+      "severity": "high"
+    },
+    "privilege_escalation": {
+      "enabled": true,
+      "severity": "critical"
+    }
+  }
+}

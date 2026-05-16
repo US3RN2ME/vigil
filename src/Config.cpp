@@ -12,6 +12,9 @@ namespace {
    constexpr std::string_view kServerNames = "serverNames";
    constexpr std::string_view kShellNames = "shellNames";
    constexpr std::string_view kSuspiciousPaths = "suspiciousPaths";
+   constexpr std::string_view kCmdlinePatterns = "cmdlinePatterns";
+   constexpr std::string_view kSuspiciousPorts = "suspiciousPorts";
+   constexpr std::string_view kProtectedProcessNames = "protectedProcessNames";
 } // namespace
 
 namespace vigil {
@@ -43,6 +46,18 @@ namespace vigil {
             if (ruleJson.contains(kSuspiciousPaths))
                for (const auto& item : ruleJson.at(kSuspiciousPaths))
                   rc.suspiciousPaths.push_back(item.get<std::string>());
+
+            if (ruleJson.contains(kCmdlinePatterns))
+               for (const auto& item : ruleJson.at(kCmdlinePatterns))
+                  rc.cmdlinePatterns.push_back(item.get<std::string>());
+
+            if (ruleJson.contains(kSuspiciousPorts))
+               for (const auto& item : ruleJson.at(kSuspiciousPorts))
+                  rc.suspiciousPorts.insert(item.get<uint16_t>());
+
+            if (ruleJson.contains(kProtectedProcessNames))
+               for (const auto& item : ruleJson.at(kProtectedProcessNames))
+                  rc.protectedProcessNames.insert(item.get<std::string>());
 
             cfg.rules_.emplace(name, std::move(rc));
          }

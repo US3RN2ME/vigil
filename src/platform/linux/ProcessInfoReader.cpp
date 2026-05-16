@@ -15,7 +15,8 @@ namespace vigil::platform {
          try {
             p.exePath = std::filesystem::read_symlink(base + "exe").string();
             p.exeDeleted = p.exePath.ends_with("(deleted)");
-            p.isMemfd = p.exePath.contains("/memfd:");
+            p.imageMissingFromDisk = p.exeDeleted;
+            p.isMemfd = p.exePath.find("/memfd:") != std::string::npos;
          } catch (...) {
             return false;
          }
@@ -88,7 +89,7 @@ namespace vigil::platform {
          if (!f)
             return;
          std::string raw{std::istreambuf_iterator{f}, {}};
-         std::replace(raw.begin(), raw.end(), '\0', ' ');
+         std::ranges::replace(raw, '\0', ' ');
          p.cmdline = std::move(raw);
       }
 
@@ -100,7 +101,7 @@ namespace vigil::platform {
             std::istringstream ss{line};
             std::string addr, perms, offset, dev, inode, path;
             ss >> addr >> perms >> offset >> dev >> inode >> path;
-            if (perms.contains('w') && perms.contains('x') && path.empty()) {
+            if (perms.find('w') != std::string::npos && perms.find('x') != std::string::npos && path.empty()) {
                p.hasAnonRwx = true;
                break;
             }
@@ -112,7 +113,7 @@ namespace vigil::platform {
          if (!f)
             return;
          const std::string raw{std::istreambuf_iterator{f}, {}};
-         p.hasLdPreload = raw.contains("LD_PRELOAD=");
+         p.hasLdPreload = raw.find("LD_PRELOAD=") != std::string::npos;
       }
 
       void readCgroup(ProcessInfo& p, const std::string& base) {

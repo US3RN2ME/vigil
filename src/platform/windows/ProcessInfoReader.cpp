@@ -1,6 +1,7 @@
 #include "ProcessInfoReader.hpp"
 
 #include <cstdint>
+#include <filesystem>
 
 #include "Handle.hpp"
 #include "Process.hpp"
@@ -29,6 +30,9 @@ namespace vigil::platform {
 
          p.exePath = StringUtils::wideToUtf8(buffer, static_cast<int>(length));
          p.name = StringUtils::filenameFromPath(p.exePath);
+         std::error_code ec;
+         const bool exists = std::filesystem::exists(p.exePath, ec);
+         p.imageMissingFromDisk = !ec && !exists;
 
          return true;
       }

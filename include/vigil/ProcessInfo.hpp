@@ -109,6 +109,12 @@ namespace vigil {
       /// Linux only — always false on Windows.
       bool exeDeleted = false;
 
+      /// The executable path resolved for the process no longer exists on disk.
+      /// Linux: true for deleted executables. Windows: true when the image path
+      /// cannot be found during the snapshot. This is a high-signal image
+      /// backing anomaly, but not proof of maliciousness by itself.
+      bool imageMissingFromDisk = false;
+
       /// Process image was created via memfd_create() and never touched the disk.
       /// The exe path will contain "/memfd:" in this case.
       /// Linux only — always false on Windows.

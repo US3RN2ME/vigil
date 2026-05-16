@@ -22,6 +22,7 @@ namespace vigil::rules {
 
    private:
       std::unordered_map<uint32_t, uint64_t> baseline_;
+      uint64_t alertBaseline_ = 0;
    };
 } // namespace vigil::rules
 
