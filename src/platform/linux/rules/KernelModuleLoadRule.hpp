@@ -2,7 +2,7 @@
 #ifndef VIGIL_PLATFORM_RULES_KERNELMODULELOADRULE_HPP
 #define VIGIL_PLATFORM_RULES_KERNELMODULELOADRULE_HPP
 
-#include "vigil/rules/Rule.hpp"
+#include <vigil/rules/Rule.hpp>
 
 namespace vigil::platform::rules {
    class KernelModuleLoadRule : public vigil::rules::Rule {

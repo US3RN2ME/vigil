@@ -4,9 +4,9 @@
 #include "ProcessSnapshot.hpp"
 #include "TcpTable.hpp"
 #include "WinApi.hpp"
-#include "vigil/SystemError.hpp"
 
 #include <vigil/Logger.hpp>
+#include <vigil/SystemError.hpp>
 
 namespace vigil {
    std::unique_ptr<EventCollector> createEventCollector() {

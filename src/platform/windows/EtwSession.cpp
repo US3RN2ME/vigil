@@ -1,9 +1,9 @@
 #include "EtwSession.hpp"
 
 #include "WinApi.hpp"
-#include "vigil/SystemError.hpp"
 
 #include <vigil/Logger.hpp>
+#include <vigil/SystemError.hpp>
 
 namespace vigil::platform {
    namespace {

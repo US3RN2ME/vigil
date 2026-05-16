@@ -2,7 +2,7 @@
 #ifndef VIGIL_PLATFORM_RULES_PRIVILEGEESCALATIONRULE_HPP
 #define VIGIL_PLATFORM_RULES_PRIVILEGEESCALATIONRULE_HPP
 
-#include "vigil/rules/Rule.hpp"
+#include <vigil/rules/Rule.hpp>
 
 namespace vigil::platform::rules {
    class PrivilegeEscalationRule : public vigil::rules::Rule {
