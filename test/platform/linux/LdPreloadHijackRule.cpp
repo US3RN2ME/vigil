@@ -1,6 +1,6 @@
 #include "rules/LdPreloadHijackRule.hpp"
 
-#include "main.hpp"
+#include "ut_main.hpp"
 
 namespace {
    suite<"[LdPreloadHijackRule]"> _ = [] {

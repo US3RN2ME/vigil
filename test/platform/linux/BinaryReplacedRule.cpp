@@ -1,6 +1,6 @@
 #include "rules/BinaryReplacedRule.hpp"
 
-#include "main.hpp"
+#include "ut_main.hpp"
 
 namespace {
    suite<"[BinaryReplacedRule]"> _ = [] {
