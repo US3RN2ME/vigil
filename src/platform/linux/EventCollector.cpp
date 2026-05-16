@@ -166,8 +166,8 @@ namespace vigil::platform {
          return;
       proc->ppid = e.hdr.ppid;
       proc->name = e.hdr.comm;
-      proc->hasPtraceAttach = true;
-      proc->ptraceTargetPid = e.targetPid;
+      proc->platform.hasPtraceAttach = true;
+      proc->platform.ptraceTargetPid = e.targetPid;
       onProcess.emit(*proc);
    }
 
@@ -177,7 +177,7 @@ namespace vigil::platform {
          return;
       proc->ppid = e.hdr.ppid;
       proc->name = e.hdr.comm;
-      proc->hasSetuidToRoot = true;
+      proc->platform.hasSetuidToRoot = true;
       onProcess.emit(*proc);
    }
 
@@ -187,7 +187,7 @@ namespace vigil::platform {
          return;
       proc->ppid = e.hdr.ppid;
       proc->name = e.hdr.comm;
-      proc->hasModuleLoad = true;
+      proc->platform.hasModuleLoad = true;
       onProcess.emit(*proc);
    }
 

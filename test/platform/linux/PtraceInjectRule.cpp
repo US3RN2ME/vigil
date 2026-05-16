@@ -1,6 +1,6 @@
 #include "rules/PtraceInjectRule.hpp"
 
-#include "main.hpp"
+#include "ut_main.hpp"
 
 namespace {
    suite<"[PtraceInjectRule]"> _ = [] {

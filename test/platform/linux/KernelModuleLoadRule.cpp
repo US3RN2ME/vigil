@@ -1,6 +1,6 @@
 #include "rules/KernelModuleLoadRule.hpp"
 
-#include "main.hpp"
+#include "ut_main.hpp"
 
 namespace {
    suite<"[KernelModuleLoadRule]"> _ = [] {
