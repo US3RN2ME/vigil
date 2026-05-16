@@ -1,0 +1,29 @@
+/**
+@mainpage Vigil API Reference
+
+Vigil is a cross-platform endpoint detection agent. The public API is split into
+small runtime components:
+
+- @ref vigil::EventCollector collects process snapshots and emits process events.
+- @ref vigil::RuleEngine evaluates process snapshots and emits alerts.
+- @ref vigil::Config loads rule configuration from platform-specific JSON files.
+- @ref vigil::ProcessInfo is the normalized cross-platform process snapshot used by rules.
+
+Typical embedding flow:
+
+@code{.cpp}
+auto config = vigil::Config::loadFromFile("config/platform/windows/config.json");
+auto collector = vigil::createEventCollector();
+auto engine = vigil::createRuleEngine(config);
+
+collector->onProcess.connect([&](const vigil::ProcessInfo& process) {
+   engine->process(process);
+});
+
+engine->onAlert.connect([](const vigil::Alert& alert) {
+   vigil::log::warn("{}: pid={}", alert.rule, alert.info.pid);
+});
+
+collector->start();
+@endcode
+*/
