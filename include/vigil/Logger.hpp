@@ -4,8 +4,25 @@
 
 #include <format>
 #include <string_view>
+#include <utility>
 
 namespace vigil::log {
+   class ShutdownGuard {
+   public:
+      ShutdownGuard(const ShutdownGuard&) = delete;
+      ShutdownGuard& operator=(const ShutdownGuard&) = delete;
+      ShutdownGuard(ShutdownGuard&& other) noexcept;
+      ShutdownGuard& operator=(ShutdownGuard&& other) noexcept;
+      ~ShutdownGuard();
+
+   private:
+      friend ShutdownGuard init(std::string_view logFile);
+
+      ShutdownGuard() = default;
+
+      bool active_{true};
+   };
+
    /**
     * @brief Log a debug message.
     *
@@ -91,7 +108,12 @@ namespace vigil::log {
     *
     * @param logFile Optional file path for persistent log output.
     */
-   void init(std::string_view logFile = "");
+   [[nodiscard]] ShutdownGuard init(std::string_view logFile = "");
+
+   /**
+    * @brief Flush and release logging resources.
+    */
+   void shutdown();
 } // namespace vigil::log
 
 #endif // VIGIL_LOGGER_HPP

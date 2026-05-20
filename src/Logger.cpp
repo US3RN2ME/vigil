@@ -5,7 +5,26 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil::log {
-   void init(std::string_view logFile) {
+   ShutdownGuard::ShutdownGuard(ShutdownGuard&& other) noexcept
+       : active_{std::exchange(other.active_, false)} {}
+
+   ShutdownGuard& ShutdownGuard::operator=(ShutdownGuard&& other) noexcept {
+      if (this != &other) {
+         if (active_) {
+            shutdown();
+         }
+         active_ = std::exchange(other.active_, false);
+      }
+      return *this;
+   }
+
+   ShutdownGuard::~ShutdownGuard() {
+      if (active_) {
+         shutdown();
+      }
+   }
+
+   ShutdownGuard init(std::string_view logFile) {
       std::vector<spdlog::sink_ptr> sinks;
       sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
       if (!logFile.empty())
@@ -16,6 +35,7 @@ namespace vigil::log {
       spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v");
       spdlog::set_level(spdlog::level::debug);
       spdlog::flush_on(spdlog::level::info);
+      return {};
    }
 
    void debug(std::string_view msg) {
@@ -29,5 +49,8 @@ namespace vigil::log {
    }
    void error(std::string_view msg) {
       spdlog::error("{}", msg);
+   }
+   void shutdown() {
+      spdlog::shutdown();
    }
 } // namespace vigil::log

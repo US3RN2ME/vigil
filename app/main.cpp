@@ -10,7 +10,7 @@
 
 int main() {
    try {
-      vigil::log::init();
+      auto logShutdownGuard = vigil::log::init();
 
       vigil::log::info("vigil {} starting...", vigil::kVersion);
 
