@@ -37,9 +37,9 @@ namespace {
          const auto alert = rule.evaluate(info);
 
          expect(alert.has_value());
-         expect(eq(alert->attributes[0].second, info.exePath));
-         expect(eq(alert->attributes[1].second, info.cmdline));
-         expect(eq(alert->attributes[2].second, info.parentName));
+         const auto* privilege = attrValue(alert->attributes, "privilege");
+         expect(privilege != nullptr);
+         expect(eq(*privilege, std::string{"SeDebugPrivilege"}));
       };
    };
 } // namespace

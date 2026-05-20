@@ -21,7 +21,6 @@ namespace vigil::rules {
    Alert SuspiciousPortRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
-          {"path", info.exePath},
           {"dest_addr", info.connectDaddr},
           {"dest_port", std::to_string(info.connectDport)},
       };

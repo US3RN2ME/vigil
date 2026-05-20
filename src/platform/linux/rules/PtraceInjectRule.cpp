@@ -18,11 +18,7 @@ namespace vigil::platform::rules {
 
    Alert PtraceInjectRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"target_pid", std::to_string(info.platform.ptraceTargetPid)},
-      };
+      alert.attributes = {{"target_pid", std::to_string(info.platform.ptraceTargetPid)}};
       return alert;
    }
 

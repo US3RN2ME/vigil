@@ -19,8 +19,6 @@ namespace vigil::platform::rules {
    Alert PrivilegeEscalationRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
           {"uid", std::to_string(info.platform.uid)},
           {"euid", std::to_string(info.platform.euid)},
       };

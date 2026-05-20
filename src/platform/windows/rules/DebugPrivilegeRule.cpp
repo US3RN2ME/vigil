@@ -17,11 +17,7 @@ namespace vigil::platform::rules {
 
    Alert DebugPrivilegeRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"parent", info.parentName},
-      };
+      alert.attributes = {{"privilege", "SeDebugPrivilege"}};
       return alert;
    }
 

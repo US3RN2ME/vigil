@@ -53,14 +53,14 @@ namespace {
          expect(rule.evaluate(info).has_value());
       };
 
-      "[AlertContainsParentAndChild]"_test = [&] {
+      "[AlertUsesProcessContextOnly]"_test = [&] {
          ServerSpawnedShellRule rule{cfg};
          ProcessInfo info;
          info.parentName = "nginx";
          info.name = "bash";
          auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"nginx"}));
-         expect(eq(alert->attributes[1].second, std::string{"bash"}));
+         expect(alert.has_value());
+         expect(alert->attributes.empty());
       };
    };
 } // namespace

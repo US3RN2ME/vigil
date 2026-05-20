@@ -1,3 +1,4 @@
+#include <format>
 #include <thread>
 
 #include <vigil/Error.hpp>
@@ -29,8 +30,9 @@ int main() {
          for (const auto& [k, v] : alert.attributes)
             attrs += std::format(" {}={}", k, v);
 
-         vigil::log::warn("[ALERT] rule={} severity={} pid={} name={}{}", alert.rule, alert.severity, alert.info.pid,
-                          alert.info.name, attrs);
+         vigil::log::warn("[ALERT] rule={} severity={} pid={} ppid={} name={} parent={} path={} cmdline={}{}", alert.rule,
+                          alert.severity, alert.info.pid, alert.info.ppid, alert.info.name, alert.info.parentName,
+                          alert.info.exePath, alert.info.cmdline, attrs);
       });
 
       std::thread collectorThread([&] {

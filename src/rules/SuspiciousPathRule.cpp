@@ -24,7 +24,12 @@ namespace vigil::rules {
 
    Alert SuspiciousPathRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {{"path", info.exePath}};
+      for (const auto& prefix : cfg_.suspiciousPaths) {
+         if (info.exePath.starts_with(prefix)) {
+            alert.attributes = {{"matched_path_prefix", prefix}};
+            break;
+         }
+      }
       return alert;
    }
 } // namespace vigil::rules

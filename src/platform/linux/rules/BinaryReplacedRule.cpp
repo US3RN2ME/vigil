@@ -17,10 +17,7 @@ namespace vigil::platform::rules {
    }
    Alert BinaryReplacedRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"reason", "inode mismatch — file replaced on disk after exec"},
-      };
+      alert.attributes = {{"reason", "inode mismatch - file replaced on disk after exec"}};
       return alert;
    }
 } // namespace vigil::platform::rules

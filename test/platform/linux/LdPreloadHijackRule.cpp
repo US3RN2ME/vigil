@@ -22,8 +22,9 @@ namespace {
          info.exePath = "/usr/bin/curl";
          info.cmdline = "curl https://example.com";
          auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"/usr/bin/curl"}));
-         expect(eq(alert->attributes[1].second, std::string{"curl https://example.com"}));
+         const auto* env = attrValue(alert->attributes, "env");
+         expect(env != nullptr);
+         expect(eq(*env, std::string{"LD_PRELOAD"}));
       };
    };
 } // namespace

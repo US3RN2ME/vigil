@@ -28,12 +28,13 @@ namespace vigil::platform::rules {
 
    Alert ContainerEscapeIndicatorRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"container", info.platform.containerId},
-          {"capability_mask", std::to_string(info.privilegeMask)},
-      };
+      alert.attributes = {{"container", info.platform.containerId}};
+      if ((info.privilegeMask & kEscapeRelevantCaps) != 0)
+         alert.attributes.emplace_back("escape_capability_mask", std::to_string(info.privilegeMask & kEscapeRelevantCaps));
+      if (info.platform.hasModuleLoad)
+         alert.attributes.emplace_back("module_load", "true");
+      if (info.platform.hasPtraceAttach)
+         alert.attributes.emplace_back("ptrace_attach", "true");
       return alert;
    }
 } // namespace vigil::platform::rules

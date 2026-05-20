@@ -27,6 +27,8 @@ namespace vigil::rules {
 
    protected:
       [[nodiscard]] std::optional<Alert> check(const ProcessInfo& info) override;
+
+      [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
    };
 } // namespace vigil::rules
 

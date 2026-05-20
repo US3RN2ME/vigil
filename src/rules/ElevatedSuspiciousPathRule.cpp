@@ -80,10 +80,18 @@ namespace vigil::rules {
 
    Alert ElevatedSuspiciousPathRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},     {"cmdline", info.cmdline},    {"parent", info.parentName},
-          {"uid", uidToString(info)}, {"euid", euidToString(info)}, {"integrity", integrityToString(info)},
-      };
+      for (const auto& prefix : cfg_.suspiciousPaths) {
+         if (info.exePath.starts_with(prefix)) {
+            alert.attributes.emplace_back("matched_path_prefix", prefix);
+            break;
+         }
+      }
+#if defined(__linux__)
+      alert.attributes.emplace_back("uid", uidToString(info));
+      alert.attributes.emplace_back("euid", euidToString(info));
+#elif defined(_WIN32)
+      alert.attributes.emplace_back("integrity", integrityToString(info));
+#endif
       return alert;
    }
 } // namespace vigil::rules

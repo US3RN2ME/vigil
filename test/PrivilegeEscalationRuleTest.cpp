@@ -68,8 +68,12 @@ namespace {
          info.privilegeMask = 0x3;
          const auto alert = rule.evaluate(info);
          expect(alert.has_value());
-         expect(eq(alert->attributes[0].second, std::string{"0x1"}));
-         expect(eq(alert->attributes[1].second, std::string{"0x3"}));
+         const auto* before = attrValue(alert->attributes, "mask_before");
+         const auto* after = attrValue(alert->attributes, "mask_after");
+         expect(before != nullptr);
+         expect(after != nullptr);
+         expect(eq(*before, std::string{"0x1"}));
+         expect(eq(*after, std::string{"0x3"}));
       };
 
       "[TracksPerPidIndependently]"_test = [] {

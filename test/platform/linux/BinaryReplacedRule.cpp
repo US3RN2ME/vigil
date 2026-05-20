@@ -21,8 +21,9 @@ namespace {
          info.platform.binaryReplaced = true;
          info.exePath = "/usr/bin/sshd";
          auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"/usr/bin/sshd"}));
-         expect(!alert->attributes[1].second.empty());
+         const auto* reason = attrValue(alert->attributes, "reason");
+         expect(reason != nullptr);
+         expect(!reason->empty());
       };
    };
 } // namespace

@@ -23,9 +23,9 @@ namespace {
          info.cmdline = "gdb -p 1234";
          info.platform.ptraceTargetPid = 1234;
          auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"/usr/bin/gdb"}));
-         expect(eq(alert->attributes[1].second, std::string{"gdb -p 1234"}));
-         expect(eq(alert->attributes[2].second, std::string{"1234"}));
+         const auto* targetPid = attrValue(alert->attributes, "target_pid");
+         expect(targetPid != nullptr);
+         expect(eq(*targetPid, std::string{"1234"}));
       };
    };
 } // namespace

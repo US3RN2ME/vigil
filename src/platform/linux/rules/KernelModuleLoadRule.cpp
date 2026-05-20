@@ -19,8 +19,7 @@ namespace vigil::platform::rules {
    Alert KernelModuleLoadRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
       alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
+          {"event", "module_load"},
           {"uid", std::to_string(info.platform.uid)},
       };
       return alert;

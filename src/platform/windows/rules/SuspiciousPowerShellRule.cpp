@@ -14,6 +14,15 @@ namespace {
    bool contains(std::string_view value, std::string_view pattern) {
       return value.find(pattern) != std::string_view::npos;
    }
+
+   std::string matchedIndicator(std::string_view cmdline) {
+      for (std::string_view indicator : {"-encodedcommand", "frombase64string", "downloadstring", "invoke-expression", " iex ",
+                                         "-nop", "-w hidden", "-windowstyle hidden"}) {
+         if (contains(cmdline, indicator))
+            return std::string{indicator};
+      }
+      return {};
+   }
 } // namespace
 
 namespace vigil::platform::rules {
@@ -43,11 +52,7 @@ namespace vigil::platform::rules {
 
    Alert SuspiciousPowerShellRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"parent", info.parentName},
-      };
+      alert.attributes = {{"indicator", matchedIndicator(lower(info.cmdline))}};
       return alert;
    }
 } // namespace vigil::platform::rules

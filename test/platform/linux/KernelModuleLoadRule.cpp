@@ -23,9 +23,12 @@ namespace {
          info.cmdline = "insmod rootkit.ko";
          info.platform.uid = 1000;
          auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"/usr/bin/insmod"}));
-         expect(eq(alert->attributes[1].second, std::string{"insmod rootkit.ko"}));
-         expect(eq(alert->attributes[2].second, std::string{"1000"}));
+         const auto* event = attrValue(alert->attributes, "event");
+         const auto* uid = attrValue(alert->attributes, "uid");
+         expect(event != nullptr);
+         expect(uid != nullptr);
+         expect(eq(*event, std::string{"module_load"}));
+         expect(eq(*uid, std::string{"1000"}));
       };
    };
 } // namespace

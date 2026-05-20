@@ -15,4 +15,10 @@ namespace vigil::rules {
       }
       return {};
    }
+
+   Alert AnonRwxRule::makeAlert(const ProcessInfo& info) const {
+      auto alert = Rule::makeAlert(info);
+      alert.attributes = {{"memory", "anonymous_rwx"}};
+      return alert;
+   }
 } // namespace vigil::rules

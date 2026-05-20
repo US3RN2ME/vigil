@@ -58,13 +58,14 @@ namespace {
          const auto alert = rule.evaluate(info);
 
          expect(alert.has_value());
-         expect(eq(alert->attributes[0].second, info.exePath));
 #if defined(__linux__)
-         expect(eq(alert->attributes[2].second, std::string{"true"}));
+         expect(attrValue(alert->attributes, "deleted") != nullptr);
 #else
-         expect(eq(alert->attributes[2].second, std::string{"false"}));
+         expect(attrValue(alert->attributes, "deleted") == nullptr);
 #endif
-         expect(eq(alert->attributes[3].second, std::string{"true"}));
+         const auto* missing = attrValue(alert->attributes, "missing_from_disk");
+         expect(missing != nullptr);
+         expect(eq(*missing, std::string{"true"}));
       };
    };
 } // namespace

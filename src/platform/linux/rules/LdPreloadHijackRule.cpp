@@ -18,10 +18,7 @@ namespace vigil::platform::rules {
 
    Alert LdPreloadHijackRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-      };
+      alert.attributes = {{"env", "LD_PRELOAD"}};
       return alert;
    }
 } // namespace vigil::platform::rules

@@ -42,12 +42,7 @@ namespace vigil::platform::rules {
 
    Alert SystemProcessImpersonationRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"name", info.name},
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"parent", info.parentName},
-      };
+      alert.attributes = {{"expected_path", R"(C:\Windows\System32\ or C:\Windows\SysWOW64\)"}};
       return alert;
    }
 } // namespace vigil::platform::rules

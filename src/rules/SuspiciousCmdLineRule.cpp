@@ -53,11 +53,7 @@ namespace vigil::rules {
       }
 
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"cmdline", info.cmdline},
-          {"matched_pattern", matched},
-      };
+      alert.attributes = {{"matched_pattern", matched}};
       return alert;
    }
 } // namespace vigil::rules

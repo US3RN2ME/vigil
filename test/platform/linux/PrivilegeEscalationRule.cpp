@@ -35,10 +35,12 @@ namespace {
          const auto alert = rule.evaluate(info);
 
          expect(alert.has_value());
-         expect(eq(alert->attributes[0].second, info.exePath));
-         expect(eq(alert->attributes[1].second, info.cmdline));
-         expect(eq(alert->attributes[2].second, std::string{"1000"}));
-         expect(eq(alert->attributes[3].second, std::string{"0"}));
+         const auto* uid = attrValue(alert->attributes, "uid");
+         const auto* euid = attrValue(alert->attributes, "euid");
+         expect(uid != nullptr);
+         expect(euid != nullptr);
+         expect(eq(*uid, std::string{"1000"}));
+         expect(eq(*euid, std::string{"0"}));
       };
    };
 } // namespace

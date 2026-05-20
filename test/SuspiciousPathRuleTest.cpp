@@ -43,7 +43,9 @@ namespace {
          ProcessInfo info;
          info.exePath = "/tmp/malware";
          auto alert = rule.evaluate(info);
-         expect(eq(alert->attributes[0].second, std::string{"/tmp/malware"}));
+         const auto* prefix = attrValue(alert->attributes, "matched_path_prefix");
+         expect(prefix != nullptr);
+         expect(eq(*prefix, std::string{"/tmp/"}));
       };
    };
 } // namespace

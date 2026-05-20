@@ -27,11 +27,6 @@ namespace vigil::rules {
    }
 
    Alert ServerSpawnedShellRule::makeAlert(const ProcessInfo& info) const {
-      auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"parent", info.parentName},
-          {"child", info.name},
-      };
-      return alert;
+      return Rule::makeAlert(info);
    }
 } // namespace vigil::rules

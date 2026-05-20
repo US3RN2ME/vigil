@@ -37,12 +37,12 @@ namespace vigil::rules {
 
    Alert FilelessExecutionRule::makeAlert(const ProcessInfo& info) const {
       auto alert = Rule::makeAlert(info);
-      alert.attributes = {
-          {"path", info.exePath},
-          {"memfd", isMemfd(info) ? "true" : "false"},
-          {"deleted", isDeletedExecutable(info) ? "true" : "false"},
-          {"missing_from_disk", info.imageMissingFromDisk ? "true" : "false"},
-      };
+      if (isMemfd(info))
+         alert.attributes.emplace_back("memfd", "true");
+      if (isDeletedExecutable(info))
+         alert.attributes.emplace_back("deleted", "true");
+      if (info.imageMissingFromDisk)
+         alert.attributes.emplace_back("missing_from_disk", "true");
       return alert;
    }
 } // namespace vigil::rules

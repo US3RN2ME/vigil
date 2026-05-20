@@ -30,8 +30,8 @@ namespace vigil {
       const ProcessInfo& info;
 
       /**
-       * @brief Rule-specific context fields for logging, telemetry, or UI display.
-       */
+       * @brief Rule-specific evidence fields, excluding common process context already available in @ref info.
+ */
       std::vector<std::pair<std::string_view, std::string>> attributes{};
    };
 } // namespace vigil
