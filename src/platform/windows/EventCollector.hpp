@@ -10,6 +10,7 @@
 
 #include "EtwSession.hpp"
 #include "Event.hpp"
+#include "TcpTable.hpp"
 
 #include <vigil/EventCollector.hpp>
 #include <vigil/ProcessInfoReader.hpp>
@@ -46,7 +47,7 @@ namespace vigil::platform {
       std::chrono::steady_clock::time_point nextScanTime_;
       std::chrono::steady_clock::time_point nextNetScanTime_;
 
-      std::unordered_set<std::string> seenConnections_;
+      std::unordered_set<TcpConnection, TcpConnectionHash> seenConnections_;
    };
 } // namespace vigil::platform
 

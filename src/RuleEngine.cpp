@@ -39,8 +39,10 @@ namespace vigil {
          }
       }
 
-      for (const auto& alert : alerts)
-         onAlert.emit(alert);
+      for (const auto& alert : alerts) {
+         if (deduplicator_.shouldEmit(alert))
+            onAlert.emit(alert);
+      }
    }
 
    void RuleEngine::addRule(std::unique_ptr<rules::Rule> rule) {

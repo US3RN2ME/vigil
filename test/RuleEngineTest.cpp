@@ -130,5 +130,20 @@ namespace {
 
          expect(eq(rulePtr->maxActive(), 1));
       };
+
+      "[SuppressesDuplicateAlerts]"_test = [] {
+         vigil::RuleEngine engine{vigil::Config{}};
+         std::atomic alerts{0};
+         engine.onAlert.connect([&](const vigil::Alert&) {
+            ++alerts;
+         });
+         engine.addRule(std::make_unique<AlwaysAlertRule>());
+         const vigil::ProcessInfo info{.pid = 42, .startTimeNs = 7};
+
+         engine.process(info);
+         engine.process(info);
+
+         expect(eq(alerts.load(), 1));
+      };
    };
 } // namespace

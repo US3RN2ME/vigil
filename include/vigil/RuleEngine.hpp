@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include <vigil/Alert.hpp>
+#include <vigil/AlertDeduplicator.hpp>
 #include <vigil/Config.hpp>
 #include <vigil/ProcessInfo.hpp>
 #include <vigil/Signal.hpp>
@@ -51,6 +52,7 @@ namespace vigil {
       Config cfg_;
       std::mutex rulesMutex_;
       std::vector<std::unique_ptr<rules::Rule>> rules_;
+      AlertDeduplicator deduplicator_;
    };
 
    /**

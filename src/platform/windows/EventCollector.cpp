@@ -152,10 +152,11 @@ namespace vigil::platform {
    }
 
    void EventCollector::scanNetwork() {
-      TcpTable::forEach([&](const TcpConnection& conn) {
-         const auto key = std::to_string(conn.pid) + ':' + conn.remoteAddr + ':' + std::to_string(conn.remotePort);
+      std::unordered_set<TcpConnection, TcpConnectionHash> currentConnections;
 
-         if (!seenConnections_.insert(key).second)
+      TcpTable::forEach([&](const TcpConnection& conn) {
+         currentConnections.insert(conn);
+         if (seenConnections_.contains(conn))
             return;
 
          workers_.submit(conn.pid, [this, conn] {
@@ -169,6 +170,8 @@ namespace vigil::platform {
             onProcess.emit(*proc);
          });
       });
+
+      seenConnections_ = std::move(currentConnections);
    }
 
 } // namespace vigil::platform
