@@ -2,7 +2,10 @@
 #ifndef VIGIL_ALERT_HPP
 #define VIGIL_ALERT_HPP
 
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include <vigil/ProcessInfo.hpp>
 
@@ -33,6 +36,11 @@ namespace vigil {
        * @brief Rule-specific evidence fields, excluding common process context already available in @ref info.
  */
       std::vector<std::pair<std::string_view, std::string>> attributes{};
+
+      /**
+       * @brief Serialize the alert and its process snapshot as JSON.
+       */
+      [[nodiscard]] std::string toJson() const;
    };
 } // namespace vigil
 

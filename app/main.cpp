@@ -1,4 +1,3 @@
-#include <format>
 #include <thread>
 
 #include <vigil/Error.hpp>
@@ -26,13 +25,7 @@ int main() {
       });
 
       engine->onAlert.connect([](const vigil::Alert& alert) {
-         std::string attrs;
-         for (const auto& [k, v] : alert.attributes)
-            attrs += std::format(" {}={}", k, v);
-
-         vigil::log::warn("[ALERT] rule={} severity={} pid={} ppid={} name={} parent={} path={} cmdline={}{}", alert.rule,
-                          alert.severity, alert.info.pid, alert.info.ppid, alert.info.name, alert.info.parentName,
-                          alert.info.exePath, alert.info.cmdline, attrs);
+         vigil::log::warn("[ALERT] {}", alert.toJson());
       });
 
       std::thread collectorThread([&] {

@@ -11,7 +11,9 @@
   "features": {
     "tests": {
       "description": "Build Tests",
-      "dependencies": [ "bext-ut" ]
+      "dependencies": [
+        "bext-ut"
+      ]
     }
   }
 }

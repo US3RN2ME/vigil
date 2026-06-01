@@ -57,7 +57,7 @@ namespace vigil::rules {
        * triggered the alert.
        *
        * @return Alert populated with this rule's name, severity, and process info.
- */
+       */
       [[nodiscard]] virtual Alert makeAlert(const ProcessInfo& info) const;
 
       /**
