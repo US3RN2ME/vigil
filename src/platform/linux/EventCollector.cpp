@@ -11,6 +11,7 @@
 #include "BpfEvents.hpp"
 #include "ProcessInfoReader.hpp"
 
+#include <vigil/Error.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/SystemError.hpp>
 
@@ -27,9 +28,8 @@ namespace vigil::platform {
    void EventCollector::start() {
       log::info("event collector starting");
       if (!init()) {
-         log::error("event collector init failed, eBPF unavailable");
          workers_.stop();
-         return;
+         throw CollectorError{"event collector init failed, eBPF unavailable"};
       }
 
       if (stopRequested_) {
@@ -45,8 +45,7 @@ namespace vigil::platform {
       while (running_ && !stopRequested_) {
          const int result = ringBuf_->poll(100);
          if ((result < 0) && error::lastCode() != EINTR) {
-            log::error("ring buffer poll error: error:'{}'", error::lastMessage());
-            break;
+            throw CollectorError{"ring buffer poll failed: '{}'", error::lastMessage()};
          }
          const auto now = std::chrono::steady_clock::now();
          if (now >= nextScanTime_) {
@@ -71,6 +70,7 @@ namespace vigil::platform {
       try {
          bpf_.emplace();
          bpf_->load();
+         bpf_->attach();
          ringBuf_.emplace(bpf_->ringBufFd(), onEvent, this);
          return true;
       } catch (const std::runtime_error& e) {
@@ -109,38 +109,52 @@ namespace vigil::platform {
       log::debug("proc scan complete: {} processes", count);
    }
 
-   int EventCollector::onEvent(void* ctx, void* data, size_t /*size*/) {
+   int EventCollector::onEvent(void* ctx, void* data, size_t size) {
       auto* self = static_cast<EventCollector*>(ctx);
-      auto* event = static_cast<ExecveEvent*>(data);
+      if (size < sizeof(EventHeader))
+         return 0;
+
       auto* hdr = static_cast<const EventHeader*>(data);
 
       switch (hdr->type) {
          case EventType::Execve:
+            if (size < sizeof(ExecveEvent))
+               return 0;
             self->workers_.submit(hdr->pid, [self, event = *static_cast<const ExecveEvent*>(data)] {
                self->handleExecve(event);
             });
             break;
          case EventType::Mmap:
+            if (size < sizeof(MmapEvent))
+               return 0;
             self->workers_.submit(hdr->pid, [self, event = *static_cast<const MmapEvent*>(data)] {
                self->handleMmap(event);
             });
             break;
          case EventType::Connect:
+            if (size < sizeof(ConnectEvent))
+               return 0;
             self->workers_.submit(hdr->pid, [self, event = *static_cast<const ConnectEvent*>(data)] {
                self->handleConnect(event);
             });
             break;
          case EventType::Ptrace:
+            if (size < sizeof(PtraceEvent))
+               return 0;
             self->workers_.submit(hdr->pid, [self, event = *static_cast<const PtraceEvent*>(data)] {
                self->handlePtrace(event);
             });
             break;
          case EventType::Setuid:
+            if (size < sizeof(SetuidEvent))
+               return 0;
             self->workers_.submit(hdr->pid, [self, event = *static_cast<const SetuidEvent*>(data)] {
                self->handleSetuid(event);
             });
             break;
          case EventType::Module:
+            if (size < sizeof(ModuleEvent))
+               return 0;
             self->workers_.submit(hdr->pid, [self, event = *static_cast<const ModuleEvent*>(data)] {
                self->handleModule(event);
             });

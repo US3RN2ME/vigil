@@ -56,7 +56,8 @@ namespace {
       [[nodiscard]] std::optional<vigil::Alert> check(const vigil::ProcessInfo&) override {
          const int active = ++active_;
          int observed = maxActive_;
-         while ((active > observed) && !maxActive_.compare_exchange_weak(observed, active)) {}
+         while ((active > observed) && !maxActive_.compare_exchange_weak(observed, active)) {
+         }
 
          std::this_thread::sleep_for(std::chrono::milliseconds{1});
          --active_;

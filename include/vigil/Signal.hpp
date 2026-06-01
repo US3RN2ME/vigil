@@ -13,7 +13,8 @@ namespace vigil {
     * @brief Lightweight in-process signal/slot helper.
     *
     * Callback registration is internally synchronized. Slots are invoked
-    * without holding the signal lock, so callbacks may safely connect or
+    * without holding the signal lock, so callbacks
+    * may safely connect or
     * disconnect slots while an emission is in progress.
     *
     * @tparam Ts

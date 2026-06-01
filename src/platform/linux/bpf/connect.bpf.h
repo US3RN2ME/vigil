@@ -67,21 +67,25 @@ int onConnectExit(struct trace_event_raw_sys_exit* ctx) {
    struct ConnectArgs* args = bpf_map_lookup_elem(&connect_args, &tid);
    if (!args)
       return 0;
-   bpf_map_delete_elem(&connect_args, &tid);
 
    const long ret = ctx->ret;
-   if (ret != 0 && ret != -EINPROGRESS)
+   if (ret != 0 && ret != -EINPROGRESS) {
+      bpf_map_delete_elem(&connect_args, &tid);
       return 0;
+   }
 
    struct ConnectEvent* e = bpf_ringbuf_reserve(&rb, sizeof(*e), 0);
-   if (!e)
+   if (!e) {
+      bpf_map_delete_elem(&connect_args, &tid);
       return 0;
+   }
 
    fillHeader(&e->hdr, EVENT_CONNECT);
    e->sa_family = args->sa_family;
    e->dport = args->dport;
    __builtin_memcpy(e->daddr, args->daddr, 16);
 
+   bpf_map_delete_elem(&connect_args, &tid);
    bpf_ringbuf_submit(e, 0);
    return 0;
 }

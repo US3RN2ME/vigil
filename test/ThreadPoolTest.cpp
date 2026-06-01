@@ -18,7 +18,8 @@ namespace {
             pool.submit([&] {
                const int current = ++active;
                int observed = maxActive;
-               while ((current > observed) && !maxActive.compare_exchange_weak(observed, current)) {}
+               while ((current > observed) && !maxActive.compare_exchange_weak(observed, current)) {
+               }
 
                std::this_thread::sleep_for(std::chrono::milliseconds{5});
                --active;
@@ -69,7 +70,8 @@ namespace {
             pool.submit(42, [&] {
                const int current = ++active;
                int observed = maxActive;
-               while ((current > observed) && !maxActive.compare_exchange_weak(observed, current)) {}
+               while ((current > observed) && !maxActive.compare_exchange_weak(observed, current)) {
+               }
 
                std::this_thread::sleep_for(std::chrono::milliseconds{1});
                --active;

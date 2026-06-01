@@ -120,6 +120,9 @@ namespace vigil::platform {
          uint64_t mask = 0;
 
          for (DWORD i = 0; i < privileges->PrivilegeCount; ++i) {
+            if ((privileges->Privileges[i].Attributes & SE_PRIVILEGE_ENABLED) == 0)
+               continue;
+
             const DWORD luid = privileges->Privileges[i].Luid.LowPart;
 
             if (luid < 64)

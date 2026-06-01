@@ -29,16 +29,16 @@ suite<"AlertDeduplicator"> alertDeduplicatorTest = [] {
       AlertDeduplicator deduplicator{1h};
       const ProcessInfo info{.pid = 42, .startTimeNs = 7};
       const Alert first{
-         .rule = "rule",
-         .severity = "high",
-         .info = info,
-         .attributes = {{"matched_pattern", "first"}},
+          .rule = "rule",
+          .severity = "high",
+          .info = info,
+          .attributes = {{"matched_pattern", "first"}},
       };
       const Alert second{
-         .rule = "rule",
-         .severity = "high",
-         .info = info,
-         .attributes = {{"matched_pattern", "second"}},
+          .rule = "rule",
+          .severity = "high",
+          .info = info,
+          .attributes = {{"matched_pattern", "second"}},
       };
 
       expect(deduplicator.shouldEmit(first));

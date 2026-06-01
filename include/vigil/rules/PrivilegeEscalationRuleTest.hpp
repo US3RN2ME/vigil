@@ -33,7 +33,12 @@ namespace vigil::rules {
       [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
 
    private:
-      std::unordered_map<uint32_t, uint64_t> baseline_;
+      struct Baseline {
+         uint64_t startTimeNs;
+         uint64_t privilegeMask;
+      };
+
+      std::unordered_map<uint32_t, Baseline> baseline_;
       uint64_t alertBaseline_ = 0;
    };
 } // namespace vigil::rules

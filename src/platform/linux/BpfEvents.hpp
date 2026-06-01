@@ -22,17 +22,11 @@ namespace vigil::platform {
    };
 
    struct ExecveEvent {
-      uint32_t pid;
-      uint32_t ppid;
-      char comm[16];
-      char filename[256];
       EventHeader hdr;
+      char filename[256];
    };
 
    struct MmapEvent {
-      uint32_t pid;
-      uint32_t ppid;
-      char comm[16];
       EventHeader hdr;
    };
 

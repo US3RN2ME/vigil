@@ -1,3 +1,4 @@
+#include <exception>
 #include <thread>
 
 #include <vigil/Error.hpp>
@@ -28,8 +29,14 @@ int main() {
          vigil::log::warn("[ALERT] {}", alert.toJson());
       });
 
+      std::exception_ptr collectorError;
       std::thread collectorThread([&] {
-         collector->start();
+         try {
+            collector->start();
+         } catch (...) {
+            collectorError = std::current_exception();
+            signalHandler.requestStop();
+         }
       });
 
       signalHandler.wait();
@@ -42,15 +49,22 @@ int main() {
          collectorThread.join();
       }
 
+      if (collectorError)
+         std::rethrow_exception(collectorError);
+
       vigil::waitForExitAcknowledgement();
    } catch (const vigil::SignalHandlerError& e) {
       vigil::log::error("Signal handler failed: {}", e.what());
+      return 1;
    } catch (const vigil::CollectorError& e) {
-      vigil::log::error("Collector init failed: {}", e.what());
+      vigil::log::error("Collector failed: {}", e.what());
+      return 1;
    } catch (const vigil::ConfigError& e) {
       vigil::log::error("Bad config: {}", e.what());
+      return 1;
    } catch (...) {
       vigil::log::error("Unknown error");
+      return 1;
    }
    return 0;
 }

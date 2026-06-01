@@ -59,6 +59,30 @@ namespace {
          expect(!rule.evaluate(info).has_value());
       };
 
+      "[FiresAfterMaskDropsAndRegainsPrivileges]"_test = [] {
+         PrivilegeEscalationRule rule{RuleConfig{}};
+         ProcessInfo info;
+         info.pid = 1;
+         info.privilegeMask = 0x3;
+         std::ignore = rule.evaluate(info);
+         info.privilegeMask = 0x1;
+         std::ignore = rule.evaluate(info);
+         info.privilegeMask = 0x3;
+         expect(rule.evaluate(info).has_value());
+      };
+
+      "[SilentWhenPidIsReused]"_test = [] {
+         PrivilegeEscalationRule rule{RuleConfig{}};
+         ProcessInfo info;
+         info.pid = 1;
+         info.startTimeNs = 1;
+         info.privilegeMask = 0x1;
+         std::ignore = rule.evaluate(info);
+         info.startTimeNs = 2;
+         info.privilegeMask = 0x3;
+         expect(!rule.evaluate(info).has_value());
+      };
+
       "[AlertContainsPreviousAndCurrentMask]"_test = [] {
          PrivilegeEscalationRule rule{RuleConfig{}};
          ProcessInfo info;

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <vigil/Logger.hpp>
 
@@ -118,8 +119,48 @@ namespace vigil::platform {
 
       void readCgroup(ProcessInfo& p, const std::string& base) {
          std::ifstream f{base + "cgroup"};
-         if (f)
-            std::getline(f, p.platform.containerId);
+         if (!f)
+            return;
+
+         for (std::string line; std::getline(f, line);) {
+            const auto pathStart = line.find_last_of(':');
+            if (pathStart == std::string::npos)
+               continue;
+
+            const auto path = line.substr(pathStart + 1);
+            if (path.find("docker") != std::string::npos || path.find("kubepods") != std::string::npos ||
+                path.find("containerd") != std::string::npos || path.find("libpod") != std::string::npos ||
+                path.find("lxc") != std::string::npos) {
+               p.platform.containerId = path;
+               return;
+            }
+         }
+      }
+
+      void readStartTime(ProcessInfo& p, const std::string& base) {
+         std::ifstream f{base + "stat"};
+         std::string line;
+         if (!f || !std::getline(f, line))
+            return;
+
+         const auto commEnd = line.rfind(')');
+         if (commEnd == std::string::npos || commEnd + 2 >= line.size())
+            return;
+
+         std::istringstream fields{line.substr(commEnd + 2)};
+         std::string ignored;
+         for (int field = 3; field < 22; ++field) {
+            if (!(fields >> ignored))
+               return;
+         }
+
+         uint64_t startTicks = 0;
+         if (!(fields >> startTicks))
+            return;
+
+         const auto ticksPerSecond = ::sysconf(_SC_CLK_TCK);
+         if (ticksPerSecond > 0)
+            p.startTimeNs = startTicks * 1'000'000'000ULL / static_cast<uint64_t>(ticksPerSecond);
       }
 
    } // namespace
@@ -143,6 +184,7 @@ namespace vigil::platform {
       readMapsFile(p, base);
       readEnviron(p, base);
       readCgroup(p, base);
+      readStartTime(p, base);
 
       return p;
    }

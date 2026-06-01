@@ -5,6 +5,7 @@
 #include "TcpTable.hpp"
 #include "WinApi.hpp"
 
+#include <vigil/Error.hpp>
 #include <vigil/Logger.hpp>
 #include <vigil/SystemError.hpp>
 
@@ -33,9 +34,8 @@ namespace vigil::platform {
    void EventCollector::start() {
       log::info("event collector starting");
       if (!init()) {
-         log::error("event collector init failed");
          workers_.stop();
-         return;
+         throw CollectorError{"event collector init failed"};
       }
 
       if (stopRequested_) {
@@ -48,8 +48,11 @@ namespace vigil::platform {
       log::info("event collector running");
 
       while (running_ && !stopRequested_) {
-         if (stopEvent_.wait(100) == WaitResult::Signaled)
+         const auto waitResult = stopEvent_.wait(100);
+         if (waitResult == WaitResult::Signaled)
             break;
+         if (waitResult == WaitResult::Failed)
+            throw CollectorError{"WaitForSingleObject failed: '{}'", error::lastMessage()};
 
          const auto now = std::chrono::steady_clock::now();
 

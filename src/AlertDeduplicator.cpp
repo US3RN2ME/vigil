@@ -1,10 +1,10 @@
-#include <vigil/AlertDeduplicator.hpp>
-
 #include <algorithm>
 #include <iterator>
 #include <string_view>
 #include <utility>
 #include <vector>
+
+#include <vigil/AlertDeduplicator.hpp>
 
 namespace vigil {
    namespace {
@@ -14,14 +14,11 @@ namespace vigil {
          key.append(value);
          key += ';';
       }
-   }
+   } // namespace
 
-   AlertDeduplicator::AlertDeduplicator(
-      const std::chrono::milliseconds cooldown,
-      const std::size_t maxEntries
-   )
-       : cooldown_{cooldown},
-         maxEntries_{std::max(maxEntries, std::size_t{1})} {}
+   AlertDeduplicator::AlertDeduplicator(const std::chrono::milliseconds cooldown, const std::size_t maxEntries)
+       : cooldown_{cooldown}
+       , maxEntries_{std::max(maxEntries, std::size_t{1})} {}
 
    bool AlertDeduplicator::shouldEmit(const Alert& alert, const Clock::time_point now) {
       auto key = makeKey(alert);
@@ -65,4 +62,4 @@ namespace vigil {
 
       return key;
    }
-}
+} // namespace vigil

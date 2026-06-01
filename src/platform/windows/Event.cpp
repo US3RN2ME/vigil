@@ -21,7 +21,14 @@ namespace vigil::platform {
    }
 
    WaitResult Event::wait(uint32_t milliseconds) const noexcept {
-      return static_cast<WaitResult>(WaitForSingleObject(static_cast<HANDLE>(handle_.native()), milliseconds));
+      switch (WaitForSingleObject(static_cast<HANDLE>(handle_.native()), milliseconds)) {
+         case WAIT_OBJECT_0:
+            return WaitResult::Signaled;
+         case WAIT_TIMEOUT:
+            return WaitResult::Timeout;
+         default:
+            return WaitResult::Failed;
+      }
    }
 
    Event::Event(Handle handle) noexcept

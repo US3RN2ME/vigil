@@ -12,12 +12,22 @@ namespace vigil::rules {
    }
 
    std::optional<Alert> PrivilegeEscalationRule::check(const ProcessInfo& info) {
-      auto [it, inserted] = baseline_.emplace(info.pid, info.privilegeMask);
-      if (inserted || info.privilegeMask <= it->second) {
+      auto [it, inserted] = baseline_.emplace(info.pid, Baseline{info.startTimeNs, info.privilegeMask});
+      if (inserted)
+         return {};
+
+      auto& baseline = it->second;
+      if (baseline.startTimeNs != info.startTimeNs) {
+         baseline = Baseline{info.startTimeNs, info.privilegeMask};
          return {};
       }
-      alertBaseline_ = it->second;
-      it->second = info.privilegeMask;
+
+      const auto previousMask = baseline.privilegeMask;
+      baseline.privilegeMask = info.privilegeMask;
+      if (info.privilegeMask <= previousMask)
+         return {};
+
+      alertBaseline_ = previousMask;
       return makeAlert(info);
    }
 

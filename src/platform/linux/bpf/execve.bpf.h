@@ -30,21 +30,25 @@ int onExecveExit(struct trace_event_raw_sys_exit* ctx) {
    struct ExecveArgs* args = bpf_map_lookup_elem(&execve_args, &tid);
    if (!args)
       return 0;
-   bpf_map_delete_elem(&execve_args, &tid);
 
-   if (ctx->ret != 0) // exec failed — no new image loaded
+   if (ctx->ret != 0) { // exec failed — no new image loaded
+      bpf_map_delete_elem(&execve_args, &tid);
       return 0;
+   }
 
    struct ExecveEvent* e = bpf_ringbuf_reserve(&rb, sizeof(*e), 0);
-   if (!e)
+   if (!e) {
+      bpf_map_delete_elem(&execve_args, &tid);
       return 0;
+   }
 
    fillHeader(&e->hdr, EVENT_EXECVE);
    // After a successful execve the kernel has already replaced comm with the
    // new program name, so bpf_get_current_comm() in fillHeader gives us the
    // executed binary's short name rather than the calling process name.
-   bpf_probe_read_kernel(e->filename, sizeof(e->filename), args->filename);
+   __builtin_memcpy(e->filename, args->filename, sizeof(e->filename));
 
+   bpf_map_delete_elem(&execve_args, &tid);
    bpf_ringbuf_submit(e, 0);
    return 0;
 }
