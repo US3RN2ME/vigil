@@ -1,4 +1,8 @@
+#include <atomic>
+#include <chrono>
 #include <stdexcept>
+#include <thread>
+#include <vector>
 
 #include "ut_main.hpp"
 
@@ -33,6 +37,35 @@ namespace {
       [[nodiscard]] std::optional<vigil::Alert> check(const vigil::ProcessInfo&) override {
          throw std::runtime_error{"boom"};
       }
+   };
+
+   class ConcurrentEvaluationRule final : public vigil::rules::Rule {
+   public:
+      ConcurrentEvaluationRule()
+          : Rule{vigil::rules::RuleConfig{}} {}
+
+      [[nodiscard]] std::string_view name() const noexcept override {
+         return "concurrent_evaluation";
+      }
+
+      [[nodiscard]] int maxActive() const noexcept {
+         return maxActive_;
+      }
+
+   protected:
+      [[nodiscard]] std::optional<vigil::Alert> check(const vigil::ProcessInfo&) override {
+         const int active = ++active_;
+         int observed = maxActive_;
+         while ((active > observed) && !maxActive_.compare_exchange_weak(observed, active)) {}
+
+         std::this_thread::sleep_for(std::chrono::milliseconds{1});
+         --active_;
+         return {};
+      }
+
+   private:
+      std::atomic<int> active_{0};
+      std::atomic<int> maxActive_{0};
    };
 
    suite<"[RuleEngine]"> _ = [] {
@@ -78,6 +111,24 @@ namespace {
          engine.process(vigil::ProcessInfo{});
 
          expect(eq(alerts, 0));
+      };
+
+      "[ConcurrentProcessCallsSerializeRuleEvaluation]"_test = [] {
+         vigil::RuleEngine engine{vigil::Config{}};
+         auto rule = std::make_unique<ConcurrentEvaluationRule>();
+         auto* rulePtr = rule.get();
+         engine.addRule(std::move(rule));
+
+         const vigil::ProcessInfo info;
+         std::vector<std::thread> threads;
+         for (int i = 0; i < 8; ++i)
+            threads.emplace_back([&] {
+               engine.process(info);
+            });
+         for (auto& thread : threads)
+            thread.join();
+
+         expect(eq(rulePtr->maxActive(), 1));
       };
    };
 } // namespace

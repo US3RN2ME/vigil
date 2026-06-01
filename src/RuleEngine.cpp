@@ -25,14 +25,22 @@ namespace vigil {
    }
 
    void RuleEngine::process(const ProcessInfo& info) {
-      for (auto& rule : rules_) {
-         try {
-            if (auto alert = rule->evaluate(info))
-               onAlert.emit(std::move(*alert));
-         } catch (const std::exception& e) {
-            log::error("rule evaluation failed: {}", e.what());
+      std::vector<Alert> alerts;
+      {
+         std::lock_guard lock(rulesMutex_);
+
+         for (auto& rule : rules_) {
+            try {
+               if (auto alert = rule->evaluate(info))
+                  alerts.emplace_back(std::move(*alert));
+            } catch (const std::exception& e) {
+               log::error("rule evaluation failed: {}", e.what());
+            }
          }
       }
+
+      for (const auto& alert : alerts)
+         onAlert.emit(alert);
    }
 
    void RuleEngine::addRule(std::unique_ptr<rules::Rule> rule) {
@@ -41,6 +49,7 @@ namespace vigil {
          return;
       }
       log::debug("registered rule: {}", rule->name());
+      std::lock_guard lock(rulesMutex_);
       rules_.emplace_back(std::move(rule));
    }
 } // namespace vigil

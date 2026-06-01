@@ -53,7 +53,7 @@ namespace {
          const vigil::Alert alert{.rule = "test", .severity = "high", .info = info};
          const auto process = nlohmann::json::parse(alert.toJson()).at("process");
 
-         expect(eq(process.at("command_line").get<std::string>().size(), std::size_t{512}));
+         expect(eq(process.at("command_line").get<std::string>().size(), std::size_t{256}));
          expect(process.at("command_line_truncated").get<bool>());
          expect(eq(process.at("command_line_original_length"), info.cmdline.size()));
       };

@@ -4,15 +4,17 @@
 
 #include <cstdint>
 #include <functional>
+#include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace vigil {
    /**
     * @brief Lightweight in-process signal/slot helper.
     *
-    * Signal is not internally synchronized. Callers should
-    * connect, disconnect,
-    * and emit from a single thread or provide external synchronization.
+    * Callback registration is internally synchronized. Slots are invoked
+    * without holding the signal lock, so callbacks may safely connect or
+    * disconnect slots while an emission is in progress.
     *
     * @tparam Ts
     * Argument types delivered to connected slots.
@@ -34,6 +36,7 @@ namespace vigil {
        * @return Connection id that can be passed to disconnect().
        */
       uint32_t connect(Slot slot) {
+         std::lock_guard lock(mutex_);
          auto id = nextId_++;
          handlers_.emplace(id, std::move(slot));
          return id;
@@ -48,6 +51,7 @@ namespace vigil {
        * @return true if a callback was removed.
        */
       bool disconnect(uint32_t id) {
+         std::lock_guard lock(mutex_);
          return handlers_.erase(id) > 0;
       }
 
@@ -58,13 +62,23 @@ namespace vigil {
        * forwarded to each connected slot.
        */
       void emit(const Ts&... args) {
-         for (const auto& [id, slot] : handlers_) {
-            (void)id;
+         std::vector<Slot> slots;
+         {
+            std::lock_guard lock(mutex_);
+            slots.reserve(handlers_.size());
+            for (const auto& [id, slot] : handlers_) {
+               (void)id;
+               slots.emplace_back(slot);
+            }
+         }
+
+         for (const auto& slot : slots) {
             slot(args...);
          }
       }
 
    private:
+      std::mutex mutex_;
       std::unordered_map<uint32_t, Slot> handlers_;
       uint32_t nextId_{1};
    };

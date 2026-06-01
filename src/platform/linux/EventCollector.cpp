@@ -28,12 +28,21 @@ namespace vigil::platform {
       log::info("event collector starting");
       if (!init()) {
          log::error("event collector init failed, eBPF unavailable");
+         workers_.stop();
          return;
       }
+
+      if (stopRequested_) {
+         workers_.stop();
+         ringBuf_.reset();
+         bpf_.reset();
+         return;
+      }
+
       running_ = true;
       log::info("event collector running");
 
-      while (running_) {
+      while (running_ && !stopRequested_) {
          const int result = ringBuf_->poll(100);
          if ((result < 0) && error::lastCode() != EINTR) {
             log::error("ring buffer poll error: error:'{}'", error::lastMessage());
@@ -45,13 +54,17 @@ namespace vigil::platform {
             nextScanTime_ = now + kScanInterval;
          }
       }
+
+      running_ = false;
+      workers_.stop();
+      ringBuf_.reset();
+      bpf_.reset();
    }
 
    void EventCollector::stop() {
       log::info("event collector stopping");
+      stopRequested_ = true;
       running_ = false;
-      ringBuf_.reset();
-      bpf_.reset();
    }
 
    bool EventCollector::init() {
@@ -80,10 +93,11 @@ namespace vigil::platform {
                    }))
                   continue;
                const int pid = std::stoi(fname);
-               auto proc = processInfoReader_->read(pid);
-               if (!proc)
-                  continue;
-               onProcess.emit(*proc);
+               workers_.submit(pid, [this, pid] {
+                  auto proc = processInfoReader_->read(pid);
+                  if (proc)
+                     onProcess.emit(*proc);
+               });
                ++count;
             } catch (const std::exception& ex) {
                log::debug("proc scan skipped entry: {}", ex.what());
@@ -102,22 +116,34 @@ namespace vigil::platform {
 
       switch (hdr->type) {
          case EventType::Execve:
-            self->handleExecve(*static_cast<const ExecveEvent*>(data));
+            self->workers_.submit(hdr->pid, [self, event = *static_cast<const ExecveEvent*>(data)] {
+               self->handleExecve(event);
+            });
             break;
          case EventType::Mmap:
-            self->handleMmap(*static_cast<const MmapEvent*>(data));
+            self->workers_.submit(hdr->pid, [self, event = *static_cast<const MmapEvent*>(data)] {
+               self->handleMmap(event);
+            });
             break;
          case EventType::Connect:
-            self->handleConnect(*static_cast<const ConnectEvent*>(data));
+            self->workers_.submit(hdr->pid, [self, event = *static_cast<const ConnectEvent*>(data)] {
+               self->handleConnect(event);
+            });
             break;
          case EventType::Ptrace:
-            self->handlePtrace(*static_cast<const PtraceEvent*>(data));
+            self->workers_.submit(hdr->pid, [self, event = *static_cast<const PtraceEvent*>(data)] {
+               self->handlePtrace(event);
+            });
             break;
          case EventType::Setuid:
-            self->handleSetuid(*static_cast<const SetuidEvent*>(data));
+            self->workers_.submit(hdr->pid, [self, event = *static_cast<const SetuidEvent*>(data)] {
+               self->handleSetuid(event);
+            });
             break;
          case EventType::Module:
-            self->handleModule(*static_cast<const ModuleEvent*>(data));
+            self->workers_.submit(hdr->pid, [self, event = *static_cast<const ModuleEvent*>(data)] {
+               self->handleModule(event);
+            });
             break;
       }
       return 0;

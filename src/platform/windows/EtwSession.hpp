@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -40,6 +41,8 @@ namespace vigil::platform {
       uint64_t sessionHandle_{kInvalid};
       uint64_t consumerHandle_{kInvalid};
       EventCallback callback_;
+      std::mutex mutex_;
+      bool stopping_{false};
    };
 
 } // namespace vigil::platform

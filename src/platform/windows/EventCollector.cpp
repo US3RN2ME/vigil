@@ -34,12 +34,20 @@ namespace vigil::platform {
       log::info("event collector starting");
       if (!init()) {
          log::error("event collector init failed");
+         workers_.stop();
          return;
       }
+
+      if (stopRequested_) {
+         stopEtw();
+         workers_.stop();
+         return;
+      }
+
       running_ = true;
       log::info("event collector running");
 
-      while (running_) {
+      while (running_ && !stopRequested_) {
          if (stopEvent_.wait(100) == WaitResult::Signaled)
             break;
 
@@ -55,19 +63,39 @@ namespace vigil::platform {
             nextNetScanTime_ = now + kNetScanInterval;
          }
       }
+
+      running_ = false;
+      stopEtw();
+      workers_.stop();
    }
 
    void EventCollector::stop() {
       log::info("event collector stopping");
+      stopRequested_ = true;
       running_ = false;
 
-      stopEvent_.set();
+      {
+         std::lock_guard lock(stopEventMutex_);
+         stopEvent_.set();
+      }
+      stopEtw();
+   }
 
+   void EventCollector::stopEtw() {
+      std::lock_guard lock(etwMutex_);
       if (etwSession_)
          etwSession_->stop();
 
       if (etwThread_.joinable())
          etwThread_.join();
+   }
+
+   void EventCollector::enqueueProcess(uint32_t pid) {
+      workers_.submit(pid, [this, pid] {
+         auto proc = processInfoReader_->read(pid);
+         if (proc)
+            onProcess.emit(*proc);
+      });
    }
 
    bool EventCollector::init() {
@@ -77,25 +105,27 @@ namespace vigil::platform {
          return false;
       }
 
-      stopEvent_ = std::move(*event);
+      {
+         std::lock_guard lock(stopEventMutex_);
+         stopEvent_ = std::move(*event);
+      }
 
       const auto now = std::chrono::steady_clock::now();
       nextScanTime_ = now;
       nextNetScanTime_ = now;
 
-      etwSession_ = EtwSession::start(L"vigil-kernel-process", kKernelProcessProvider, kProcessKeyword);
-      if (!etwSession_) {
+      auto etwSession = EtwSession::start(L"vigil-kernel-process", kKernelProcessProvider, kProcessKeyword);
+      if (!etwSession) {
          log::warn("ETW unavailable (requires elevation); running in scan-only mode");
       } else {
+         std::lock_guard lock(etwMutex_);
+         etwSession_ = std::move(etwSession);
          etwThread_ = std::thread([this] {
             etwSession_->consume([this](const _EVENT_RECORD& r) {
                if (r.EventHeader.EventDescriptor.Id != kEventIdProcessStart)
                   return;
                const auto pid = static_cast<uint32_t>(r.EventHeader.ProcessId);
-               auto proc = processInfoReader_->read(pid);
-               if (!proc)
-                  return;
-               onProcess.emit(*proc);
+               enqueueProcess(pid);
             });
          });
       }
@@ -114,10 +144,7 @@ namespace vigil::platform {
       }
 
       snapshot->forEach([&](uint32_t pid) {
-         auto proc = processInfoReader_->read(pid);
-         if (!proc)
-            return;
-         onProcess.emit(*proc);
+         enqueueProcess(pid);
          ++count;
       });
 
@@ -131,14 +158,16 @@ namespace vigil::platform {
          if (!seenConnections_.insert(key).second)
             return;
 
-         auto proc = processInfoReader_->read(conn.pid);
-         if (!proc)
-            return;
+         workers_.submit(conn.pid, [this, conn] {
+            auto proc = processInfoReader_->read(conn.pid);
+            if (!proc)
+               return;
 
-         proc->hasConnect = true;
-         proc->connectDport = conn.remotePort;
-         proc->connectDaddr = conn.remoteAddr;
-         onProcess.emit(*proc);
+            proc->hasConnect = true;
+            proc->connectDport = conn.remotePort;
+            proc->connectDaddr = conn.remoteAddr;
+            onProcess.emit(*proc);
+         });
       });
    }
 

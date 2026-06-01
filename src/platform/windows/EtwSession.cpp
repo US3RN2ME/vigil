@@ -89,7 +89,8 @@ namespace vigil::platform {
        , providerGuid_{other.providerGuid_}
        , sessionHandle_{other.sessionHandle_}
        , consumerHandle_{other.consumerHandle_}
-       , callback_{std::move(other.callback_)} {
+       , callback_{std::move(other.callback_)}
+       , stopping_{other.stopping_} {
       other.sessionHandle_ = kInvalid;
       other.consumerHandle_ = kInvalid;
    }
@@ -102,6 +103,7 @@ namespace vigil::platform {
          sessionHandle_ = other.sessionHandle_;
          consumerHandle_ = other.consumerHandle_;
          callback_ = std::move(other.callback_);
+         stopping_ = other.stopping_;
          other.sessionHandle_ = kInvalid;
          other.consumerHandle_ = kInvalid;
       }
@@ -109,12 +111,21 @@ namespace vigil::platform {
    }
 
    void EtwSession::notify(const _EVENT_RECORD& event) {
-      if (callback_)
-         callback_(event);
+      EventCallback callback;
+      {
+         std::lock_guard lock(mutex_);
+         callback = callback_;
+      }
+
+      if (callback)
+         callback(event);
    }
 
    void EtwSession::consume(EventCallback callback) {
-      callback_ = std::move(callback);
+      {
+         std::lock_guard lock(mutex_);
+         callback_ = std::move(callback);
+      }
 
       EVENT_TRACE_LOGFILEW logfile{};
       logfile.LoggerName = const_cast<wchar_t*>(name_.c_str());
@@ -127,19 +138,36 @@ namespace vigil::platform {
          log::error("ETW OpenTrace failed: '{}'", error::lastMessage());
          return;
       }
-      consumerHandle_ = static_cast<uint64_t>(consumerHandle);
+      {
+         std::lock_guard lock(mutex_);
+         if (stopping_) {
+            CloseTrace(consumerHandle);
+            return;
+         }
+         consumerHandle_ = static_cast<uint64_t>(consumerHandle);
+      }
 
       ProcessTrace(&consumerHandle, 1, nullptr, nullptr);
    }
 
    void EtwSession::stop() {
-      if (consumerHandle_ != kInvalid) {
-         CloseTrace(static_cast<TRACEHANDLE>(consumerHandle_)); // unblocks ProcessTrace
+      uint64_t consumerHandle;
+      uint64_t sessionHandle;
+      {
+         std::lock_guard lock(mutex_);
+         stopping_ = true;
+         consumerHandle = consumerHandle_;
+         sessionHandle = sessionHandle_;
          consumerHandle_ = kInvalid;
+         sessionHandle_ = kInvalid;
       }
-      if (sessionHandle_ != kInvalid) {
+
+      if (consumerHandle != kInvalid) {
+         CloseTrace(static_cast<TRACEHANDLE>(consumerHandle)); // unblocks ProcessTrace
+      }
+      if (sessionHandle != kInvalid) {
          auto props = makeProperties(name_);
-         ControlTraceW(static_cast<TRACEHANDLE>(sessionHandle_), nullptr, &props.props, EVENT_TRACE_CONTROL_STOP);
+         ControlTraceW(static_cast<TRACEHANDLE>(sessionHandle), nullptr, &props.props, EVENT_TRACE_CONTROL_STOP);
       }
    }
 } // namespace vigil::platform

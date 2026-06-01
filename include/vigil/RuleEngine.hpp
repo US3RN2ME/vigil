@@ -3,6 +3,7 @@
 #define VIGIL_RULEENGINE_HPP
 
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include <vigil/Alert.hpp>
@@ -48,6 +49,7 @@ namespace vigil {
 
    private:
       Config cfg_;
+      std::mutex rulesMutex_;
       std::vector<std::unique_ptr<rules::Rule>> rules_;
    };
 

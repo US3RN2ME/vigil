@@ -12,6 +12,7 @@
 
 #include <vigil/EventCollector.hpp>
 #include <vigil/ProcessInfoReader.hpp>
+#include <vigil/ThreadPool.hpp>
 
 namespace vigil::platform {
    class EventCollector : public vigil::EventCollector {
@@ -38,6 +39,8 @@ namespace vigil::platform {
       std::optional<BpfSkeleton> bpf_;
       std::optional<RingBuffer> ringBuf_;
       std::atomic<bool> running_{false};
+      std::atomic<bool> stopRequested_{false};
+      ThreadPool workers_;
       std::chrono::steady_clock::time_point nextScanTime_{std::chrono::steady_clock::now()};
    };
 } // namespace vigil::platform
