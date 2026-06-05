@@ -9,48 +9,46 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil::platform {
-   BpfSkeleton::BpfSkeleton() {
-      skel_ = events_bpf__open();
-      if (!skel_)
-         throw CollectorError{"events_bpf__open failed"};
-   }
+BpfSkeleton::BpfSkeleton() {
+  skel_ = events_bpf__open();
+  if (!skel_)
+    throw CollectorError{"events_bpf__open failed"};
+}
 
-   BpfSkeleton::~BpfSkeleton() {
-      if (skel_)
-         events_bpf__destroy(skel_);
-   }
+BpfSkeleton::~BpfSkeleton() {
+  if (skel_)
+    events_bpf__destroy(skel_);
+}
 
-   BpfSkeleton::BpfSkeleton(BpfSkeleton&& o) noexcept
-       : skel_{std::exchange(o.skel_, nullptr)} {}
+BpfSkeleton::BpfSkeleton(BpfSkeleton &&o) noexcept
+    : skel_{std::exchange(o.skel_, nullptr)} {}
 
-   BpfSkeleton& BpfSkeleton::operator=(BpfSkeleton&& o) noexcept {
-      if (this != &o) {
-         if (skel_)
-            events_bpf__destroy(skel_);
-         skel_ = std::exchange(o.skel_, nullptr);
-      }
-      return *this;
-   }
+BpfSkeleton &BpfSkeleton::operator=(BpfSkeleton &&o) noexcept {
+  if (this != &o) {
+    if (skel_)
+      events_bpf__destroy(skel_);
+    skel_ = std::exchange(o.skel_, nullptr);
+  }
+  return *this;
+}
 
-   void BpfSkeleton::load() {
-      const rlimit rl{.rlim_cur = RLIM_INFINITY, .rlim_max = RLIM_INFINITY};
-      if (setrlimit(RLIMIT_MEMLOCK, &rl) != 0)
-         log::warn("failed to raise RLIMIT_MEMLOCK");
+void BpfSkeleton::load() {
+  const rlimit rl{.rlim_cur = RLIM_INFINITY, .rlim_max = RLIM_INFINITY};
+  if (setrlimit(RLIMIT_MEMLOCK, &rl) != 0)
+    log::warn("failed to raise RLIMIT_MEMLOCK");
 
-      if (events_bpf__load(skel_))
-         throw CollectorError{"events_bpf__load failed"};
+  if (events_bpf__load(skel_))
+    throw CollectorError{"events_bpf__load failed"};
 
-      log::info("BPF skeleton loaded");
-   }
+  log::info("BPF skeleton loaded");
+}
 
-   void BpfSkeleton::attach() {
-      if (events_bpf__attach(skel_))
-         throw CollectorError{"events_bpf__attach failed"};
+void BpfSkeleton::attach() {
+  if (events_bpf__attach(skel_))
+    throw CollectorError{"events_bpf__attach failed"};
 
-      log::info("BPF programs attached");
-   }
+  log::info("BPF programs attached");
+}
 
-   int BpfSkeleton::ringBufFd() const {
-      return bpf_map__fd(skel_->maps.rb);
-   }
+int BpfSkeleton::ringBufFd() const { return bpf_map__fd(skel_->maps.rb); }
 } // namespace vigil::platform

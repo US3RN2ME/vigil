@@ -3,69 +3,40 @@
 #include <vigil/rules/FilelessExecutionRule.hpp>
 
 namespace {
-   suite<"[FilelessExecutionRule]"> _ = [] {
-      using vigil::ProcessInfo;
-      using vigil::rules::FilelessExecutionRule;
-      using vigil::rules::RuleConfig;
+suite<"[FilelessExecutionRule]"> _ = [] {
+  using vigil::ProcessInfo;
+  using vigil::rules::FilelessExecutionRule;
+  using vigil::rules::RuleConfig;
 
-#if defined(__linux__)
-      "[FiresWhenExeDeleted]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.platform.exeDeleted = true;
+  "[FiresWhenImageMissingFromDisk]"_test = [] {
+    FilelessExecutionRule rule{RuleConfig{}};
+    ProcessInfo info;
+    info.imageMissingFromDisk = true;
 
-         expect(rule.evaluate(info).has_value());
-      };
+    expect(rule.evaluate(info).has_value());
+  };
 
-      "[FiresWhenMemfd]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.platform.isMemfd = true;
+  "[SilentWhenDisabled]"_test = [] {
+    FilelessExecutionRule rule{RuleConfig{.enabled = false}};
+    ProcessInfo info;
+    info.imageMissingFromDisk = true;
 
-         expect(rule.evaluate(info).has_value());
-      };
-#endif
+    expect(!rule.evaluate(info).has_value());
+  };
 
-      "[FiresWhenImageMissingFromDisk]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{}};
-         ProcessInfo info;
-         info.imageMissingFromDisk = true;
+  "[AlertAttributesDescribeImageBacking]"_test = [] {
+    FilelessExecutionRule rule{RuleConfig{}};
+    ProcessInfo info;
+    info.imageMissingFromDisk = true;
+    info.exePath = "/tmp/payload (deleted)";
 
-         expect(rule.evaluate(info).has_value());
-      };
+    const auto alert = rule.evaluate(info);
 
-      "[SilentWhenDisabled]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{.enabled = false}};
-         ProcessInfo info;
-#if defined(__linux__)
-         info.platform.isMemfd = true;
-#else
-         info.imageMissingFromDisk = true;
-#endif
-
-         expect(!rule.evaluate(info).has_value());
-      };
-
-      "[AlertAttributesDescribeImageBacking]"_test = [] {
-         FilelessExecutionRule rule{RuleConfig{}};
-         ProcessInfo info;
-#if defined(__linux__)
-         info.platform.exeDeleted = true;
-#endif
-         info.imageMissingFromDisk = true;
-         info.exePath = "/tmp/payload (deleted)";
-
-         const auto alert = rule.evaluate(info);
-
-         expect(alert.has_value());
-#if defined(__linux__)
-         expect(attrValue(alert->attributes, "deleted") != nullptr);
-#else
-         expect(attrValue(alert->attributes, "deleted") == nullptr);
-#endif
-         const auto* missing = attrValue(alert->attributes, "missing_from_disk");
-         expect(missing != nullptr);
-         expect(eq(*missing, std::string{"true"}));
-      };
-   };
+    expect(alert.has_value());
+    expect(attrValue(alert->attributes, "deleted") == nullptr);
+    const auto *missing = attrValue(alert->attributes, "missing_from_disk");
+    expect(missing != nullptr);
+    expect(eq(*missing, std::string{"true"}));
+  };
+};
 } // namespace

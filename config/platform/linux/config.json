@@ -1,4 +1,9 @@
 {
+  "alertSinks": [
+    {
+      "type": "stdout"
+    }
+  ],
   "rules": {
     "server_spawned_shell": {
       "enabled": true,

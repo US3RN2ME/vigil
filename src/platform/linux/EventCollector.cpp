@@ -16,219 +16,227 @@
 #include <vigil/SystemError.hpp>
 
 namespace vigil {
-   std::unique_ptr<EventCollector> createEventCollector() {
-      return std::make_unique<platform::EventCollector>(std::make_unique<platform::ProcessInfoReader>());
-   }
+std::unique_ptr<EventCollector> createEventCollector() {
+  return std::make_unique<platform::EventCollector>(
+      std::make_unique<platform::ProcessInfoReader>());
+}
 } // namespace vigil
 
 namespace vigil::platform {
-   EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader)
-       : vigil::EventCollector{std::move(reader)} {}
+EventCollector::EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader)
+    : vigil::EventCollector{std::move(reader)} {}
 
-   void EventCollector::start() {
-      log::info("event collector starting");
-      if (!init()) {
-         workers_.stop();
-         throw CollectorError{"event collector init failed, eBPF unavailable"};
-      }
+void EventCollector::start() {
+  log::info("event collector starting");
+  if (!init()) {
+    workers_.stop();
+    throw CollectorError{"event collector init failed, eBPF unavailable"};
+  }
 
-      if (stopRequested_) {
-         workers_.stop();
-         ringBuf_.reset();
-         bpf_.reset();
-         return;
-      }
+  if (stopRequested_) {
+    workers_.stop();
+    ringBuf_.reset();
+    bpf_.reset();
+    return;
+  }
 
-      running_ = true;
-      log::info("event collector running");
+  running_ = true;
+  log::info("event collector running");
 
-      while (running_ && !stopRequested_) {
-         const int result = ringBuf_->poll(100);
-         if ((result < 0) && error::lastCode() != EINTR) {
-            throw CollectorError{"ring buffer poll failed: '{}'", error::lastMessage()};
-         }
-         const auto now = std::chrono::steady_clock::now();
-         if (now >= nextScanTime_) {
-            scanProc();
-            nextScanTime_ = now + kScanInterval;
-         }
-      }
+  while (running_ && !stopRequested_) {
+    const int result = ringBuf_->poll(100);
+    if ((result < 0) && error::lastCode() != EINTR) {
+      throw CollectorError{"ring buffer poll failed: '{}'",
+                           error::lastMessage()};
+    }
+    const auto now = std::chrono::steady_clock::now();
+    if (now >= nextScanTime_) {
+      scanProc();
+      nextScanTime_ = now + kScanInterval;
+    }
+  }
 
-      running_ = false;
-      workers_.stop();
-      ringBuf_.reset();
-      bpf_.reset();
-   }
+  running_ = false;
+  workers_.stop();
+  ringBuf_.reset();
+  bpf_.reset();
+}
 
-   void EventCollector::stop() {
-      log::info("event collector stopping");
-      stopRequested_ = true;
-      running_ = false;
-   }
+void EventCollector::stop() {
+  log::info("event collector stopping");
+  stopRequested_ = true;
+  running_ = false;
+}
 
-   bool EventCollector::init() {
+bool EventCollector::init() {
+  try {
+    bpf_.emplace();
+    bpf_->load();
+    bpf_->attach();
+    ringBuf_.emplace(bpf_->ringBufFd(), onEvent, this);
+    return true;
+  } catch (const std::runtime_error &e) {
+    log::error("BPF init error: {}", e.what());
+    return false;
+  }
+}
+
+void EventCollector::scanProc() {
+  log::debug("proc scan starting");
+  int count = 0;
+  try {
+    for (const auto &entry : std::filesystem::directory_iterator("/proc")) {
       try {
-         bpf_.emplace();
-         bpf_->load();
-         bpf_->attach();
-         ringBuf_.emplace(bpf_->ringBufFd(), onEvent, this);
-         return true;
-      } catch (const std::runtime_error& e) {
-         log::error("BPF init error: {}", e.what());
-         return false;
+        if (!entry.is_directory())
+          continue;
+        const auto fname = entry.path().filename().string();
+        if (fname.empty() || !std::ranges::all_of(fname, [](unsigned char ch) {
+              return std::isdigit(ch);
+            }))
+          continue;
+        const int pid = std::stoi(fname);
+        workers_.submit(pid, [this, pid] {
+          auto proc = processInfoReader_->read(pid);
+          if (proc)
+            onProcess.emit(*proc);
+        });
+        ++count;
+      } catch (const std::exception &ex) {
+        log::debug("proc scan skipped entry: {}", ex.what());
       }
-   }
+    }
+  } catch (const std::exception &ex) {
+    log::error("proc scan failed: {}", ex.what());
+  }
+  log::debug("proc scan complete: {} processes", count);
+}
 
-   void EventCollector::scanProc() {
-      log::debug("proc scan starting");
-      int count = 0;
-      try {
-         for (const auto& entry : std::filesystem::directory_iterator("/proc")) {
-            try {
-               if (!entry.is_directory())
-                  continue;
-               const auto fname = entry.path().filename().string();
-               if (fname.empty() || !std::ranges::all_of(fname, [](unsigned char ch) {
-                      return std::isdigit(ch);
-                   }))
-                  continue;
-               const int pid = std::stoi(fname);
-               workers_.submit(pid, [this, pid] {
-                  auto proc = processInfoReader_->read(pid);
-                  if (proc)
-                     onProcess.emit(*proc);
-               });
-               ++count;
-            } catch (const std::exception& ex) {
-               log::debug("proc scan skipped entry: {}", ex.what());
-            }
-         }
-      } catch (const std::exception& ex) {
-         log::error("proc scan failed: {}", ex.what());
-      }
-      log::debug("proc scan complete: {} processes", count);
-   }
+int EventCollector::onEvent(void *ctx, void *data, size_t size) {
+  auto *self = static_cast<EventCollector *>(ctx);
+  if (size < sizeof(EventHeader))
+    return 0;
 
-   int EventCollector::onEvent(void* ctx, void* data, size_t size) {
-      auto* self = static_cast<EventCollector*>(ctx);
-      if (size < sizeof(EventHeader))
-         return 0;
+  auto *hdr = static_cast<const EventHeader *>(data);
 
-      auto* hdr = static_cast<const EventHeader*>(data);
-
-      switch (hdr->type) {
-         case EventType::Execve:
-            if (size < sizeof(ExecveEvent))
-               return 0;
-            self->workers_.submit(hdr->pid, [self, event = *static_cast<const ExecveEvent*>(data)] {
-               self->handleExecve(event);
-            });
-            break;
-         case EventType::Mmap:
-            if (size < sizeof(MmapEvent))
-               return 0;
-            self->workers_.submit(hdr->pid, [self, event = *static_cast<const MmapEvent*>(data)] {
-               self->handleMmap(event);
-            });
-            break;
-         case EventType::Connect:
-            if (size < sizeof(ConnectEvent))
-               return 0;
-            self->workers_.submit(hdr->pid, [self, event = *static_cast<const ConnectEvent*>(data)] {
-               self->handleConnect(event);
-            });
-            break;
-         case EventType::Ptrace:
-            if (size < sizeof(PtraceEvent))
-               return 0;
-            self->workers_.submit(hdr->pid, [self, event = *static_cast<const PtraceEvent*>(data)] {
-               self->handlePtrace(event);
-            });
-            break;
-         case EventType::Setuid:
-            if (size < sizeof(SetuidEvent))
-               return 0;
-            self->workers_.submit(hdr->pid, [self, event = *static_cast<const SetuidEvent*>(data)] {
-               self->handleSetuid(event);
-            });
-            break;
-         case EventType::Module:
-            if (size < sizeof(ModuleEvent))
-               return 0;
-            self->workers_.submit(hdr->pid, [self, event = *static_cast<const ModuleEvent*>(data)] {
-               self->handleModule(event);
-            });
-            break;
-      }
+  switch (hdr->type) {
+  case EventType::Execve:
+    if (size < sizeof(ExecveEvent))
       return 0;
-   }
+    self->workers_.submit(
+        hdr->pid, [self, event = *static_cast<const ExecveEvent *>(data)] {
+          self->handleExecve(event);
+        });
+    break;
+  case EventType::Mmap:
+    if (size < sizeof(MmapEvent))
+      return 0;
+    self->workers_.submit(
+        hdr->pid, [self, event = *static_cast<const MmapEvent *>(data)] {
+          self->handleMmap(event);
+        });
+    break;
+  case EventType::Connect:
+    if (size < sizeof(ConnectEvent))
+      return 0;
+    self->workers_.submit(
+        hdr->pid, [self, event = *static_cast<const ConnectEvent *>(data)] {
+          self->handleConnect(event);
+        });
+    break;
+  case EventType::Ptrace:
+    if (size < sizeof(PtraceEvent))
+      return 0;
+    self->workers_.submit(
+        hdr->pid, [self, event = *static_cast<const PtraceEvent *>(data)] {
+          self->handlePtrace(event);
+        });
+    break;
+  case EventType::Setuid:
+    if (size < sizeof(SetuidEvent))
+      return 0;
+    self->workers_.submit(
+        hdr->pid, [self, event = *static_cast<const SetuidEvent *>(data)] {
+          self->handleSetuid(event);
+        });
+    break;
+  case EventType::Module:
+    if (size < sizeof(ModuleEvent))
+      return 0;
+    self->workers_.submit(
+        hdr->pid, [self, event = *static_cast<const ModuleEvent *>(data)] {
+          self->handleModule(event);
+        });
+    break;
+  }
+  return 0;
+}
 
-   void EventCollector::handleExecve(const ExecveEvent& e) {
-      auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
-      if (!proc)
-         return;
-      proc->ppid = e.hdr.ppid;
-      proc->name = e.hdr.comm;
-      onProcess.emit(*proc);
-   }
+void EventCollector::handleExecve(const ExecveEvent &e) {
+  auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
+  if (!proc)
+    return;
+  proc->ppid = e.hdr.ppid;
+  proc->name = e.hdr.comm;
+  onProcess.emit(*proc);
+}
 
-   void EventCollector::handleMmap(const MmapEvent& e) {
-      auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
-      if (!proc)
-         return;
-      proc->ppid = e.hdr.ppid;
-      proc->name = e.hdr.comm;
-      onProcess.emit(*proc);
-   }
+void EventCollector::handleMmap(const MmapEvent &e) {
+  auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
+  if (!proc)
+    return;
+  proc->ppid = e.hdr.ppid;
+  proc->name = e.hdr.comm;
+  onProcess.emit(*proc);
+}
 
-   void EventCollector::handleConnect(const ConnectEvent& e) {
-      auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
-      if (!proc)
-         return;
-      proc->ppid = e.hdr.ppid;
-      proc->name = e.hdr.comm;
-      proc->hasConnect = true;
-      proc->connectDport = e.dport;
+void EventCollector::handleConnect(const ConnectEvent &e) {
+  auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
+  if (!proc)
+    return;
+  proc->ppid = e.hdr.ppid;
+  proc->name = e.hdr.comm;
+  proc->hasConnect = true;
+  proc->connectDport = e.dport;
 
-      char buf[INET6_ADDRSTRLEN] = {};
-      if (e.sa_family == AF_INET)
-         ::inet_ntop(AF_INET, e.daddr, buf, INET_ADDRSTRLEN);
-      else
-         ::inet_ntop(AF_INET6, e.daddr, buf, INET6_ADDRSTRLEN);
-      proc->connectDaddr = buf;
+  char buf[INET6_ADDRSTRLEN] = {};
+  if (e.sa_family == AF_INET)
+    ::inet_ntop(AF_INET, e.daddr, buf, INET_ADDRSTRLEN);
+  else
+    ::inet_ntop(AF_INET6, e.daddr, buf, INET6_ADDRSTRLEN);
+  proc->connectDaddr = buf;
 
-      onProcess.emit(*proc);
-   }
+  onProcess.emit(*proc);
+}
 
-   void EventCollector::handlePtrace(const PtraceEvent& e) {
-      auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
-      if (!proc)
-         return;
-      proc->ppid = e.hdr.ppid;
-      proc->name = e.hdr.comm;
-      proc->platform.hasPtraceAttach = true;
-      proc->platform.ptraceTargetPid = e.targetPid;
-      onProcess.emit(*proc);
-   }
+void EventCollector::handlePtrace(const PtraceEvent &e) {
+  auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
+  if (!proc)
+    return;
+  proc->ppid = e.hdr.ppid;
+  proc->name = e.hdr.comm;
+  proc->platform.hasPtraceAttach = true;
+  proc->platform.ptraceTargetPid = e.targetPid;
+  onProcess.emit(*proc);
+}
 
-   void EventCollector::handleSetuid(const SetuidEvent& e) {
-      auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
-      if (!proc)
-         return;
-      proc->ppid = e.hdr.ppid;
-      proc->name = e.hdr.comm;
-      proc->platform.hasSetuidToRoot = true;
-      onProcess.emit(*proc);
-   }
+void EventCollector::handleSetuid(const SetuidEvent &e) {
+  auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
+  if (!proc)
+    return;
+  proc->ppid = e.hdr.ppid;
+  proc->name = e.hdr.comm;
+  proc->platform.hasSetuidToRoot = true;
+  onProcess.emit(*proc);
+}
 
-   void EventCollector::handleModule(const ModuleEvent& e) {
-      auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
-      if (!proc)
-         return;
-      proc->ppid = e.hdr.ppid;
-      proc->name = e.hdr.comm;
-      proc->platform.hasModuleLoad = true;
-      onProcess.emit(*proc);
-   }
+void EventCollector::handleModule(const ModuleEvent &e) {
+  auto proc = processInfoReader_->read(static_cast<int>(e.hdr.pid));
+  if (!proc)
+    return;
+  proc->ppid = e.hdr.ppid;
+  proc->name = e.hdr.comm;
+  proc->platform.hasModuleLoad = true;
+  onProcess.emit(*proc);
+}
 
 } // namespace vigil::platform
