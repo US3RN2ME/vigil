@@ -19,6 +19,8 @@ constexpr std::string_view kSuspiciousPaths = "suspiciousPaths";
 constexpr std::string_view kCmdlinePatterns = "cmdlinePatterns";
 constexpr std::string_view kSuspiciousPorts = "suspiciousPorts";
 constexpr std::string_view kProtectedProcessNames = "protectedProcessNames";
+constexpr std::string_view kExcludePaths = "excludePaths";
+constexpr std::string_view kExcludeParentNames = "excludeParentNames";
 
 vigil::AlertSinkType parseAlertSinkType(const std::string &type) {
   if (type == "stdout")
@@ -83,6 +85,14 @@ Config Config::loadFromFile(const std::string_view path) {
       if (ruleJson.contains(kProtectedProcessNames))
         for (const auto &item : ruleJson.at(kProtectedProcessNames))
           rc.protectedProcessNames.insert(item.get<std::string>());
+
+      if (ruleJson.contains(kExcludePaths))
+        for (const auto &item : ruleJson.at(kExcludePaths))
+          rc.excludePaths.push_back(item.get<std::string>());
+
+      if (ruleJson.contains(kExcludeParentNames))
+        for (const auto &item : ruleJson.at(kExcludeParentNames))
+          rc.excludeParentNames.insert(item.get<std::string>());
 
       cfg.rules_.emplace(name, std::move(rc));
     }

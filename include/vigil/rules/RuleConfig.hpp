@@ -57,6 +57,19 @@ struct RuleConfig {
    * paths.
    */
   std::unordered_set<std::string> protectedProcessNames;
+
+  /**
+   * @brief Executable paths excluded from this rule.
+   *
+   * Entries ending with a path separator are treated as prefixes. Other entries
+   * must match the process executable path exactly.
+   */
+  std::vector<std::string> excludePaths;
+
+  /**
+   * @brief Parent process names excluded from this rule.
+   */
+  std::unordered_set<std::string> excludeParentNames;
 };
 } // namespace vigil::rules
 

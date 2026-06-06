@@ -83,6 +83,10 @@
     "suspicious_cmdline": {
       "enabled": true,
       "severity": "high",
+      "excludeParentNames": [
+        "backup-agent.exe",
+        "sccmexec.exe"
+      ],
       "cmdlinePatterns": [
         "-EncodedCommand",
         "FromBase64String",

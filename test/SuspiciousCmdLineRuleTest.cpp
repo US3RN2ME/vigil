@@ -25,5 +25,38 @@ suite<"[SuspiciousCmdLineRule]"> _ = [] {
 
     expect(!rule.evaluate(info).has_value());
   };
+
+  "[DoesNotFireForExcludedExactPath]"_test = [] {
+    SuspiciousCmdLineRule rule{
+        RuleConfig{.cmdlinePatterns = {"EncodedCommand"},
+                   .excludePaths = {R"(C:\Program Files\Vendor\backup.ps1)"}}};
+    ProcessInfo info;
+    info.exePath = R"(C:\Program Files\Vendor\backup.ps1)";
+    info.cmdline = "powershell.exe -EncodedCommand AAAA";
+
+    expect(!rule.evaluate(info).has_value());
+  };
+
+  "[DoesNotFireForExcludedPathPrefix]"_test = [] {
+    SuspiciousCmdLineRule rule{
+        RuleConfig{.cmdlinePatterns = {"EncodedCommand"},
+                   .excludePaths = {R"(C:\Program Files\Vendor\)"}}};
+    ProcessInfo info;
+    info.exePath = R"(C:\Program Files\Vendor\backup.ps1)";
+    info.cmdline = "powershell.exe -EncodedCommand AAAA";
+
+    expect(!rule.evaluate(info).has_value());
+  };
+
+  "[DoesNotFireForExcludedParent]"_test = [] {
+    SuspiciousCmdLineRule rule{
+        RuleConfig{.cmdlinePatterns = {"EncodedCommand"},
+                   .excludeParentNames = {"backup-agent.exe"}}};
+    ProcessInfo info;
+    info.parentName = "backup-agent.exe";
+    info.cmdline = "powershell.exe -EncodedCommand AAAA";
+
+    expect(!rule.evaluate(info).has_value());
+  };
 };
 } // namespace

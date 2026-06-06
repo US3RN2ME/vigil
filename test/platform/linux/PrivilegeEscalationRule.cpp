@@ -23,6 +23,16 @@ suite<"[LinuxPrivilegeEscalationRule]"> _ = [] {
     expect(!rule.evaluate(info).has_value());
   };
 
+  "[DoesNotFireForExcludedSetuidPath]"_test = [] {
+    PrivilegeEscalationRule rule{
+        RuleConfig{.excludePaths = {"/usr/bin/sudo"}}};
+    ProcessInfo info;
+    info.platform.hasSetuidToRoot = true;
+    info.exePath = "/usr/bin/sudo";
+
+    expect(!rule.evaluate(info).has_value());
+  };
+
   "[AlertContainsIdentityContext]"_test = [] {
     PrivilegeEscalationRule rule{RuleConfig{}};
     ProcessInfo info;

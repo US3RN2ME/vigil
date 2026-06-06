@@ -30,7 +30,9 @@ suite<"[Config]"> _ = [] {
                      "suspiciousPaths": ["/tmp/", "/dev/shm/"],
                      "cmdlinePatterns": ["encodedcommand", "bash -i"],
                      "suspiciousPorts": [4444, 9001],
-                     "protectedProcessNames": ["lsass.exe", "winlogon.exe"]
+                     "protectedProcessNames": ["lsass.exe", "winlogon.exe"],
+                     "excludePaths": ["/usr/bin/sudo", "/opt/vendor/"],
+                     "excludeParentNames": ["agent", "launcher.exe"]
                   }
                }
             })";
@@ -47,6 +49,9 @@ suite<"[Config]"> _ = [] {
     expect(eq(rule.cmdlinePatterns[1], std::string{"bash -i"}));
     expect(eq(rule.suspiciousPorts.count(4444), std::size_t{1}));
     expect(eq(rule.protectedProcessNames.count("lsass.exe"), std::size_t{1}));
+    expect(eq(rule.excludePaths[0], std::string{"/usr/bin/sudo"}));
+    expect(eq(rule.excludePaths[1], std::string{"/opt/vendor/"}));
+    expect(eq(rule.excludeParentNames.count("agent"), std::size_t{1}));
 
     std::filesystem::remove(path);
   };
