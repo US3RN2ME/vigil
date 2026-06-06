@@ -12,243 +12,259 @@
 #include <vigil/Logger.hpp>
 
 namespace vigil::platform {
-   namespace {
+namespace {
 
-      constexpr auto kProcessCommandLineInformation = static_cast<PROCESSINFOCLASS>(60);
-      constexpr auto kStatusInfoLengthMismatch = static_cast<NTSTATUS>(0xC0000004L);
+constexpr auto kProcessCommandLineInformation =
+    static_cast<PROCESSINFOCLASS>(60);
+constexpr auto kStatusInfoLengthMismatch = static_cast<NTSTATUS>(0xC0000004L);
 
-      constexpr bool ntSuccess(NTSTATUS status) noexcept {
-         return status >= 0;
-      }
+constexpr bool ntSuccess(NTSTATUS status) noexcept { return status >= 0; }
 
-      bool readExePath(ProcessInfo& p, HANDLE process) {
-         wchar_t buffer[MAX_PATH + 1]{};
-         DWORD length = MAX_PATH;
+bool readExePath(ProcessInfo &p, HANDLE process) {
+  wchar_t buffer[MAX_PATH + 1]{};
+  DWORD length = MAX_PATH;
 
-         if (!QueryFullProcessImageNameW(process, 0, buffer, &length))
-            return false;
+  if (!QueryFullProcessImageNameW(process, 0, buffer, &length))
+    return false;
 
-         p.exePath = StringUtils::wideToUtf8(buffer, static_cast<int>(length));
-         p.name = StringUtils::filenameFromPath(p.exePath);
-         std::error_code ec;
-         const bool exists = std::filesystem::exists(p.exePath, ec);
-         p.imageMissingFromDisk = !ec && !exists;
+  p.exePath = StringUtils::wideToUtf8(buffer, static_cast<int>(length));
+  p.name = StringUtils::filenameFromPath(p.exePath);
+  std::error_code ec;
+  const bool exists = std::filesystem::exists(p.exePath, ec);
+  p.imageMissingFromDisk = !ec && !exists;
 
-         return true;
-      }
+  return true;
+}
 
-      void readBasicInfo(ProcessInfo& p, HANDLE process, const ProcessInfoReader& reader) {
-         PROCESS_BASIC_INFORMATION pbi{};
-         ULONG returnedLength = 0;
+void readBasicInfo(ProcessInfo &p, HANDLE process,
+                   const ProcessInfoReader &reader) {
+  PROCESS_BASIC_INFORMATION pbi{};
+  ULONG returnedLength = 0;
 
-         const auto status = NtQueryInformationProcess(process, ProcessBasicInformation, &pbi, sizeof(pbi), &returnedLength);
+  const auto status = NtQueryInformationProcess(
+      process, ProcessBasicInformation, &pbi, sizeof(pbi), &returnedLength);
 
-         if (!ntSuccess(status))
-            return;
+  if (!ntSuccess(status))
+    return;
 
-         p.ppid = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pbi.Reserved3));
+  p.ppid = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(pbi.Reserved3));
 
-         if (auto name = reader.readName(p.ppid))
-            p.parentName = std::move(*name);
-      }
+  if (auto name = reader.readName(p.ppid))
+    p.parentName = std::move(*name);
+}
 
-      void readCmdline(ProcessInfo& p, HANDLE process) {
-         ULONG needed = 0;
+void readCmdline(ProcessInfo &p, HANDLE process) {
+  ULONG needed = 0;
 
-         NTSTATUS status = NtQueryInformationProcess(process, kProcessCommandLineInformation, nullptr, 0, &needed);
+  NTSTATUS status = NtQueryInformationProcess(
+      process, kProcessCommandLineInformation, nullptr, 0, &needed);
 
-         if (status != kStatusInfoLengthMismatch || needed == 0)
-            return;
+  if (status != kStatusInfoLengthMismatch || needed == 0)
+    return;
 
-         std::vector<std::byte> buffer(needed);
+  std::vector<std::byte> buffer(needed);
 
-         status = NtQueryInformationProcess(process, kProcessCommandLineInformation, buffer.data(), needed, &needed);
+  status = NtQueryInformationProcess(process, kProcessCommandLineInformation,
+                                     buffer.data(), needed, &needed);
 
-         if (!ntSuccess(status))
-            return;
+  if (!ntSuccess(status))
+    return;
 
-         const auto* unicode = reinterpret_cast<const UNICODE_STRING*>(buffer.data());
+  const auto *unicode = reinterpret_cast<const UNICODE_STRING *>(buffer.data());
 
-         if (unicode->Buffer && unicode->Length > 0) {
-            p.cmdline = StringUtils::wideToUtf8(unicode->Buffer, unicode->Length / sizeof(wchar_t));
-         }
-      }
+  if (unicode->Buffer && unicode->Length > 0) {
+    p.cmdline = StringUtils::wideToUtf8(unicode->Buffer,
+                                        unicode->Length / sizeof(wchar_t));
+  }
+}
 
-      void readMemoryInfo(ProcessInfo& p, HANDLE process) {
-         PROCESS_MEMORY_COUNTERS counters{};
-         counters.cb = sizeof(counters);
+void readMemoryInfo(ProcessInfo &p, HANDLE process) {
+  PROCESS_MEMORY_COUNTERS counters{};
+  counters.cb = sizeof(counters);
 
-         if (!GetProcessMemoryInfo(process, &counters, sizeof(counters)))
-            return;
+  if (!GetProcessMemoryInfo(process, &counters, sizeof(counters)))
+    return;
 
-         p.rssBytes = counters.WorkingSetSize;
-         p.vszBytes = counters.PagefileUsage;
-      }
+  p.rssBytes = counters.WorkingSetSize;
+  p.vszBytes = counters.PagefileUsage;
+}
 
-      void readThreadCount(ProcessInfo& p) {
-         Handle snapshot{CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)};
+void readThreadCount(ProcessInfo &p) {
+  Handle snapshot{CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)};
 
-         if (!snapshot)
-            return;
+  if (!snapshot)
+    return;
 
-         THREADENTRY32 entry{};
-         entry.dwSize = sizeof(entry);
+  THREADENTRY32 entry{};
+  entry.dwSize = sizeof(entry);
 
-         uint32_t count = 0;
+  uint32_t count = 0;
 
-         if (Thread32First(static_cast<HANDLE>(snapshot.native()), &entry)) {
-            do {
-               if (entry.th32OwnerProcessID == p.pid)
-                  ++count;
-            } while (Thread32Next(static_cast<HANDLE>(snapshot.native()), &entry));
-         }
+  if (Thread32First(static_cast<HANDLE>(snapshot.native()), &entry)) {
+    do {
+      if (entry.th32OwnerProcessID == p.pid)
+        ++count;
+    } while (Thread32Next(static_cast<HANDLE>(snapshot.native()), &entry));
+  }
 
-         p.threadCount = count;
-      }
+  p.threadCount = count;
+}
 
-      void readPrivileges(ProcessInfo& p, HANDLE process) {
-         auto token = ProcessToken::open(process);
-         if (!token)
-            return;
+void readPrivileges(ProcessInfo &p, HANDLE process) {
+  auto token = ProcessToken::open(process);
+  if (!token)
+    return;
 
-         auto buffer = token->query(ProcessToken::InfoClass::Privileges);
-         if (buffer.empty())
-            return;
+  auto buffer = token->query(ProcessToken::InfoClass::Privileges);
+  if (buffer.empty())
+    return;
 
-         const auto* privileges = reinterpret_cast<const TOKEN_PRIVILEGES*>(buffer.data());
+  const auto *privileges =
+      reinterpret_cast<const TOKEN_PRIVILEGES *>(buffer.data());
 
-         uint64_t mask = 0;
+  uint64_t mask = 0;
 
-         for (DWORD i = 0; i < privileges->PrivilegeCount; ++i) {
-            const DWORD luid = privileges->Privileges[i].Luid.LowPart;
+  for (DWORD i = 0; i < privileges->PrivilegeCount; ++i) {
+    if ((privileges->Privileges[i].Attributes & SE_PRIVILEGE_ENABLED) == 0)
+      continue;
 
-            if (luid < 64)
-               mask |= 1ULL << luid;
-         }
+    const DWORD luid = privileges->Privileges[i].Luid.LowPart;
 
-         p.privilegeMask = mask;
-      }
+    if (luid < 64)
+      mask |= 1ULL << luid;
+  }
 
-      void readIntegrity(ProcessInfo& p, HANDLE process) {
-         auto token = ProcessToken::open(process);
-         if (!token)
-            return;
+  p.privilegeMask = mask;
+}
 
-         auto buffer = token->query(ProcessToken::InfoClass::IntegrityLevel);
-         if (buffer.empty())
-            return;
+void readIntegrity(ProcessInfo &p, HANDLE process) {
+  auto token = ProcessToken::open(process);
+  if (!token)
+    return;
 
-         const auto* label = reinterpret_cast<const TOKEN_MANDATORY_LABEL*>(buffer.data());
+  auto buffer = token->query(ProcessToken::InfoClass::IntegrityLevel);
+  if (buffer.empty())
+    return;
 
-         const DWORD rid = *GetSidSubAuthority(label->Label.Sid, *GetSidSubAuthorityCount(label->Label.Sid) - 1);
+  const auto *label =
+      reinterpret_cast<const TOKEN_MANDATORY_LABEL *>(buffer.data());
 
-         if (rid < SECURITY_MANDATORY_MEDIUM_RID)
-            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::Low;
-         else if (rid < SECURITY_MANDATORY_HIGH_RID)
-            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::Medium;
-         else if (rid < SECURITY_MANDATORY_SYSTEM_RID)
-            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::High;
-         else
-            p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::System;
-      }
+  const DWORD rid = *GetSidSubAuthority(
+      label->Label.Sid, *GetSidSubAuthorityCount(label->Label.Sid) - 1);
 
-      void readAnonRwx(ProcessInfo& p, HANDLE process) {
-         MEMORY_BASIC_INFORMATION mbi{};
-         uintptr_t address = 0;
+  if (rid < SECURITY_MANDATORY_MEDIUM_RID)
+    p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::Low;
+  else if (rid < SECURITY_MANDATORY_HIGH_RID)
+    p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::Medium;
+  else if (rid < SECURITY_MANDATORY_SYSTEM_RID)
+    p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::High;
+  else
+    p.platform.integrity = ProcessInfo::PlatformInfo::Integrity::System;
+}
 
-         while (VirtualQueryEx(process, reinterpret_cast<LPCVOID>(address), &mbi, sizeof(mbi))) {
-            if (mbi.RegionSize == 0)
-               break;
+void readAnonRwx(ProcessInfo &p, HANDLE process) {
+  MEMORY_BASIC_INFORMATION mbi{};
+  uintptr_t address = 0;
 
-            const bool isRwx = mbi.Protect == PAGE_EXECUTE_READWRITE || mbi.Protect == PAGE_EXECUTE_WRITECOPY;
+  while (VirtualQueryEx(process, reinterpret_cast<LPCVOID>(address), &mbi,
+                        sizeof(mbi))) {
+    if (mbi.RegionSize == 0)
+      break;
 
-            if (mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE && isRwx) {
-               p.hasAnonRwx = true;
-               break;
-            }
+    const bool isRwx = mbi.Protect == PAGE_EXECUTE_READWRITE ||
+                       mbi.Protect == PAGE_EXECUTE_WRITECOPY;
 
-            address += mbi.RegionSize;
-         }
-      }
+    if (mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE && isRwx) {
+      p.hasAnonRwx = true;
+      break;
+    }
 
-      void readStartTime(ProcessInfo& p, HANDLE process) {
-         FILETIME create{};
-         FILETIME exit{};
-         FILETIME kernel{};
-         FILETIME user{};
+    address += mbi.RegionSize;
+  }
+}
 
-         if (!GetProcessTimes(process, &create, &exit, &kernel, &user))
-            return;
+void readStartTime(ProcessInfo &p, HANDLE process) {
+  FILETIME create{};
+  FILETIME exit{};
+  FILETIME kernel{};
+  FILETIME user{};
 
-         const ULONGLONG createFileTime = (static_cast<ULONGLONG>(create.dwHighDateTime) << 32) | create.dwLowDateTime;
+  if (!GetProcessTimes(process, &create, &exit, &kernel, &user))
+    return;
 
-         FILETIME now{};
-         GetSystemTimeAsFileTime(&now);
+  const ULONGLONG createFileTime =
+      (static_cast<ULONGLONG>(create.dwHighDateTime) << 32) |
+      create.dwLowDateTime;
 
-         const ULONGLONG nowFileTime = (static_cast<ULONGLONG>(now.dwHighDateTime) << 32) | now.dwLowDateTime;
+  FILETIME now{};
+  GetSystemTimeAsFileTime(&now);
 
-         const ULONGLONG bootFileTime = nowFileTime - GetTickCount64() * 10'000ULL;
+  const ULONGLONG nowFileTime =
+      (static_cast<ULONGLONG>(now.dwHighDateTime) << 32) | now.dwLowDateTime;
 
-         if (createFileTime >= bootFileTime)
-            p.startTimeNs = (createFileTime - bootFileTime) * 100ULL;
-      }
+  const ULONGLONG bootFileTime = nowFileTime - GetTickCount64() * 10'000ULL;
 
-      void readJobObject(ProcessInfo& p, HANDLE process) {
-         BOOL inJob = FALSE;
+  if (createFileTime >= bootFileTime)
+    p.startTimeNs = (createFileTime - bootFileTime) * 100ULL;
+}
 
-         if (IsProcessInJob(process, nullptr, &inJob) && inJob)
-            p.platform.jobObjectName = "<job>";
-      }
+void readJobObject(ProcessInfo &p, HANDLE process) {
+  BOOL inJob = FALSE;
 
-   } // namespace
+  if (IsProcessInJob(process, nullptr, &inJob) && inJob)
+    p.platform.jobObjectName = "<job>";
+}
 
-   std::optional<ProcessInfo> ProcessInfoReader::read(uint32_t pid) const {
-      auto process = Process::open(pid);
+} // namespace
 
-      if (!process) {
-         log::debug("process {} inaccessible or vanished", pid);
-         return {};
-      }
+std::optional<ProcessInfo> ProcessInfoReader::read(uint32_t pid) const {
+  auto process = Process::open(pid);
 
-      ProcessInfo info;
-      info.pid = pid;
+  if (!process) {
+    log::debug("process {} inaccessible or vanished", pid);
+    return {};
+  }
 
-      const auto nativeProcess = static_cast<HANDLE>(process.native());
+  ProcessInfo info;
+  info.pid = pid;
 
-      if (!readExePath(info, nativeProcess)) {
-         log::debug("process {} vanished before snapshot", pid);
-         return {};
-      }
+  const auto nativeProcess = static_cast<HANDLE>(process.native());
 
-      readBasicInfo(info, nativeProcess, *this);
-      readCmdline(info, nativeProcess);
-      readMemoryInfo(info, nativeProcess);
-      readPrivileges(info, nativeProcess);
-      readIntegrity(info, nativeProcess);
-      readAnonRwx(info, nativeProcess);
-      readStartTime(info, nativeProcess);
-      readJobObject(info, nativeProcess);
-      readThreadCount(info);
+  if (!readExePath(info, nativeProcess)) {
+    log::debug("process {} vanished before snapshot", pid);
+    return {};
+  }
 
-      return info;
-   }
+  readBasicInfo(info, nativeProcess, *this);
+  readCmdline(info, nativeProcess);
+  readMemoryInfo(info, nativeProcess);
+  readPrivileges(info, nativeProcess);
+  readIntegrity(info, nativeProcess);
+  readAnonRwx(info, nativeProcess);
+  readStartTime(info, nativeProcess);
+  readJobObject(info, nativeProcess);
+  readThreadCount(info);
 
-   std::optional<std::string> ProcessInfoReader::readName(uint32_t pid) const {
-      auto process = Process::open(pid);
+  return info;
+}
 
-      if (!process)
-         return {};
+std::optional<std::string> ProcessInfoReader::readName(uint32_t pid) const {
+  auto process = Process::open(pid);
 
-      wchar_t buffer[MAX_PATH + 1]{};
-      DWORD length = MAX_PATH;
+  if (!process)
+    return {};
 
-      if (!QueryFullProcessImageNameW(static_cast<HANDLE>(process.native()), 0, buffer, &length)) {
-         return {};
-      }
+  wchar_t buffer[MAX_PATH + 1]{};
+  DWORD length = MAX_PATH;
 
-      auto path = StringUtils::wideToUtf8(buffer, static_cast<int>(length));
+  if (!QueryFullProcessImageNameW(static_cast<HANDLE>(process.native()), 0,
+                                  buffer, &length)) {
+    return {};
+  }
 
-      return StringUtils::filenameFromPath(path);
-   }
+  auto path = StringUtils::wideToUtf8(buffer, static_cast<int>(length));
+
+  return StringUtils::filenameFromPath(path);
+}
 
 } // namespace vigil::platform

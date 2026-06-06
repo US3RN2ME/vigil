@@ -12,34 +12,38 @@
 
 #include <vigil/EventCollector.hpp>
 #include <vigil/ProcessInfoReader.hpp>
+#include <vigil/ThreadPool.hpp>
 
 namespace vigil::platform {
-   class EventCollector : public vigil::EventCollector {
-      static constexpr std::chrono::seconds kScanInterval{30};
+class EventCollector : public vigil::EventCollector {
+  static constexpr std::chrono::seconds kScanInterval{30};
 
-   public:
-      explicit EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader);
+public:
+  explicit EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader);
 
-      void start() override;
-      void stop() override;
+  void start() override;
+  void stop() override;
 
-   private:
-      bool init();
-      static int onEvent(void* ctx, void* data, size_t size);
+private:
+  bool init();
+  static int onEvent(void *ctx, void *data, size_t size);
 
-      void handleExecve(const ExecveEvent& e);
-      void handleMmap(const MmapEvent& e);
-      void handleConnect(const ConnectEvent& e);
-      void handlePtrace(const PtraceEvent& e);
-      void handleSetuid(const SetuidEvent& e);
-      void handleModule(const ModuleEvent& e);
-      void scanProc();
+  void handleExecve(const ExecveEvent &e);
+  void handleMmap(const MmapEvent &e);
+  void handleConnect(const ConnectEvent &e);
+  void handlePtrace(const PtraceEvent &e);
+  void handleSetuid(const SetuidEvent &e);
+  void handleModule(const ModuleEvent &e);
+  void scanProc();
 
-      std::optional<BpfSkeleton> bpf_;
-      std::optional<RingBuffer> ringBuf_;
-      std::atomic<bool> running_{false};
-      std::chrono::steady_clock::time_point nextScanTime_{std::chrono::steady_clock::now()};
-   };
+  std::optional<BpfSkeleton> bpf_;
+  std::optional<RingBuffer> ringBuf_;
+  std::atomic<bool> running_{false};
+  std::atomic<bool> stopRequested_{false};
+  ThreadPool workers_;
+  std::chrono::steady_clock::time_point nextScanTime_{
+      std::chrono::steady_clock::now()};
+};
 } // namespace vigil::platform
 
 #endif // VIGIL_PLATFORM_EVENTCOLLECTOR_HPP

@@ -1,4 +1,9 @@
 {
+  "alertSinks": [
+    {
+      "type": "stdout"
+    }
+  ],
   "rules": {
     "server_spawned_shell": {
       "enabled": true,
@@ -35,6 +40,11 @@
     "suspicious_cmdline": {
       "enabled": true,
       "severity": "high",
+      "excludeParentNames": [
+        "ansible",
+        "puppet",
+        "chef-client"
+      ],
       "cmdlinePatterns": [
         "curl ",
         "wget ",
@@ -78,11 +88,21 @@
     },
     "privilege_escalation": {
       "enabled": true,
-      "severity": "critical"
+      "severity": "critical",
+      "excludePaths": [
+        "/usr/bin/sudo",
+        "/usr/bin/ping",
+        "/usr/bin/passwd"
+      ]
     },
     "privilege_escalation_rule": {
       "enabled": true,
-      "severity": "critical"
+      "severity": "critical",
+      "excludePaths": [
+        "/usr/bin/sudo",
+        "/usr/bin/ping",
+        "/usr/bin/passwd"
+      ]
     },
     "dangerous_capabilities": {
       "enabled": true,
