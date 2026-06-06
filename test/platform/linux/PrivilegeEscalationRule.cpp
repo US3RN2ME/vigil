@@ -24,8 +24,7 @@ suite<"[LinuxPrivilegeEscalationRule]"> _ = [] {
   };
 
   "[DoesNotFireForExcludedSetuidPath]"_test = [] {
-    PrivilegeEscalationRule rule{
-        RuleConfig{.excludePaths = {"/usr/bin/sudo"}}};
+    PrivilegeEscalationRule rule{RuleConfig{.excludePaths = {"/usr/bin/sudo"}}};
     ProcessInfo info;
     info.platform.hasSetuidToRoot = true;
     info.exePath = "/usr/bin/sudo";

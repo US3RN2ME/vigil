@@ -53,7 +53,8 @@ struct RuleConfig {
   std::unordered_set<uint16_t> suspiciousPorts;
 
   /**
-   * @brief Protected system process names that should only run from trusted
+   * @brief Protected system process names that should only run from
+   * trusted
    * paths.
    */
   std::unordered_set<std::string> protectedProcessNames;
@@ -61,7 +62,9 @@ struct RuleConfig {
   /**
    * @brief Executable paths excluded from this rule.
    *
-   * Entries ending with a path separator are treated as prefixes. Other entries
+   * Entries
+   * ending with a path separator are treated as prefixes. Other entries
+   *
    * must match the process executable path exactly.
    */
   std::vector<std::string> excludePaths;
