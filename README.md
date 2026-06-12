@@ -56,8 +56,34 @@ skeleton with `bpftool`.
 - `VIGIL_BUILD_APP=ON` builds the `vigil` executable.
 - `VIGIL_BUILD_TESTS=ON` builds tests and enables the vcpkg `tests` feature.
 - `VIGIL_BUILD_DOCS=ON` enables the Doxygen `docs` target when Doxygen is available.
+- `VIGIL_BUILD_EXAMPLES=OFF` builds benign attack-simulation examples for validating rule telemetry.
 - `VIGIL_ENABLE_INSTALL=ON` enables install rules for the library, executable, headers, package config files, and
   default config.
+
+## Attack Simulation Examples
+
+The `examples` directory contains C++ programs that generate realistic EDR telemetry for each detection rule without
+implementing malware behavior. They model suspicious process trees, execution from writable paths, memfd/fileless
+execution, anonymous RWX mappings, privilege boundaries, LD_PRELOAD, ptrace, LOLBIN usage, encoded PowerShell, protected
+process-name masquerading, and suspicious-port beacon shapes.
+
+Build them from the main project with:
+
+```sh
+cmake -B build -DVIGIL_BUILD_EXAMPLES=ON
+cmake --build build --parallel
+```
+
+Or build only examples:
+
+```sh
+cmake -S examples -B build/examples
+cmake --build build/examples --parallel
+```
+
+Run examples only in a lab environment while `vigil` is collecting telemetry. Some examples require root,
+Administrator, sudo/UAC, or explicit opt-in through `VIGIL_ALLOW_DANGEROUS=1`. See `examples/README.md` for scenario
+details and cleanup paths.
 
 ## API Documentation
 
