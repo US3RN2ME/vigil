@@ -26,8 +26,8 @@ endif()
 
 include(GNUInstallDirs)
 
-configure_file("${CMAKE_SOURCE_DIR}/cmake/Version.hpp.in"
-               "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp" @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/cmake/version.hpp.in"
+               "${PROJECT_BINARY_DIR}/include/vigil/version.hpp" @ONLY)
 
 add_library(vigil_options INTERFACE)
 target_compile_features(vigil_options INTERFACE cxx_std_23)
@@ -83,21 +83,21 @@ if(VIGIL_ENABLE_INSTALL)
     FILES_MATCHING
     PATTERN "*.hpp")
 
-  install(FILES "${PROJECT_BINARY_DIR}/include/vigil/Version.hpp"
+  install(FILES "${PROJECT_BINARY_DIR}/include/vigil/version.hpp"
           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vigil)
 
   configure_package_config_file(
-    "${CMAKE_SOURCE_DIR}/cmake/VigilConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
+    "${CMAKE_SOURCE_DIR}/cmake/vigilConfig.cmake.in"
+    "${PROJECT_BINARY_DIR}/vigilConfig.cmake"
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 
   write_basic_package_version_file(
-    "${PROJECT_BINARY_DIR}/VigilConfigVersion.cmake"
+    "${PROJECT_BINARY_DIR}/vigilConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion)
 
-  install(FILES "${PROJECT_BINARY_DIR}/VigilConfig.cmake"
-                "${PROJECT_BINARY_DIR}/VigilConfigVersion.cmake"
+  install(FILES "${PROJECT_BINARY_DIR}/vigilConfig.cmake"
+                "${PROJECT_BINARY_DIR}/vigilConfigVersion.cmake"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 
   install(

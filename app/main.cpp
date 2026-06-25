@@ -1,13 +1,7 @@
 #include <exception>
 #include <thread>
 
-#include <vigil/AlertSink.hpp>
-#include <vigil/Error.hpp>
-#include <vigil/EventCollector.hpp>
-#include <vigil/Logger.hpp>
-#include <vigil/RuleEngine.hpp>
-#include <vigil/SignalHandler.hpp>
-#include <vigil/Version.hpp>
+#include <vigil/vigil.hpp>
 
 int main() {
   try {
