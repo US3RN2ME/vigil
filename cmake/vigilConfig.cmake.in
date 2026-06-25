@@ -2,6 +2,16 @@
 
 include(CMakeFindDependencyMacro)
 
+find_dependency(nlohmann_json CONFIG)
+find_dependency(spdlog CONFIG)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  find_dependency(PkgConfig)
+  pkg_check_modules(libbpf REQUIRED IMPORTED_TARGET libbpf)
+  pkg_check_modules(libelf REQUIRED IMPORTED_TARGET libelf)
+  pkg_check_modules(zlib REQUIRED IMPORTED_TARGET zlib)
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/VigilTargets.cmake")
 
 check_required_components(vigil)
