@@ -12,6 +12,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   pkg_check_modules(zlib REQUIRED IMPORTED_TARGET zlib)
 endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/VigilTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/vigilTargets.cmake")
 
 check_required_components(vigil)

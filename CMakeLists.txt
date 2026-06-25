@@ -75,7 +75,7 @@ endif()
 if(VIGIL_ENABLE_INSTALL)
   include(CMakePackageConfigHelpers)
 
-  install(TARGETS vigil_options EXPORT VigilTargets)
+  install(TARGETS vigil_options EXPORT vigilTargets)
 
   install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
@@ -101,8 +101,8 @@ if(VIGIL_ENABLE_INSTALL)
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 
   install(
-    EXPORT VigilTargets
-    FILE VigilTargets.cmake
+    EXPORT vigilTargets
+    FILE vigilTargets.cmake
     NAMESPACE vigil::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vigil)
 endif()
