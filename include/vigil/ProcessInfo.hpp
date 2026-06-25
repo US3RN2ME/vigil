@@ -2,12 +2,23 @@
 #ifndef VIGIL_PROCESSINFO_HPP
 #define VIGIL_PROCESSINFO_HPP
 
+/**
+ * @file ProcessInfo.hpp
+ * @brief Declares the normalized process snapshot
+ * shared by collectors, rules,
+ * and alert serialization.
+ */
+
 #include <cstdint>
 #include <string>
 #include <vector>
 
 #include <vigil/platform/ProcessPlatformInfo.hpp>
 
+/**
+ * @brief Public API namespace for Vigil process collection and detection.
+
+ */
 namespace vigil {
 /**
  * @brief Normalized cross-platform process snapshot.

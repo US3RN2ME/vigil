@@ -18,13 +18,33 @@ namespace vigil {
  */
 class ThreadPool {
 public:
+  /**
+   * @brief Unit of work executed by a worker thread.
+   */
   using Task = std::function<void()>;
 
+  /**
+   * @brief Create a fixed-size worker pool.
+   *
+   * @param workerCount Number of worker threads to start.
+   * @param maxQueuedTasks Maximum total queued tasks before submit() blocks.
+   */
   explicit ThreadPool(std::size_t workerCount = defaultWorkerCount(),
                       std::size_t maxQueuedTasks = 4096);
+
+  /**
+   * @brief Stop the pool and join all worker threads.
+   */
   ~ThreadPool();
 
+  /**
+   * @brief Thread pools own worker threads and cannot be copied.
+   */
   ThreadPool(const ThreadPool &) = delete;
+
+  /**
+   * @brief Thread pools own worker threads and cannot be copy-assigned.
+   */
   ThreadPool &operator=(const ThreadPool &) = delete;
 
   /**
@@ -56,7 +76,14 @@ public:
    */
   void stop();
 
+  /**
+   * @brief Return the number of worker threads in this pool.
+   */
   [[nodiscard]] std::size_t workerCount() const noexcept;
+
+  /**
+   * @brief Return the default worker count for this host.
+   */
   [[nodiscard]] static std::size_t defaultWorkerCount() noexcept;
 
 private:

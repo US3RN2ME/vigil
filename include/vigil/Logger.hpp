@@ -7,12 +7,48 @@
 #include <utility>
 
 namespace vigil::log {
+/**
+ * @brief RAII handle that shuts down logging when it leaves scope.
+ *
+ *
+ * Instances are returned by init(). Moving transfers shutdown ownership to the
+
+ * * destination guard.
+ */
 class ShutdownGuard {
 public:
+  /**
+   * @brief Logging shutdown ownership cannot be copied.
+   */
   ShutdownGuard(const ShutdownGuard &) = delete;
+
+  /**
+   * @brief Logging shutdown ownership cannot be copy-assigned.
+   */
   ShutdownGuard &operator=(const ShutdownGuard &) = delete;
+
+  /**
+   * @brief Transfer logging shutdown ownership from another guard.
+   *
+
+   * * @param other Guard whose ownership is transferred.
+   */
   ShutdownGuard(ShutdownGuard &&other) noexcept;
+
+  /**
+   * @brief Transfer logging shutdown ownership from another guard.
+   *
+
+   * * @param other Guard whose ownership is transferred.
+   *
+   * @return
+   * Reference to this guard.
+   */
   ShutdownGuard &operator=(ShutdownGuard &&other) noexcept;
+
+  /**
+   * @brief Shut down logging if this guard owns the active logger.
+   */
   ~ShutdownGuard();
 
 private:
