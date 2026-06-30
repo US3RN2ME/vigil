@@ -10,9 +10,9 @@
 #include "Common.hpp"
 
 int main() {
-  std::cout << "uid=" << ::getuid() << " euid=" << ::geteuid() << "\n";
-  std::cout << "starting a sudo child to create an elevation boundary\n";
-  ::execlp("sudo", "sudo", "id", "-u", nullptr);
-  perror("execlp(sudo)");
-  return 1;
+   std::cout << "uid=" << ::getuid() << " euid=" << ::geteuid() << "\n";
+   std::cout << "starting a sudo child to create an elevation boundary\n";
+   ::execlp("sudo", "sudo", "id", "-u", nullptr);
+   perror("execlp(sudo)");
+   return 1;
 }

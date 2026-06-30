@@ -1,43 +1,40 @@
 #include "ContainerEscapeIndicatorRule.hpp"
 
 namespace {
-constexpr uint64_t cap(int bit) { return 1ULL << bit; }
+   constexpr uint64_t cap(int bit) {
+      return 1ULL << bit;
+   }
 
-constexpr uint64_t kEscapeRelevantCaps = cap(16) | cap(19) | cap(21);
+   constexpr uint64_t kEscapeRelevantCaps = cap(16) | cap(19) | cap(21);
 } // namespace
 
 namespace vigil::platform::rules {
-ContainerEscapeIndicatorRule::ContainerEscapeIndicatorRule(
-    vigil::rules::RuleConfig cfg)
-    : Rule{std::move(cfg)} {}
+   ContainerEscapeIndicatorRule::ContainerEscapeIndicatorRule(vigil::rules::RuleConfig cfg)
+       : Rule{std::move(cfg)} {}
 
-std::string_view ContainerEscapeIndicatorRule::name() const noexcept {
-  return kName;
-}
+   std::string_view ContainerEscapeIndicatorRule::name() const noexcept {
+      return kName;
+   }
 
-std::optional<Alert>
-ContainerEscapeIndicatorRule::check(const ProcessInfo &info) {
-  if (info.platform.containerId.empty())
-    return {};
+   std::optional<Alert> ContainerEscapeIndicatorRule::check(const ProcessInfo& info) {
+      if (info.platform.containerId.empty())
+         return {};
 
-  if ((info.privilegeMask & kEscapeRelevantCaps) != 0 ||
-      info.platform.hasModuleLoad || info.platform.hasPtraceAttach)
-    return makeAlert(info);
+      if ((info.privilegeMask & kEscapeRelevantCaps) != 0 || info.platform.hasModuleLoad || info.platform.hasPtraceAttach)
+         return makeAlert(info);
 
-  return {};
-}
+      return {};
+   }
 
-Alert ContainerEscapeIndicatorRule::makeAlert(const ProcessInfo &info) const {
-  auto alert = Rule::makeAlert(info);
-  alert.attributes = {{"container", info.platform.containerId}};
-  if ((info.privilegeMask & kEscapeRelevantCaps) != 0)
-    alert.attributes.emplace_back(
-        "escape_capability_mask",
-        std::to_string(info.privilegeMask & kEscapeRelevantCaps));
-  if (info.platform.hasModuleLoad)
-    alert.attributes.emplace_back("module_load", "true");
-  if (info.platform.hasPtraceAttach)
-    alert.attributes.emplace_back("ptrace_attach", "true");
-  return alert;
-}
+   Alert ContainerEscapeIndicatorRule::makeAlert(const ProcessInfo& info) const {
+      auto alert = Rule::makeAlert(info);
+      alert.attributes = {{"container", info.platform.containerId}};
+      if ((info.privilegeMask & kEscapeRelevantCaps) != 0)
+         alert.attributes.emplace_back("escape_capability_mask", std::to_string(info.privilegeMask & kEscapeRelevantCaps));
+      if (info.platform.hasModuleLoad)
+         alert.attributes.emplace_back("module_load", "true");
+      if (info.platform.hasPtraceAttach)
+         alert.attributes.emplace_back("ptrace_attach", "true");
+      return alert;
+   }
 } // namespace vigil::platform::rules

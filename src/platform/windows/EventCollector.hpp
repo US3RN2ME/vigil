@@ -17,38 +17,38 @@
 #include <vigil/ThreadPool.hpp>
 
 namespace vigil::platform {
-class EventCollector : public vigil::EventCollector {
-  static constexpr std::chrono::seconds kScanInterval{30};
-  static constexpr std::chrono::seconds kNetScanInterval{5};
+   class EventCollector : public vigil::EventCollector {
+      static constexpr std::chrono::seconds kScanInterval{30};
+      static constexpr std::chrono::seconds kNetScanInterval{5};
 
-public:
-  explicit EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader);
+   public:
+      explicit EventCollector(std::unique_ptr<vigil::ProcessInfoReader> reader);
 
-  void start() override;
-  void stop() override;
+      void start() override;
+      void stop() override;
 
-private:
-  bool init();
-  void enqueueProcess(uint32_t pid);
-  void stopEtw();
-  void scanProcesses();
-  void scanNetwork();
+   private:
+      bool init();
+      void enqueueProcess(uint32_t pid);
+      void stopEtw();
+      void scanProcesses();
+      void scanNetwork();
 
-  std::optional<EtwSession> etwSession_;
-  std::thread etwThread_;
-  std::atomic<bool> running_{false};
-  std::atomic<bool> stopRequested_{false};
-  ThreadPool workers_;
-  std::mutex etwMutex_;
+      std::optional<EtwSession> etwSession_;
+      std::thread etwThread_;
+      std::atomic<bool> running_{false};
+      std::atomic<bool> stopRequested_{false};
+      ThreadPool workers_;
+      std::mutex etwMutex_;
 
-  Event stopEvent_;
-  std::mutex stopEventMutex_;
+      Event stopEvent_;
+      std::mutex stopEventMutex_;
 
-  std::chrono::steady_clock::time_point nextScanTime_;
-  std::chrono::steady_clock::time_point nextNetScanTime_;
+      std::chrono::steady_clock::time_point nextScanTime_;
+      std::chrono::steady_clock::time_point nextNetScanTime_;
 
-  std::unordered_set<TcpConnection, TcpConnectionHash> seenConnections_;
-};
+      std::unordered_set<TcpConnection, TcpConnectionHash> seenConnections_;
+   };
 } // namespace vigil::platform
 
 #endif // VIGIL_PLATFORM_EVENTCOLLECTOR_HPP

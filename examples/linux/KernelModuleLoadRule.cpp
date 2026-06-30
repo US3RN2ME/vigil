@@ -10,8 +10,8 @@
 #include "Common.hpp"
 
 int main() {
-  vigil::examples::require_dangerous();
-  std::cout << "vigil kernel_module_load_rule benign modprobe simulation\n";
-  std::cout << "invoking modprobe loop\n";
-  return std::system("modprobe loop");
+   vigil::examples::require_dangerous();
+   std::cout << "vigil kernel_module_load_rule benign modprobe simulation\n";
+   std::cout << "invoking modprobe loop\n";
+   return std::system("modprobe loop");
 }

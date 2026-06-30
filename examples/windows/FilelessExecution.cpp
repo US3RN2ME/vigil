@@ -10,11 +10,10 @@
 #include "Common.hpp"
 
 int wmain() {
-  std::wcout << L"vigil fileless_execution PowerShell reflection-shaped "
-                L"simulation\n";
-  return vigil::examples::run_process(
-      vigil::examples::system32(L"WindowsPowerShell\\v1.0\\powershell.exe"),
-      L"-NoProfile -ExecutionPolicy Bypass -EncodedCommand "
-      L"VwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIAAnAHYAaQBnAGkAbAAgAGYAaQBsAGUAbABlAHM"
-      L"AcwBfAGUAeABlAGMAdQB0AGkAbwBuACAAcwBpAG0AdQBsAGEAdABpAG8AbgAnAA==");
+   std::wcout << L"vigil fileless_execution PowerShell reflection-shaped "
+                 L"simulation\n";
+   return vigil::examples::run_process(vigil::examples::system32(L"WindowsPowerShell\\v1.0\\powershell.exe"),
+                                       L"-NoProfile -ExecutionPolicy Bypass -EncodedCommand "
+                                       L"VwByAGkAdABlAC0ATwB1AHQAcAB1AHQAIAAnAHYAaQBnAGkAbAAgAGYAaQBsAGUAbABlAHM"
+                                       L"AcwBfAGUAeABlAGMAdQB0AGkAbwBuACAAcwBpAG0AdQBsAGEAdABpAG8AbgAnAA==");
 }

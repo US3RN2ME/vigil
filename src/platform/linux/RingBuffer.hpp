@@ -7,27 +7,27 @@
 struct ring_buffer;
 
 namespace vigil::platform {
-class RingBuffer {
-public:
-  using Callback = int (*)(void *ctx, void *data, size_t size);
+   class RingBuffer {
+   public:
+      using Callback = int (*)(void* ctx, void* data, size_t size);
 
-  RingBuffer(int mapFd, Callback cb, void *ctx);
+      RingBuffer(int mapFd, Callback cb, void* ctx);
 
-  ~RingBuffer();
+      ~RingBuffer();
 
-  RingBuffer(const RingBuffer &) = delete;
+      RingBuffer(const RingBuffer&) = delete;
 
-  RingBuffer &operator=(const RingBuffer &) = delete;
+      RingBuffer& operator=(const RingBuffer&) = delete;
 
-  RingBuffer(RingBuffer &&o) noexcept;
+      RingBuffer(RingBuffer&& o) noexcept;
 
-  RingBuffer &operator=(RingBuffer &&o) noexcept;
+      RingBuffer& operator=(RingBuffer&& o) noexcept;
 
-  int poll(int timeoutMs = 100) const;
+      int poll(int timeoutMs = 100) const;
 
-private:
-  struct ring_buffer *rb_ = nullptr;
-};
+   private:
+      struct ring_buffer* rb_ = nullptr;
+   };
 } // namespace vigil::platform
 
 #endif // VIGIL_PLATFORM_RINGBUFFER_HPP

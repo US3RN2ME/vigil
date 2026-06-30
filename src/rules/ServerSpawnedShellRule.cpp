@@ -2,29 +2,31 @@
 #include <vigil/rules/ServerSpawnedShellRuleTest.hpp>
 
 namespace {
-[[nodiscard]] std::string stripExe(const std::string &name) noexcept {
-  if (name.ends_with(".exe"))
-    return name.substr(0, name.size() - 4);
-  return name;
-}
+   [[nodiscard]] std::string stripExe(const std::string& name) noexcept {
+      if (name.ends_with(".exe"))
+         return name.substr(0, name.size() - 4);
+      return name;
+   }
 } // namespace
 
 namespace vigil::rules {
-ServerSpawnedShellRule::ServerSpawnedShellRule(RuleConfig cfg)
-    : Rule{std::move(cfg)} {}
+   ServerSpawnedShellRule::ServerSpawnedShellRule(RuleConfig cfg)
+       : Rule{std::move(cfg)} {}
 
-std::string_view ServerSpawnedShellRule::name() const noexcept { return kName; }
+   std::string_view ServerSpawnedShellRule::name() const noexcept {
+      return kName;
+   }
 
-std::optional<Alert> ServerSpawnedShellRule::check(const ProcessInfo &info) {
-  auto parentIsServer = cfg_.serverNames.contains(stripExe(info.parentName));
-  auto childIsShell = cfg_.shellNames.contains(stripExe(info.name));
-  if (parentIsServer && childIsShell) {
-    return makeAlert(info);
-  }
-  return {};
-}
+   std::optional<Alert> ServerSpawnedShellRule::check(const ProcessInfo& info) {
+      auto parentIsServer = cfg_.serverNames.contains(stripExe(info.parentName));
+      auto childIsShell = cfg_.shellNames.contains(stripExe(info.name));
+      if (parentIsServer && childIsShell) {
+         return makeAlert(info);
+      }
+      return {};
+   }
 
-Alert ServerSpawnedShellRule::makeAlert(const ProcessInfo &info) const {
-  return Rule::makeAlert(info);
-}
+   Alert ServerSpawnedShellRule::makeAlert(const ProcessInfo& info) const {
+      return Rule::makeAlert(info);
+   }
 } // namespace vigil::rules

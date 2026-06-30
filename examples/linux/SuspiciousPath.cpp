@@ -9,14 +9,14 @@
 
 #include "Common.hpp"
 
-int main(int argc, char **argv) {
-  if (vigil::examples::has_arg(argc, argv, "--child")) {
-    std::cout << "vigil suspicious_path dropper-shaped simulation\n";
-    vigil::examples::sleep_for_agent();
-    return 0;
-  }
+int main(int argc, char** argv) {
+   if (vigil::examples::has_arg(argc, argv, "--child")) {
+      std::cout << "vigil suspicious_path dropper-shaped simulation\n";
+      vigil::examples::sleep_for_agent();
+      return 0;
+   }
 
-  const std::filesystem::path target = "/tmp/.vigil-cache/update-helper";
-  vigil::examples::copy_self_to(target);
-  vigil::examples::exec_path(target, {"--child"});
+   const std::filesystem::path target = "/tmp/.vigil-cache/update-helper";
+   vigil::examples::copy_self_to(target);
+   vigil::examples::exec_path(target, {"--child"});
 }

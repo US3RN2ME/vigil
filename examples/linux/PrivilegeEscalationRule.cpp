@@ -9,9 +9,9 @@
 #include "Common.hpp"
 
 int main() {
-  std::cout << "uid=" << ::getuid() << " euid=" << ::geteuid() << "\n";
-  std::cout << "Linux config alias for privilege_escalation\n";
-  ::execlp("sudo", "sudo", "id", "-u", nullptr);
-  perror("execlp(sudo)");
-  return 1;
+   std::cout << "uid=" << ::getuid() << " euid=" << ::geteuid() << "\n";
+   std::cout << "Linux config alias for privilege_escalation\n";
+   ::execlp("sudo", "sudo", "id", "-u", nullptr);
+   perror("execlp(sudo)");
+   return 1;
 }

@@ -15,21 +15,18 @@
 
 namespace {
 
-__attribute__((constructor)) void preload_probe_constructor() {
-  const auto now =
-      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  std::array<char, 64> timestamp{};
-  std::strftime(timestamp.data(), timestamp.size(), "%F %T",
-                std::localtime(&now));
+   __attribute__((constructor)) void preload_probe_constructor() {
+      const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+      std::array<char, 64> timestamp{};
+      std::strftime(timestamp.data(), timestamp.size(), "%F %T", std::localtime(&now));
 
-  FILE *file = std::fopen("/tmp/vigil-preload-probe.log", "a");
-  if (file == nullptr)
-    return;
+      FILE* file = std::fopen("/tmp/vigil-preload-probe.log", "a");
+      if (file == nullptr)
+         return;
 
-  std::fprintf(file, "%s benign LD_PRELOAD probe loaded in pid=%ld uid=%ld\n",
-               timestamp.data(), static_cast<long>(::getpid()),
-               static_cast<long>(::getuid()));
-  std::fclose(file);
-}
+      std::fprintf(file, "%s benign LD_PRELOAD probe loaded in pid=%ld uid=%ld\n", timestamp.data(),
+                   static_cast<long>(::getpid()), static_cast<long>(::getuid()));
+      std::fclose(file);
+   }
 
 } // namespace

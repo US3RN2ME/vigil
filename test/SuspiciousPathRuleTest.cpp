@@ -3,50 +3,49 @@
 #include <vigil/rules/SuspiciousPathRuleTest.hpp>
 
 namespace {
-suite<"[SuspiciousPathRule]"> _ = [] {
-  using vigil::ProcessInfo;
-  using vigil::rules::RuleConfig;
-  using vigil::rules::SuspiciousPathRule;
+   suite<"[SuspiciousPathRule]"> _ = [] {
+      using vigil::ProcessInfo;
+      using vigil::rules::RuleConfig;
+      using vigil::rules::SuspiciousPathRule;
 
-  const RuleConfig cfg{.suspiciousPaths = {"/tmp/", "/dev/shm/"}};
+      const RuleConfig cfg{.suspiciousPaths = {"/tmp/", "/dev/shm/"}};
 
-  "[FiresOnMatchingPrefix]"_test = [&] {
-    SuspiciousPathRule rule{cfg};
-    ProcessInfo info;
-    info.exePath = "/tmp/malware";
-    expect(rule.evaluate(info).has_value());
-  };
+      "[FiresOnMatchingPrefix]"_test = [&] {
+         SuspiciousPathRule rule{cfg};
+         ProcessInfo info;
+         info.exePath = "/tmp/malware";
+         expect(rule.evaluate(info).has_value());
+      };
 
-  "[FiresOnSecondPrefix]"_test = [&] {
-    SuspiciousPathRule rule{cfg};
-    ProcessInfo info;
-    info.exePath = "/dev/shm/payload";
-    expect(rule.evaluate(info).has_value());
-  };
+      "[FiresOnSecondPrefix]"_test = [&] {
+         SuspiciousPathRule rule{cfg};
+         ProcessInfo info;
+         info.exePath = "/dev/shm/payload";
+         expect(rule.evaluate(info).has_value());
+      };
 
-  "[SilentWhenNoMatchingPrefix]"_test = [&] {
-    SuspiciousPathRule rule{cfg};
-    ProcessInfo info;
-    info.exePath = "/usr/bin/ls";
-    expect(!rule.evaluate(info).has_value());
-  };
+      "[SilentWhenNoMatchingPrefix]"_test = [&] {
+         SuspiciousPathRule rule{cfg};
+         ProcessInfo info;
+         info.exePath = "/usr/bin/ls";
+         expect(!rule.evaluate(info).has_value());
+      };
 
-  "[SilentWhenDisabled]"_test = [&] {
-    SuspiciousPathRule rule{
-        RuleConfig{.enabled = false, .suspiciousPaths = {"/tmp/"}}};
-    ProcessInfo info;
-    info.exePath = "/tmp/malware";
-    expect(!rule.evaluate(info).has_value());
-  };
+      "[SilentWhenDisabled]"_test = [&] {
+         SuspiciousPathRule rule{RuleConfig{.enabled = false, .suspiciousPaths = {"/tmp/"}}};
+         ProcessInfo info;
+         info.exePath = "/tmp/malware";
+         expect(!rule.evaluate(info).has_value());
+      };
 
-  "[AlertContainsPath]"_test = [&] {
-    SuspiciousPathRule rule{cfg};
-    ProcessInfo info;
-    info.exePath = "/tmp/malware";
-    auto alert = rule.evaluate(info);
-    const auto *prefix = attrValue(alert->attributes, "matched_path_prefix");
-    expect(prefix != nullptr);
-    expect(eq(*prefix, std::string{"/tmp/"}));
-  };
-};
+      "[AlertContainsPath]"_test = [&] {
+         SuspiciousPathRule rule{cfg};
+         ProcessInfo info;
+         info.exePath = "/tmp/malware";
+         auto alert = rule.evaluate(info);
+         const auto* prefix = attrValue(alert->attributes, "matched_path_prefix");
+         expect(prefix != nullptr);
+         expect(eq(*prefix, std::string{"/tmp/"}));
+      };
+   };
 } // namespace

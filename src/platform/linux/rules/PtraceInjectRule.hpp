@@ -5,19 +5,19 @@
 #include <vigil/rules/Rule.hpp>
 
 namespace vigil::platform::rules {
-class PtraceInjectRule : public vigil::rules::Rule {
-public:
-  static constexpr std::string_view kName = "ptrace_inject_rule";
+   class PtraceInjectRule : public vigil::rules::Rule {
+   public:
+      static constexpr std::string_view kName = "ptrace_inject_rule";
 
-  explicit PtraceInjectRule(vigil::rules::RuleConfig cfg);
+      explicit PtraceInjectRule(vigil::rules::RuleConfig cfg);
 
-  [[nodiscard]] std::string_view name() const noexcept override;
+      [[nodiscard]] std::string_view name() const noexcept override;
 
-protected:
-  [[nodiscard]] std::optional<Alert> check(const ProcessInfo &info) override;
+   protected:
+      [[nodiscard]] std::optional<Alert> check(const ProcessInfo& info) override;
 
-  [[nodiscard]] Alert makeAlert(const ProcessInfo &info) const override;
-};
+      [[nodiscard]] Alert makeAlert(const ProcessInfo& info) const override;
+   };
 } // namespace vigil::platform::rules
 
 #endif // VIGIL_PLATFORM_RULES_PTRACEINJECTRULE_HPP
